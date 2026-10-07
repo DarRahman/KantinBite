@@ -117,7 +117,7 @@ export const ConsignmentScreen = ({ route, navigation }) => {
           <Text style={styles.dateBarText}>HARI INI (Kamis, 8 Okt 2026)</Text>
         </View>
 
-        {/* DAFTAR KANTIN DENGAN ASET VISUAL ETALASE TOKO */}
+        {/* DAFTAR KANTIN HORIZONTAL CARD COMPACT & PADAT */}
         <Text style={styles.sectionTitle}>Pilih Kantin Rekanan</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.canteenScroll}>
           {canteens.map((c) => {
@@ -129,16 +129,21 @@ export const ConsignmentScreen = ({ route, navigation }) => {
                 activeOpacity={0.8}
                 onPress={() => handleSelectCanteen(c.id)}
               >
-                <View style={styles.canteenIconCenter}>
-                  <FoodVisual type="canteen_shop" size={44} />
+                <View style={styles.canteenTopRow}>
+                  <FoodVisual type="canteen_shop" size={32} />
+                  <View style={[styles.canteenDebtChip, c.debt > 0 ? styles.debtChipRed : styles.debtChipGreen]}>
+                    <Text style={[styles.canteenDebtText, c.debt > 0 ? styles.textRed : styles.textGreen]}>
+                      {c.debt > 0 ? `Piutang ${formatRupiah(c.debt)}` : 'Lunas'}
+                    </Text>
+                  </View>
                 </View>
-                <Text style={[styles.canteenCardName, isSelected && styles.textOrange]}>{c.name}</Text>
-                <Text style={styles.canteenCardPic}>PIC: {c.pic}</Text>
-                <View style={[styles.canteenDebtChip, c.debt > 0 ? styles.debtChipRed : styles.debtChipGreen]}>
-                  <Text style={[styles.canteenDebtText, c.debt > 0 ? styles.textRed : styles.textGreen]}>
-                    {c.debt > 0 ? `Piutang: ${formatRupiah(c.debt)}` : 'Lunas Bersih'}
-                  </Text>
-                </View>
+
+                <Text style={[styles.canteenCardName, isSelected && styles.textOrange]} numberOfLines={1}>
+                  {c.name}
+                </Text>
+                <Text style={styles.canteenCardPic} numberOfLines={1}>
+                  PIC: {c.pic}
+                </Text>
               </TouchableOpacity>
             );
           })}
@@ -329,20 +334,22 @@ const styles = StyleSheet.create({
   },
   canteenCard: {
     backgroundColor: '#FAFAFA',
-    borderRadius: 16,
-    padding: 12,
-    width: 145,
+    borderRadius: 14,
+    padding: 10,
+    width: 155,
     marginRight: 10,
     borderWidth: 1.5,
     borderColor: '#F4F4F5'
   },
-  canteenIconCenter: {
-    alignItems: 'center',
-    marginBottom: 6
-  },
   canteenCardActive: {
     backgroundColor: '#FFF7ED',
     borderColor: '#EA580C'
+  },
+  canteenTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8
   },
   canteenCardName: {
     fontSize: 13,
@@ -352,14 +359,12 @@ const styles = StyleSheet.create({
   },
   canteenCardPic: {
     fontSize: 11,
-    color: '#71717A',
-    marginBottom: 6
+    color: '#71717A'
   },
   canteenDebtChip: {
     borderRadius: 6,
     paddingVertical: 2,
-    paddingHorizontal: 6,
-    alignSelf: 'flex-start'
+    paddingHorizontal: 6
   },
   debtChipRed: {
     backgroundColor: '#FEE2E2'
@@ -368,7 +373,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ECFDF5'
   },
   canteenDebtText: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '700'
   },
   lapakCard: {
