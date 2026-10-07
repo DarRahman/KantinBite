@@ -9,29 +9,22 @@ import { formatRupiah } from '../utils/formatters';
 import { calculateConsignmentSettlement } from '../utils/calculations';
 import { colors } from '../theme/tokens';
 
-export const ConsignmentScreen = ({ navigation }) => {
+export const ConsignmentScreen = ({ route, navigation }) => {
   const [canteens, setCanteens] = useState([]);
-  const [products, setProducts] = useState([]);
-
-  // Modal Lapak State
-  const [selectedCanteen, setSelectedCanteen] = useState(null);
-  const [showLapakModal, setShowLapakModal] = useState(false);
-  const [lapakMode, setLapakMode] = useState('BUKA'); // 'BUKA' atau 'REKAP'
-
-  // Simpan status sesi lapak harian per kantin di memori
-  const [sessions, setSessions] = useState({
-    c1: {
-      status: 'ONGOING',
-      items: [{ name: 'Risoles Rogout', price: 1200, unitPrice: 1000, titip: 30, retur: 5, laku: 25 }]
-    }
+  const [selectedCanteenId, setSelectedCanteenId] = useState('c1');
+  const [activeMode, setActiveMode] = useState('sore'); // 'pagi' (nitip) atau 'sore' (rekap)
+  
+  const [sessionData, setSessionData] = useState({
+    c1: { initialQty: 30, returnQty: 5, unitPrice: 1000, isPaid: true, itemName: 'Risoles Rogout' },
+    c2: { initialQty: 25, returnQty: 0, unitPrice: 1500, isPaid: false, itemName: 'Pastel Telur' },
+    c3: { initialQty: 20, returnQty: 3, unitPrice: 1000, isPaid: true, itemName: 'Dadar Gulung' }
   });
 
-  // State Input Form Titip Pagi di Modal
-  const [titipQtyInput, setTitipQtyInput] = useState('30');
-  const [returQtyInput, setReturQtyInput] = useState('5');
+  const [returInput, setReturInput] = useState('5');
+  const [titipInput, setTitipInput] = useState('30');
 
   // Modal Tambah Kantin Baru
-  const [isAddCanteenOpen, setIsAddCanteenOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [newCanteenName, setNewCanteenName] = useState('');
   const [newPic, setNewPic] = useState('');
   const [newPhone, setNewPhone] = useState('');
@@ -42,65 +35,46 @@ export const ConsignmentScreen = ({ navigation }) => {
 
   const loadData = async () => {
     const cList = await getCanteens();
-    const pList = await getProducts();
     setCanteens(cList);
-    setProducts(pList);
   };
 
-  const handleOpenLapakModal = (canteen) => {
-    setSelectedCanteen(canteen);
-    const existingSession = sessions[canteen.id];
-    if (existingSession && existingSession.status === 'ONGOING') {
-      setLapakMode('REKAP');
-      const item = existingSession.items[0] || { titip: 30, retur: 0 };
-      setTitipQtyInput(item.titip.toString());
-      setReturQtyInput(item.retur.toString());
-    } else {
-      setLapakMode('BUKA');
-      setTitipQtyInput('30');
-      setReturQtyInput('0');
-    }
-    setShowLapakModal(true);
+  const currentCanteen = canteens.find(c => c.id === selectedCanteenId) || canteens[0] || {
+    id: 'c1', name: 'Kantin Fakultas Teknik', pic: 'Pak Joko', phone: '081298765432', debt: 0
   };
 
-  const handleBukaLapak = () => {
-    const qty = Number(titipQtyInput) || 0;
-    if (qty <= 0) {
-      Alert.alert('Perhatian', 'Masukkan jumlah kue yang dititipkan pagi ini.');
-      return;
-    }
-    setSessions({
-      ...sessions,
-      [selectedCanteen.id]: {
-        status: 'ONGOING',
-        items: [{ name: 'Risoles Rogout', price: 1200, unitPrice: 1000, titip: qty, retur: 0, laku: qty }]
+  const currentSession = sessionData[selectedCanteenId] || {
+    initialQty: 30, returnQty: 5, unitPrice: 1000, isPaid: true, itemName: 'Risoles Rogout'
+  };
+
+  const initialQty = Number(titipInput) || currentSession.initialQty;
+  const returnQty = Number(returInput) || 0;
+  const soldQty = Math.max(0, initialQty - returnQty);
+  const totalDue = Math.round(soldQty * currentSession.unitPrice);
+
+  const handleSelectCanteen = (cId) => {
+    setSelectedCanteenId(cId);
+    const sess = sessionData[cId] || { initialQty: 20, returnQty: 0, unitPrice: 1000, isPaid: true, itemName: 'Risoles Rogout' };
+    setTitipInput(sess.initialQty.toString());
+    setReturInput(sess.returnQty.toString());
+  };
+
+  const handleSaveSession = () => {
+    const updated = {
+      ...sessionData,
+      [selectedCanteenId]: {
+        ...currentSession,
+        initialQty,
+        returnQty,
+        soldQty,
+        totalDue,
+        isPaid: currentSession.isPaid
       }
-    });
-    setShowLapakModal(false);
-    Alert.alert('Lapak Dibuka', `Penitipan ${qty} pcs di ${selectedCanteen.name} berhasil dicatat.`);
-  };
+    };
+    setSessionData(updated);
 
-  const handleTutupLapak = () => {
-    const titip = Number(titipQtyInput) || 30;
-    const retur = Number(returQtyInput) || 0;
-    if (retur > titip) {
-      Alert.alert('Perhatian', 'Sisa retur tidak boleh lebih besar dari kue yang dititipkan.');
-      return;
-    }
-    const laku = titip - retur;
-    const totalSetoran = laku * 1000;
-
-    setSessions({
-      ...sessions,
-      [selectedCanteen.id]: {
-        status: 'COMPLETED',
-        items: [{ name: 'Risoles Rogout', price: 1200, unitPrice: 1000, titip, retur, laku, totalSetoran }]
-      }
-    });
-    setShowLapakModal(false);
     Alert.alert(
-      'Rekap Sore Selesai',
-      `Kue laku: ${laku} pcs. Total setoran ${formatRupiah(totalSetoran)} tercatat di kas.`,
+      'Sesi Rekap Tersimpan',
+      `Setoran ${formatRupiah(totalDue)} dari ${currentCanteen.name} (${currentSession.isPaid ? 'LUNAS' : 'UTANG'}) tercatat di buku kas.`,
       [
         { text: 'Kirim Nota WA', onPress: () => navigation.navigate('Receipt') },
         { text: 'Selesai', onPress: () => navigation.navigate('Dashboard') }
@@ -108,9 +82,9 @@ export const ConsignmentScreen = ({ navigation }) => {
     );
   };
 
-  const handleSaveNewCanteen = async () => {
+  const handleAddNewCanteen = async () => {
     if (!newCanteenName.trim() || !newPic.trim()) {
-      Alert.alert('Perhatian', 'Nama kantin dan PIC wajib diisi.');
+      Alert.alert('Peringatan', 'Lengkapi nama kantin dan nama PIC.');
       return;
     }
     await addCanteen({
@@ -121,9 +95,9 @@ export const ConsignmentScreen = ({ navigation }) => {
     setNewCanteenName('');
     setNewPic('');
     setNewPhone('');
-    setIsAddCanteenOpen(false);
+    setIsModalOpen(false);
     await loadData();
-    Alert.alert('Sukses', 'Kantin baru berhasil ditambahkan.');
+    Alert.alert('Sukses', 'Mitra kantin baru berhasil ditambahkan.');
   };
 
   return (
@@ -133,202 +107,169 @@ export const ConsignmentScreen = ({ navigation }) => {
         title="Titip Kantin"
         subtitle="Pagi Nitip, Sore Ambil Uang"
         rightElement={
-          <PrimaryActionBadge label="+ Kantin Baru" onPress={() => setIsAddCanteenOpen(true)} />
+          <PrimaryActionBadge label="+ Kantin Baru" onPress={() => setIsModalOpen(true)} />
         }
       />
-
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
-        {/* BANNER TANGGAL OPERASIONAL PERSIS DAPUR-RN */}
+        {/* BANNER TANGGAL OPERASIONAL SEPERTI DAPUR-RN */}
         <View style={styles.dateBar}>
           <Text style={styles.dateBarText}>HARI INI (Kamis, 8 Okt 2026)</Text>
         </View>
 
-        {/* DAFTAR KANTIN VERTIKAL UTUH PERSIS DAPUR-RN */}
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>Daftar Kantin Mitra</Text>
-          <Text style={styles.sectionSubtitle}>{canteens.length} Kantin Terdaftar</Text>
-        </View>
-
-        {canteens.length === 0 ? (
-          <EmptyState
-            title="Belum Ada Kantin"
-            message="Ketuk tombol + Kantin Baru di pojok kanan atas untuk menambahkan mitra kantin."
-            iconType="canteen"
-          />
-        ) : (
-          canteens.map((canteen) => {
-            const session = sessions[canteen.id];
-            const isOngoing = session?.status === 'ONGOING';
-            const isCompleted = session?.status === 'COMPLETED';
-
-            let statusBg = '#FAFAFA';
-            let statusText = '• Belum Nitip Hari Ini';
-            let statusColor = '#71717A';
-
-            if (isOngoing) {
-              statusBg = '#FFFBEB';
-              statusText = '• Lapak Sedang Berjalan (Nitip Pagi)';
-              statusColor = '#D97706';
-            } else if (isCompleted) {
-              statusBg = '#F0FDF4';
-              statusText = '• Selesai (Rekap Sore Disetor)';
-              statusColor = '#059669';
-            }
-
+        {/* DAFTAR KANTIN HORIZONTAL CARD COMPACT & PADAT */}
+        <Text style={styles.sectionTitle}>Pilih Kantin Rekanan</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.canteenScroll}>
+          {canteens.map((c) => {
+            const isSelected = c.id === selectedCanteenId;
             return (
-              <View key={canteen.id} style={[styles.canteenCardFull, { backgroundColor: statusBg }]}>
-                
-                {/* BARIS ATAS: ASET TOKO SVG + NAMA + PIC */}
-                <View style={styles.canteenCardHeader}>
-                  <View style={styles.canteenIconBox}>
-                    <FoodVisual type="canteen_shop" size={44} />
+              <TouchableOpacity
+                key={c.id}
+                style={[styles.canteenCard, isSelected && styles.canteenCardActive]}
+                activeOpacity={0.8}
+                onPress={() => handleSelectCanteen(c.id)}
+              >
+                <View style={styles.canteenTopRow}>
+                  <FoodVisual type="canteen_shop" size={26} />
+                  <View style={[styles.canteenDebtChip, c.debt > 0 ? styles.debtChipRed : styles.debtChipGreen]}>
+                    <Text style={[styles.canteenDebtText, c.debt > 0 ? styles.textRed : styles.textGreen]}>
+                      {c.debt > 0 ? `Piutang ${formatRupiah(c.debt)}` : 'Lunas'}
+                    </Text>
                   </View>
-                  <View style={styles.canteenInfoText}>
-                    <Text style={styles.canteenName}>{canteen.name}</Text>
-                    <Text style={styles.canteenPic}>PIC: {canteen.pic} • {canteen.phone || '-'}</Text>
-                    <Text style={[styles.canteenStatusText, { color: statusColor }]}>{statusText}</Text>
-                  </View>
-                  <TouchableOpacity
-                    style={styles.waIconBtn}
-                    onPress={() => Linking.openURL(`whatsapp://send?phone=62${(canteen.phone || '').slice(1)}`)}
-                  >
-                    <Text style={styles.waIconText}>WA</Text>
-                  </TouchableOpacity>
                 </View>
 
-                {/* TOMBOL AKSI SESI LAPAK */}
-                <TouchableOpacity
-                  style={[styles.btnOpenLapak, isOngoing ? styles.btnOngoing : styles.btnStart]}
-                  activeOpacity={0.8}
-                  onPress={() => handleOpenLapakModal(canteen)}
-                >
-                  <Text style={[styles.btnOpenLapakText, isOngoing ? styles.textOngoing : styles.textStart]}>
-                    {isOngoing ? 'Rekap Sore (Ambil Uang)' : isCompleted ? 'Buka Data Lapak' : 'Mulai Titip Pagi (Buka Lapak)'}
-                  </Text>
-                </TouchableOpacity>
-
-              </View>
+                <Text style={[styles.canteenCardName, isSelected && styles.textOrange]} numberOfLines={1}>
+                  {c.name}
+                </Text>
+                <Text style={styles.canteenCardPic} numberOfLines={1}>
+                  PIC: {c.pic}
+                </Text>
+              </TouchableOpacity>
             );
-          })
-        )}
+          })}
+        </ScrollView>
+
+        {/* SESI LAPAK KANTIN TERPILIH */}
+        <View style={styles.lapakCard}>
+          <View style={styles.lapakHeader}>
+            <View>
+              <Text style={styles.lapakTitle}>{currentCanteen.name}</Text>
+              <Text style={styles.lapakSubtitle}>PIC: {currentCanteen.pic} • {currentCanteen.phone}</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.waBtn}
+              activeOpacity={0.8}
+              onPress={() => Linking.openURL(`whatsapp://send?phone=62${currentCanteen.phone.slice(1)}&text=Halo%20${currentCanteen.pic}`)}
+            >
+              <Text style={styles.waBtnText}>Chat WA</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* TOGGLE SESI PAGI / SORE */}
+          <View style={styles.sessionToggle}>
+            <TouchableOpacity
+              style={[styles.toggleBtn, activeMode === 'pagi' && styles.toggleBtnActive]}
+              onPress={() => setActiveMode('pagi')}
+            >
+              <Text style={[styles.toggleBtnText, activeMode === 'pagi' && styles.textOrange]}>Sesi Pagi (Nitip)</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.toggleBtn, activeMode === 'sore' && styles.toggleBtnActive]}
+              onPress={() => setActiveMode('sore')}
+            >
+              <Text style={[styles.toggleBtnText, activeMode === 'sore' && styles.textOrange]}>Sesi Sore (Rekap)</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* ITEM PENITIPAN KANTIN DENGAN ASET VEKTOR MAKANAN */}
+          <View style={styles.itemPenitipanRow}>
+            <FoodVisual type="risoles" size={48} />
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={styles.itemPenitipanTitle}>{currentSession.itemName}</Text>
+              <Text style={styles.itemPenitipanPrice}>Harga Titip: {formatRupiah(currentSession.unitPrice)} / pcs</Text>
+            </View>
+          </View>
+
+          {/* FORM SESI PAGI / SORE */}
+          {activeMode === 'pagi' ? (
+            <View style={styles.lapakFormArea}>
+              <Text style={styles.fLabel}>Jumlah Kue Dititipkan (Pagi):</Text>
+              <TextInput
+                style={styles.fInputLarge}
+                value={titipInput}
+                onChangeText={setTitipInput}
+                keyboardType="number-pad"
+              />
+              <Text style={styles.helpText}>Kue dititipkan pagi ini dengan status aktif menunggu penarikan sore.</Text>
+            </View>
+          ) : (
+            <View style={styles.lapakFormArea}>
+              <View style={styles.calcRow}>
+                <Text style={styles.calcLabel}>Titip Pagi:</Text>
+                <Text style={styles.calcVal}>{initialQty} pcs</Text>
+              </View>
+
+              <View style={styles.calcRow}>
+                <Text style={styles.calcLabel}>Sisa Retur Fisik:</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <TextInput
+                    style={styles.returInput}
+                    value={returInput}
+                    onChangeText={setReturInput}
+                    keyboardType="number-pad"
+                  />
+                  <Text style={{ fontSize: 13, color: '#71717A', marginLeft: 4 }}>pcs</Text>
+                </View>
+              </View>
+
+              <View style={styles.calcRow}>
+                <Text style={styles.calcLabel}>Kue Terjual Laku:</Text>
+                <Text style={[styles.calcVal, { color: '#059669', fontWeight: '800' }]}>{soldQty} pcs</Text>
+              </View>
+
+              <View style={styles.totalSetoranRow}>
+                <Text style={styles.totalSetoranLabel}>Wajib Setor (@{formatRupiah(currentSession.unitPrice)}):</Text>
+                <Text style={styles.totalSetoranVal}>{formatRupiah(totalDue)}</Text>
+              </View>
+            </View>
+          )}
+
+          {/* TOMBOL AKSI SIMPAN */}
+          <TouchableOpacity style={styles.btnPrimary} activeOpacity={0.8} onPress={handleSaveSession}>
+            <Text style={styles.btnPrimaryText}>
+              {activeMode === 'pagi' ? 'Terbitkan Nota Titip Pagi' : 'Simpan Rekap ke Buku Kas'}
+            </Text>
+          </TouchableOpacity>
+
+        </View>
 
       </ScrollView>
 
-      {/* MODAL LAPAK KANTIN PERSIS SEPERTI DAPUR-RN */}
-      <Modal visible={showLapakModal} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            
-            <View style={styles.modalHeaderRow}>
-              <View>
-                <Text style={styles.modalCanteenTitle}>{selectedCanteen?.name}</Text>
-                <Text style={styles.modalCanteenSubtitle}>PIC: {selectedCanteen?.pic} • Sesi {lapakMode === 'BUKA' ? 'Pagi (Nitip)' : 'Sore (Rekap)'}</Text>
-              </View>
-              <TouchableOpacity onPress={() => setShowLapakModal(false)} style={styles.closeBtn}>
-                <Text style={styles.closeText}>✕</Text>
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView showsVerticalScrollIndicator={false}>
-              
-              {/* ITEM JAJANAN YANG DITITIP */}
-              <View style={styles.modalItemRow}>
-                <FoodVisual type="risoles" size={48} />
-                <View style={{ flex: 1, marginLeft: 12 }}>
-                  <Text style={styles.modalItemName}>Risoles Rogout Ayam</Text>
-                  <Text style={styles.modalItemPrice}>Harga Titip Satuan: Rp 1.000 / pcs</Text>
-                </View>
-              </View>
-
-              {lapakMode === 'BUKA' ? (
-                <View style={styles.lapakInputSection}>
-                  <Text style={styles.fLabel}>Jumlah Kue Dititipkan (Pagi):</Text>
-                  <TextInput
-                    style={styles.fInputBig}
-                    placeholder="30"
-                    keyboardType="number-pad"
-                    value={titipQtyInput}
-                    onChangeText={setTitipQtyInput}
-                  />
-                  <Text style={styles.helpDesc}>Kue akan dicatat sebagai barang aktif di lapak kantin.</Text>
-                </View>
-              ) : (
-                <View style={styles.rekapSection}>
-                  <View style={styles.rekapRow}>
-                    <Text style={styles.rekapLabel}>Total Kue Dititip Pagi:</Text>
-                    <Text style={styles.rekapVal}>{titipQtyInput} pcs</Text>
-                  </View>
-                  <View style={styles.rekapRow}>
-                    <Text style={styles.rekapLabel}>Sisa Retur Fisik Sore:</Text>
-                    <TextInput
-                      style={styles.returInputBox}
-                      value={returQtyInput}
-                      onChangeText={setReturQtyInput}
-                      keyboardType="number-pad"
-                    />
-                  </View>
-                  <View style={styles.rekapRow}>
-                    <Text style={styles.rekapLabel}>Kue Terjual Laku:</Text>
-                    <Text style={[styles.rekapVal, { color: '#059669', fontWeight: '800' }]}>
-                      {Math.max(0, Number(titipQtyInput) - Number(returQtyInput))} pcs
-                    </Text>
-                  </View>
-                  <View style={styles.rekapTotalRow}>
-                    <Text style={styles.rekapTotalLabel}>Wajib Setor (@Rp 1.000):</Text>
-                    <Text style={styles.rekapTotalVal}>
-                      {formatRupiah(Math.max(0, Number(titipQtyInput) - Number(returQtyInput)) * 1000)}
-                    </Text>
-                  </View>
-                </View>
-              )}
-
-              <TouchableOpacity
-                style={styles.btnPrimaryLapak}
-                activeOpacity={0.8}
-                onPress={lapakMode === 'BUKA' ? handleBukaLapak : handleTutupLapak}
-              >
-                <Text style={styles.btnPrimaryLapakText}>
-                  {lapakMode === 'BUKA' ? 'Terbitkan Nota Titip Pagi' : 'Simpan Rekap & Ambil Uang'}
-                </Text>
-              </TouchableOpacity>
-
-            </ScrollView>
-
-          </View>
-        </View>
-      </Modal>
-
       {/* MODAL TAMBAH KANTIN BARU */}
-      <Modal visible={isAddCanteenOpen} transparent animationType="slide">
+      <Modal visible={isModalOpen} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <View style={styles.modalHeaderRow}>
-              <Text style={styles.modalTitle}>Tambah Kantin Baru</Text>
-              <TouchableOpacity onPress={() => setIsAddCanteenOpen(false)} style={styles.closeBtn}>
-                <Text style={styles.closeText}>✕</Text>
-              </TouchableOpacity>
-            </View>
+            <Text style={styles.modalTitle}>Tambah Mitra Kantin Baru</Text>
 
-            <Text style={styles.fLabel}>Nama Kantin</Text>
+            <Text style={styles.formLabel}>Nama Kantin</Text>
             <TextInput
-              style={styles.fInput}
+              style={styles.formInput}
               placeholder="Contoh: Kantin Gedung Kuliah B"
               value={newCanteenName}
               onChangeText={setNewCanteenName}
             />
 
-            <Text style={styles.fLabel}>Nama PIC / Penjaga Kantin</Text>
+            <Text style={styles.formLabel}>Nama PIC / Penjaga</Text>
             <TextInput
-              style={styles.fInput}
+              style={styles.formInput}
               placeholder="Contoh: Bu Ratna"
               value={newPic}
               onChangeText={setNewPic}
             />
 
-            <Text style={styles.fLabel}>Nomor WhatsApp</Text>
+            <Text style={styles.formLabel}>Nomor WhatsApp</Text>
             <TextInput
-              style={styles.fInput}
+              style={styles.formInput}
               placeholder="Contoh: 08123456789"
               keyboardType="phone-pad"
               value={newPhone}
@@ -336,11 +277,11 @@ export const ConsignmentScreen = ({ navigation }) => {
             />
 
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
-              <TouchableOpacity style={styles.btnCancel} onPress={() => setIsAddCanteenOpen(false)}>
-                <Text style={styles.btnCancelText}>Batal</Text>
+              <TouchableOpacity style={styles.modalBtnCancel} onPress={() => setIsModalOpen(false)}>
+                <Text style={styles.modalCancelText}>Batal</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.btnSave} onPress={handleSaveNewCanteen}>
-                <Text style={styles.btnSaveText}>Simpan Kantin</Text>
+              <TouchableOpacity style={styles.modalBtnSave} onPress={handleAddNewCanteen}>
+                <Text style={styles.modalSaveText}>Simpan Kantin</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -382,164 +323,156 @@ const styles = StyleSheet.create({
     color: '#059669',
     textAlign: 'center'
   },
-  sectionHeaderRow: {
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#18181B',
+    marginBottom: 8
+  },
+  canteenScroll: {
+    marginBottom: 16
+  },
+  canteenCard: {
+    backgroundColor: '#FAFAFA',
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    width: 140,
+    marginRight: 8,
+    borderWidth: 1.5,
+    borderColor: '#F4F4F5'
+  },
+  canteenCardActive: {
+    backgroundColor: '#FFF7ED',
+    borderColor: '#EA580C'
+  },
+  canteenTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'baseline',
-    marginBottom: 12
+    alignItems: 'center',
+    marginBottom: 4
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#18181B'
-  },
-  sectionSubtitle: {
+  canteenCardName: {
     fontSize: 12,
-    color: '#71717A',
-    fontWeight: '600'
+    fontWeight: '800',
+    color: '#18181B',
+    marginBottom: 1
   },
-  canteenCardFull: {
-    borderRadius: 18,
+  canteenCardPic: {
+    fontSize: 10,
+    color: '#71717A'
+  },
+  canteenDebtChip: {
+    borderRadius: 6,
+    paddingVertical: 2,
+    paddingHorizontal: 6
+  },
+  debtChipRed: {
+    backgroundColor: '#FEE2E2'
+  },
+  debtChipGreen: {
+    backgroundColor: '#ECFDF5'
+  },
+  canteenDebtText: {
+    fontSize: 9,
+    fontWeight: '700'
+  },
+  lapakCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
     padding: 16,
-    marginBottom: 14,
     borderWidth: 1,
     borderColor: '#F4F4F5',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
     elevation: 2
   },
-  canteenCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12
-  },
-  canteenIconBox: {
-    width: 48,
-    height: 48,
-    marginRight: 12,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  canteenInfoText: {
-    flex: 1
-  },
-  canteenName: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#18181B'
-  },
-  canteenPic: {
-    fontSize: 12,
-    color: '#71717A',
-    marginTop: 2
-  },
-  canteenStatusText: {
-    fontSize: 11,
-    fontWeight: '700',
-    marginTop: 4
-  },
-  waIconBtn: {
-    backgroundColor: '#ECFDF5',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#A7F3D0'
-  },
-  waIconText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#059669'
-  },
-  btnOpenLapak: {
-    borderRadius: 12,
-    paddingVertical: 11,
-    alignItems: 'center'
-  },
-  btnStart: {
-    backgroundColor: '#F4F4F5'
-  },
-  textStart: {
-    color: '#18181B',
-    fontWeight: '700',
-    fontSize: 13
-  },
-  btnOngoing: {
-    backgroundColor: '#EA580C'
-  },
-  textOngoing: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 13
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end'
-  },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 22
-  },
-  modalHeaderRow: {
+  lapakHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
+    paddingBottom: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#F4F4F5',
-    paddingBottom: 10
+    borderBottomColor: '#F4F4F5'
   },
-  modalCanteenTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#18181B'
-  },
-  modalCanteenSubtitle: {
-    fontSize: 12,
-    color: '#71717A',
-    marginTop: 2
-  },
-  closeBtn: {
-    padding: 6
-  },
-  closeText: {
-    fontSize: 18,
-    color: '#71717A',
-    fontWeight: '800'
-  },
-  modalItemRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FAFAFA',
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 14
-  },
-  modalItemName: {
+  lapakTitle: {
     fontSize: 15,
     fontWeight: '800',
     color: '#18181B'
   },
-  modalItemPrice: {
+  lapakSubtitle: {
+    fontSize: 11,
+    color: '#71717A',
+    marginTop: 2
+  },
+  waBtn: {
+    backgroundColor: '#22C55E',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 8
+  },
+  waBtnText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700'
+  },
+  sessionToggle: {
+    flexDirection: 'row',
+    backgroundColor: '#F4F4F5',
+    borderRadius: 10,
+    padding: 3,
+    marginBottom: 14
+  },
+  toggleBtn: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 6,
+    borderRadius: 8
+  },
+  toggleBtnActive: {
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 3,
+    elevation: 1
+  },
+  toggleBtnText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#71717A'
+  },
+  itemPenitipanRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FAFAFA',
+    borderRadius: 14,
+    padding: 10,
+    marginBottom: 12
+  },
+  itemPenitipanTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#18181B'
+  },
+  itemPenitipanPrice: {
     fontSize: 12,
     color: '#71717A',
     marginTop: 2
   },
-  lapakInputSection: {
-    marginBottom: 16
+  lapakFormArea: {
+    marginBottom: 14
   },
   fLabel: {
     fontSize: 12,
     fontWeight: '600',
     color: '#52525B',
-    marginBottom: 6
+    marginBottom: 4
   },
-  fInputBig: {
+  fInputLarge: {
     backgroundColor: '#F4F4F5',
     borderRadius: 12,
     paddingVertical: 10,
@@ -549,18 +482,12 @@ const styles = StyleSheet.create({
     color: '#18181B',
     marginBottom: 6
   },
-  helpDesc: {
+  helpText: {
     fontSize: 11,
     color: '#71717A',
-    marginTop: 6
+    lineHeight: 16
   },
-  rekapSection: {
-    backgroundColor: '#FAFAFA',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 16
-  },
-  rekapRow: {
+  calcRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -568,93 +495,120 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F4F4F5'
   },
-  rekapLabel: {
+  calcLabel: {
     fontSize: 12,
     color: '#52525B'
   },
-  rekapVal: {
+  calcVal: {
     fontSize: 13,
     fontWeight: '700',
     color: '#18181B'
   },
-  returInputBox: {
+  returInput: {
     backgroundColor: '#FEE2E2',
     color: '#DC2626',
     fontWeight: '800',
-    fontSize: 14,
-    borderRadius: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    minWidth: 44,
+    fontSize: 13,
+    borderRadius: 6,
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    minWidth: 36,
     textAlign: 'center'
   },
-  rekapTotalRow: {
+  totalSetoranRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'baseline',
     paddingTop: 10,
     marginTop: 4
   },
-  rekapTotalLabel: {
+  totalSetoranLabel: {
     fontSize: 13,
     fontWeight: '800',
     color: '#18181B'
   },
-  rekapTotalVal: {
+  totalSetoranVal: {
     fontSize: 17,
     fontWeight: '800',
     color: '#059669'
   },
-  btnPrimaryLapak: {
+  textOrange: {
+    color: '#EA580C'
+  },
+  textGreen: {
+    color: '#059669'
+  },
+  textRed: {
+    color: '#DC2626'
+  },
+  btnPrimary: {
     backgroundColor: '#EA580C',
     borderRadius: 14,
-    paddingVertical: 14,
+    paddingVertical: 13,
     alignItems: 'center',
     shadowColor: '#EA580C',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 3
   },
-  btnPrimaryLapakText: {
+  btnPrimaryText: {
     color: '#FFFFFF',
-    fontWeight: '800',
+    fontWeight: '700',
     fontSize: 14
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end'
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20
   },
   modalTitle: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#18181B'
+    color: '#18181B',
+    marginBottom: 14
   },
-  fInput: {
+  formLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#52525B',
+    marginBottom: 4
+  },
+  formInput: {
     backgroundColor: '#F4F4F5',
-    borderRadius: 12,
+    borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 12,
-    fontSize: 13,
+    fontSize: 14,
     color: '#18181B',
     marginBottom: 12
   },
-  btnCancel: {
+  modalBtnCancel: {
     flex: 1,
     paddingVertical: 12,
-    borderRadius: 12,
+    alignItems: 'center',
     backgroundColor: '#F4F4F5',
-    alignItems: 'center'
+    borderRadius: 12
   },
-  btnCancelText: {
+  modalCancelText: {
     fontSize: 13,
     fontWeight: '700',
     color: '#71717A'
   },
-  btnSave: {
-    flex: 2,
+  modalBtnSave: {
+    flex: 1,
     paddingVertical: 12,
-    borderRadius: 12,
+    alignItems: 'center',
     backgroundColor: '#EA580C',
-    alignItems: 'center'
+    borderRadius: 12
   },
-  btnSaveText: {
+  modalSaveText: {
     fontSize: 13,
     fontWeight: '700',
     color: '#FFFFFF'
