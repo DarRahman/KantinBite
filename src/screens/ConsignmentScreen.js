@@ -117,7 +117,7 @@ export const ConsignmentScreen = ({ route, navigation }) => {
           <Text style={styles.dateBarText}>HARI INI (Kamis, 8 Okt 2026)</Text>
         </View>
 
-        {/* DAFTAR KANTIN HORIZONTAL CARD COMPACT & PADAT */}
+        {/* DAFTAR KANTIN HORIZONTAL PILL BAR BERSIH & CEPER */}
         <Text style={styles.sectionTitle}>Pilih Kantin Rekanan</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.canteenScroll}>
           {canteens.map((c) => {
@@ -125,25 +125,26 @@ export const ConsignmentScreen = ({ route, navigation }) => {
             return (
               <TouchableOpacity
                 key={c.id}
-                style={[styles.canteenCard, isSelected && styles.canteenCardActive]}
+                style={[styles.canteenPillBar, isSelected && styles.canteenPillBarActive]}
                 activeOpacity={0.8}
                 onPress={() => handleSelectCanteen(c.id)}
               >
-                <View style={styles.canteenTopRow}>
+                <View style={styles.canteenIconBox}>
                   <FoodVisual type="canteen_shop" size={32} />
-                  <View style={[styles.canteenDebtChip, c.debt > 0 ? styles.debtChipRed : styles.debtChipGreen]}>
-                    <Text style={[styles.canteenDebtText, c.debt > 0 ? styles.textRed : styles.textGreen]}>
-                      {c.debt > 0 ? `Piutang ${formatRupiah(c.debt)}` : 'Lunas'}
-                    </Text>
-                  </View>
                 </View>
-
-                <Text style={[styles.canteenCardName, isSelected && styles.textOrange]} numberOfLines={1}>
-                  {c.name}
-                </Text>
-                <Text style={styles.canteenCardPic} numberOfLines={1}>
-                  PIC: {c.pic}
-                </Text>
+                <View style={styles.canteenPillInfo}>
+                  <Text style={[styles.canteenPillName, isSelected && styles.textOrange]} numberOfLines={1}>
+                    {c.name}
+                  </Text>
+                  <Text style={styles.canteenPillPic} numberOfLines={1}>
+                    PIC: {c.pic}
+                  </Text>
+                </View>
+                <View style={[styles.canteenDebtChip, c.debt > 0 ? styles.debtChipRed : styles.debtChipGreen]}>
+                  <Text style={[styles.canteenDebtText, c.debt > 0 ? styles.textRed : styles.textGreen]}>
+                    {c.debt > 0 ? `Piutang: ${formatRupiah(c.debt)}` : 'Lunas'}
+                  </Text>
+                </View>
               </TouchableOpacity>
             );
           })}
@@ -332,39 +333,52 @@ const styles = StyleSheet.create({
   canteenScroll: {
     marginBottom: 16
   },
-  canteenCard: {
+  canteenPillBar: {
     backgroundColor: '#FAFAFA',
     borderRadius: 14,
-    padding: 10,
-    width: 155,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     marginRight: 10,
     borderWidth: 1.5,
-    borderColor: '#F4F4F5'
+    borderColor: '#F4F4F5',
+    flexDirection: 'row',
+    alignItems: 'center',
+    minWidth: 240,
+    alignSelf: 'flex-start'
   },
-  canteenCardActive: {
+  canteenPillBarActive: {
     backgroundColor: '#FFF7ED',
     borderColor: '#EA580C'
   },
-  canteenTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  canteenIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
-    marginBottom: 8
+    justifyContent: 'center',
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#F4F4F5'
   },
-  canteenCardName: {
+  canteenPillInfo: {
+    flex: 1,
+    marginRight: 10
+  },
+  canteenPillName: {
     fontSize: 13,
     fontWeight: '800',
-    color: '#18181B',
-    marginBottom: 2
+    color: '#18181B'
   },
-  canteenCardPic: {
+  canteenPillPic: {
     fontSize: 11,
-    color: '#71717A'
+    color: '#71717A',
+    marginTop: 1
   },
   canteenDebtChip: {
-    borderRadius: 6,
-    paddingVertical: 2,
-    paddingHorizontal: 6
+    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 8
   },
   debtChipRed: {
     backgroundColor: '#FEE2E2'
@@ -373,7 +387,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ECFDF5'
   },
   canteenDebtText: {
-    fontSize: 9.5,
+    fontSize: 10,
     fontWeight: '700'
   },
   lapakCard: {
