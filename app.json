@@ -28,6 +28,12 @@
       "@react-native-community/datetimepicker",
       "expo-sharing",
       "expo-status-bar"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "11a660d6-b07f-4a0c-8bee-a1f69ddc21c0"
+      }
+    },
+    "owner": "darrahman"
   }
 }
