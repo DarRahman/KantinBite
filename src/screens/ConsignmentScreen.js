@@ -119,35 +119,37 @@ export const ConsignmentScreen = ({ route, navigation }) => {
 
         {/* DAFTAR KANTIN HORIZONTAL CARD COMPACT & PADAT */}
         <Text style={styles.sectionTitle}>Pilih Kantin Rekanan</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.canteenScroll}>
-          {canteens.map((c) => {
-            const isSelected = c.id === selectedCanteenId;
-            return (
-              <TouchableOpacity
-                key={c.id}
-                style={[styles.canteenCard, isSelected && styles.canteenCardActive]}
-                activeOpacity={0.8}
-                onPress={() => handleSelectCanteen(c.id)}
-              >
-                <View style={styles.canteenTopRow}>
-                  <FoodVisual type="canteen_shop" size={26} />
-                  <View style={[styles.canteenDebtChip, c.debt > 0 ? styles.debtChipRed : styles.debtChipGreen]}>
-                    <Text style={[styles.canteenDebtText, c.debt > 0 ? styles.textRed : styles.textGreen]}>
-                      {c.debt > 0 ? `Piutang ${formatRupiah(c.debt)}` : 'Lunas'}
-                    </Text>
+        <View style={{ height: 85, marginBottom: 16 }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ alignItems: 'flex-start' }}>
+            {canteens.map((c) => {
+              const isSelected = c.id === selectedCanteenId;
+              return (
+                <TouchableOpacity
+                  key={c.id}
+                  style={[styles.canteenCard, isSelected && styles.canteenCardActive]}
+                  activeOpacity={0.8}
+                  onPress={() => handleSelectCanteen(c.id)}
+                >
+                  <View style={styles.canteenTopRow}>
+                    <FoodVisual type="canteen_shop" size={26} />
+                    <View style={[styles.canteenDebtChip, c.debt > 0 ? styles.debtChipRed : styles.debtChipGreen]}>
+                      <Text style={[styles.canteenDebtText, c.debt > 0 ? styles.textRed : styles.textGreen]}>
+                        {c.debt > 0 ? `Piutang ${formatRupiah(c.debt)}` : 'Lunas'}
+                      </Text>
+                    </View>
                   </View>
-                </View>
 
-                <Text style={[styles.canteenCardName, isSelected && styles.textOrange]} numberOfLines={1}>
-                  {c.name}
-                </Text>
-                <Text style={styles.canteenCardPic} numberOfLines={1}>
-                  PIC: {c.pic}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+                  <Text style={[styles.canteenCardName, isSelected && styles.textOrange]} numberOfLines={1}>
+                    {c.name}
+                  </Text>
+                  <Text style={styles.canteenCardPic} numberOfLines={1}>
+                    PIC: {c.pic}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
 
         {/* SESI LAPAK KANTIN TERPILIH */}
         <View style={styles.lapakCard}>
@@ -338,6 +340,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 10,
     width: 140,
+    height: 76,
     marginRight: 8,
     borderWidth: 1.5,
     borderColor: '#F4F4F5'
