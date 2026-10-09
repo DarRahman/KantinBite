@@ -1,230 +1,371 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, StatusBar, Linking, Alert } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
-import { ScreenHeader } from '../components/ScreenHeader';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, StatusBar, Alert, Dimensions, Share } from 'react-native';
 import { BottomNav } from '../components/BottomNav';
-import { getConsignment, getProfile } from '../db/storage';
-import { formatRupiah, formatDateIndo } from '../utils/formatters';
-import { colors } from '../theme/tokens';
+import AssetVisual from '../components/AssetVisual';
+import { BentoCard, TactileButton } from '../components/PlayfulComponents';
+import { formatRupiah } from '../utils/formatters';
 
-export const ReceiptScreen = ({ navigation }) => {
-  const [consignment, setConsignment] = useState({
-    partnerName: 'Kantin Fakultas Teknik',
-    picName: 'Pak Joko',
-    itemName: 'Risoles Rogout',
-    initialQty: 30,
-    returnQty: 5,
-    soldQty: 25,
-    totalDue: 25000,
-    isPaid: true,
-    noteCode: '#KB-20261007'
-  });
+const { width } = Dimensions.get('window');
 
-  const [profile, setProfile] = useState({ businessName: 'DAPUR BERKAH' });
+export const ReceiptScreen = ({ route, navigation }) => {
+  const params = route?.params || {};
+  
+  // Data nota POS atau Konsinyasi
+  const isConsignment = Boolean(params.canteenName);
+  const totalAmount = params.total || 25000;
+  const cashReceived = params.received || 30000;
+  const cashChange = params.change || 5000;
+  
+  const receiptNo = `KB-${Math.floor(100000 + Math.random() * 900000)}`;
+  const dateStr = 'Kamis, 8 Okt 2026 • 15:30 WIB';
 
-  useEffect(() => {
-    const load = async () => {
-      const c = await getConsignment();
-      const p = await getProfile();
-      setConsignment(c);
-      setProfile(p);
-    };
-    load();
-  }, []);
+  const items = isConsignment ? [
+    { name: params.item || 'Risoles Rogout', qty: params.sold || 25, price: 1000, subtotal: params.total || 25000 }
+  ] : [
+    { name: 'Risoles Rogout', qty: 10, price: 1200, subtotal: 12000 },
+    { name: 'Dadar Gulung Unti', qty: 8, price: 1000, subtotal: 8000 },
+    { name: 'Pastel Telur Sayur', qty: 5, price: 1500, subtotal: 7500 }
+  ];
 
-  const handleSendWhatsApp = () => {
-    const textMsg = 
-`*BUKTI REKONSILIASI KONSINYASI*
-*${profile.businessName.toUpperCase()}*
-Nota: ${consignment.noteCode}
-Tanggal: ${formatDateIndo()}
+  const handleShareWhatsApp = async () => {
+    let msg = `*BUKTI NOTA TRANSAKSI - KANTINBITE*\n`;
+    msg += `No. Nota: #${receiptNo}\n`;
+    msg += `Waktu: ${dateStr}\n`;
+    if (isConsignment) {
+      msg += `Mitra: ${params.canteenName} (PIC: ${params.pic})\n`;
+      msg += `Titip Pagi: ${params.titip} pcs | Retur Fisik: ${params.retur} pcs\n`;
+    }
+    msg += `--------------------------------\n`;
+    items.forEach(i => {
+      msg += `${i.name} x${i.qty} = ${formatRupiah(i.subtotal)}\n`;
+    });
+    msg += `--------------------------------\n`;
+    msg += `*TOTAL: ${formatRupiah(totalAmount)}*\n`;
+    if (!isConsignment) {
+      msg += `Tunai: ${formatRupiah(cashReceived)}\n`;
+      msg += `Kembalian: ${formatRupiah(cashChange)}\n`;
+    }
+    msg += `\n_Terima kasih atas kerja samanya!_`;
 
-Kepada: ${consignment.partnerName} (${consignment.picName})
------------------------------------------
-Menu: ${consignment.itemName}
-• Titip Pagi: ${consignment.initialQty} pcs
-• Sisa Retur: ${consignment.returnQty} pcs
-• Laku Terjual: ${consignment.soldQty} pcs
------------------------------------------
-*TOTAL SETORAN: ${formatRupiah(consignment.totalDue)}*
-Status: ${consignment.isPaid ? 'LUNAS TUNAI' : 'BELUM DISETOR (PIUTANG)'}
-
-Terima kasih atas kerja samanya. 🙏`;
-
-    const encoded = encodeURI(textMsg);
-    const url = `whatsapp://send?text=${encoded}`;
-
-    Linking.canOpenURL(url)
-      .then((supported) => {
-        if (supported) {
-          Linking.openURL(url);
-        } else {
-          Alert.alert('Catatan', 'Aplikasi WhatsApp tidak terpasang di perangkat. Teks nota siap disalin secara manual.');
-        }
-      })
-      .catch(() => {
-        Alert.alert('Error', 'Gagal membuka aplikasi WhatsApp.');
-      });
+    try {
+      await Share.share({ message: msg });
+    } catch (e) {
+      Alert.alert('Gagal membagikan', e.message);
+    }
   };
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      <ScreenHeader
-        title="Nota Digital"
-        subtitle="Bukti Rekonsiliasi Konsinyasi Sore"
-      />
-      <View style={styles.contentWrap}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+      
+      {/* HEADER AMAN PLAYFUL */}
+      <View style={styles.header}>
+        <View>
+          <View style={styles.headerTag}>
+            <AssetVisual name="receipt_bill" size={16} />
+            <Text style={styles.headerTagText}>BUKTI TRANSAKSI RESMI</Text>
+          </View>
+          <Text style={styles.headerTitle}>Nota Digital WhatsApp</Text>
+        </View>
 
-          {/* RECEIPT PAPER SURFACE */}
-          <View style={styles.receiptSheet}>
-            <View style={styles.receiptHeader}>
-              <Text style={styles.businessTitle}>{profile.businessName.toUpperCase()}</Text>
-              <Text style={styles.noteCodeText}>{consignment.noteCode} • {formatDateIndo()}</Text>
-            </View>
+        <TouchableOpacity
+          style={styles.closeHeaderBtn}
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('Dashboard')}
+        >
+          <Text style={styles.closeHeaderText}>✕ Selesai</Text>
+        </TouchableOpacity>
+      </View>
 
-            <View style={styles.receiptRow}>
-              <Text style={styles.labelCol}>Tujuan:</Text>
-              <Text style={styles.valColBold}>{consignment.partnerName}</Text>
-            </View>
-
-            <View style={[styles.receiptRow, { marginBottom: 10 }]}>
-              <Text style={styles.labelCol}>Penerima:</Text>
-              <Text style={styles.valColBold}>{consignment.picName}</Text>
-            </View>
-
-            <View style={styles.dividerDashed}>
-              <Text style={styles.itemTitle}>{consignment.itemName}</Text>
-              <View style={styles.receiptRow}>
-                <Text style={styles.qtyText}>Titip {consignment.initialQty} | Sisa {consignment.returnQty}</Text>
-                <Text style={styles.qtySoldText}>Laku {consignment.soldQty} pcs</Text>
-              </View>
-              <View style={[styles.receiptRow, { marginTop: 6 }]}>
-                <Text style={styles.totalDueLabel}>Setoran (@1.000):</Text>
-                <Text style={styles.totalDueValue}>{formatRupiah(consignment.totalDue)}</Text>
-              </View>
-            </View>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        
+        {/* KERTAS STRUK DIGITAL DENGAN GERIGI ATAS & BAWAH */}
+        <View style={styles.receiptPaper}>
+          
+          {/* HEADER STRUK DENGAN MASKOT BITEY */}
+          <View style={styles.receiptBrandBox}>
+            <AssetVisual name="chef_mascot" size={54} />
+            <Text style={styles.receiptBrandTitle}>KANTINBITE SAAS</Text>
+            <Text style={styles.receiptBrandSubtitle}>Sistem Operasional & Konsinyasi Mikro</Text>
+            <Text style={styles.receiptNoText}>No. #{receiptNo}</Text>
+            <Text style={styles.receiptDateText}>{dateStr}</Text>
           </View>
 
-          {/* WHATSAPP CTA BUTTON */}
-          <TouchableOpacity style={styles.btnWhatsApp} activeOpacity={0.8} onPress={handleSendWhatsApp}>
-            <Svg width={18} height={18} viewBox="0 0 24 24" fill="#FFFFFF" style={{ marginRight: 8 }}>
-              <Path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.53 2.052.814 3.19.814 3.182 0 5.768-2.586 5.768-5.766 0-3.18-2.586-5.766-5.767-5.766zm9.969 5.766c0 5.503-4.469 9.969-9.969 9.969-1.745 0-3.385-.45-4.819-1.241l-7.212 1.89 1.933-7.051c-.886-1.488-1.39-3.232-1.39-5.083 0-5.504 4.469-9.969 9.969-9.969 5.503 0 9.969 4.465 9.969 9.969z" />
-            </Svg>
-            <Text style={styles.btnWhatsAppText}>Kirim ke WhatsApp</Text>
-          </TouchableOpacity>
+          <View style={styles.dashedDivider} />
+
+          {/* INFORMASI MITRA / TRANSAKSI */}
+          {isConsignment && (
+            <View style={styles.canteenMetaBox}>
+              <Text style={styles.metaLabel}>Mitra Kantin:</Text>
+              <Text style={styles.metaVal}>{params.canteenName}</Text>
+              <Text style={styles.metaSub}>PIC: {params.pic} • Titip: {params.titip} | Retur: {params.retur}</Text>
+            </View>
+          )}
+
+          {/* ITEM TRANSAKSI */}
+          <Text style={styles.itemsHeaderLabel}>RINCIAN PESANAN</Text>
+          {items.map((it, idx) => (
+            <View key={idx} style={styles.itemRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.itemRowName}>{it.name}</Text>
+                <Text style={styles.itemRowSub}>{it.qty} pcs x {formatRupiah(it.price)}</Text>
+              </View>
+              <Text style={styles.itemRowSubtotal}>{formatRupiah(it.subtotal)}</Text>
+            </View>
+          ))}
+
+          <View style={styles.dashedDivider} />
+
+          {/* TOTAL & KEMBALIAN */}
+          <View style={styles.calcSummaryRow}>
+            <Text style={styles.calcSummaryLabel}>TOTAL TAGIHAN:</Text>
+            <Text style={styles.calcSummaryTotal}>{formatRupiah(totalAmount)}</Text>
+          </View>
+
+          {!isConsignment && (
+            <>
+              <View style={styles.calcSubRow}>
+                <Text style={styles.calcSubLabel}>Uang Diterima:</Text>
+                <Text style={styles.calcSubVal}>{formatRupiah(cashReceived)}</Text>
+              </View>
+              <View style={styles.calcSubRow}>
+                <Text style={styles.calcSubLabel}>Kembalian Tunai:</Text>
+                <Text style={[styles.calcSubVal, { color: '#15803D', fontWeight: '900' }]}>{formatRupiah(cashChange)}</Text>
+              </View>
+            </>
+          )}
+
+          {/* STEMPEL LUNAS BESAR DARI OPENMOJI */}
+          <View style={styles.stampCenterBox}>
+            <AssetVisual name="check_badge" size={44} />
+            <Text style={styles.stampCenterText}>PEMBAYARAN LUNAS</Text>
+            <Text style={styles.stampCenterSub}>Tercatat otomatis di Buku Kas SQLite</Text>
+          </View>
 
         </View>
-        <BottomNav activeTab="Consignment" navigation={navigation} />
+
+        {/* DUA TOMBOL AKSI: KIRIM WA & CETAK */}
+        <View style={styles.actionBtnRow}>
+          <TactileButton
+            size="lg"
+            variant="success"
+            style={{ width: '100%' }}
+            icon={<AssetVisual name="receipt_bill" size={22} />}
+            onPress={handleShareWhatsApp}
+          >
+            Kirim Nota ke WhatsApp
+          </TactileButton>
+        </View>
+
+        <View style={{ height: 60 }} />
+      </ScrollView>
+
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FFFFFF'
-  },
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF'
+    backgroundColor: '#FAF8F5',
   },
-  contentWrap: {
-    flex: 1,
+  header: {
     paddingHorizontal: 20,
     paddingTop: 16,
-    paddingBottom: 16
-  },
-  headerTitle: {
-    display: 'none'
-  },
-  receiptSheet: {
-    backgroundColor: '#F4F4F5',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 'auto'
-  },
-  receiptHeader: {
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#D4D4D8',
-    borderStyle: 'dashed',
-    paddingBottom: 10,
-    marginBottom: 10
-  },
-  businessTitle: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#18181B'
-  },
-  noteCodeText: {
-    fontSize: 11,
-    color: '#71717A',
-    marginTop: 2
-  },
-  receiptRow: {
+    paddingBottom: 12,
+    backgroundColor: '#FAF8F5',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1EFEA',
   },
-  labelCol: {
-    fontSize: 12,
-    color: '#52525B'
-  },
-  valColBold: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#18181B'
-  },
-  dividerDashed: {
-    borderTopWidth: 1,
-    borderTopColor: '#D4D4D8',
-    borderStyle: 'dashed',
-    paddingTop: 8,
-    marginTop: 4
-  },
-  itemTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#18181B',
-    marginBottom: 2
-  },
-  qtyText: {
-    fontSize: 11,
-    color: '#71717A'
-  },
-  qtySoldText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#18181B'
-  },
-  totalDueLabel: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#18181B'
-  },
-  totalDueValue: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#059669'
-  },
-  btnWhatsApp: {
-    backgroundColor: '#22C55E',
-    borderRadius: 14,
-    paddingVertical: 13,
+  headerTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#22C55E',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 3,
-    marginTop: 16
+    gap: 4,
+    marginBottom: 2,
   },
-  btnWhatsAppText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 14
-  }
+  headerTagText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#EA580C',
+    letterSpacing: 0.5,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#1E293B',
+    letterSpacing: -0.4,
+  },
+  closeHeaderBtn: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+  },
+  closeHeaderText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  scrollContent: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  receiptPaper: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 22,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderBottomWidth: 5,
+    borderBottomColor: '#CBD5E1',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 4,
+    marginBottom: 20,
+  },
+  receiptBrandBox: {
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  receiptBrandTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#1E293B',
+    letterSpacing: 1,
+    marginTop: 6,
+  },
+  receiptBrandSubtitle: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  receiptNoText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#EA580C',
+    marginTop: 8,
+  },
+  receiptDateText: {
+    fontSize: 11,
+    color: '#94A3B8',
+    marginTop: 2,
+  },
+  dashedDivider: {
+    borderBottomWidth: 1.5,
+    borderBottomColor: '#E2E8F0',
+    borderStyle: 'dashed',
+    marginVertical: 14,
+  },
+  canteenMetaBox: {
+    backgroundColor: '#FAF8F5',
+    padding: 10,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  metaLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#64748B',
+  },
+  metaVal: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  metaSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  itemsHeaderLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#94A3B8',
+    letterSpacing: 0.6,
+    marginBottom: 8,
+  },
+  itemRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  itemRowName: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  itemRowSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  itemRowSubtotal: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  calcSummaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    marginBottom: 6,
+  },
+  calcSummaryLabel: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#1E293B',
+  },
+  calcSummaryTotal: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#EA580C',
+  },
+  calcSubRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 2,
+  },
+  calcSubLabel: {
+    fontSize: 12,
+    color: '#64748B',
+  },
+  calcSubVal: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  stampCenterBox: {
+    alignItems: 'center',
+    backgroundColor: '#DCFCE7',
+    borderRadius: 16,
+    padding: 14,
+    marginTop: 16,
+    borderWidth: 1.5,
+    borderColor: '#BBF7D0',
+  },
+  stampCenterText: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#15803D',
+    letterSpacing: 0.8,
+    marginTop: 4,
+  },
+  stampCenterSub: {
+    fontSize: 10,
+    color: '#166534',
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  actionBtnRow: {
+    width: '100%',
+  },
 });
