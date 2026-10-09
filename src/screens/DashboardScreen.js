@@ -108,14 +108,14 @@ export const DashboardScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* 4. 4 TOMBOL AKSI OPERASIONAL 1:1 GAYA REFERENSI PASTEL 8-ICON */}
+        {/* 4. 4 TOMBOL AKSI OPERASIONAL 1:1 GAYA REFERENSI PASTEL 8-ICON (IKON BESAR 75%) */}
         <View style={styles.quickActionGrid}>
           <TouchableOpacity 
             style={styles.quickActionTile}
             activeOpacity={0.8}
             onPress={() => navigation.navigate('Pos')}
           >
-            <PastelReferenceIcon type="pos" size={64} />
+            <PastelReferenceIcon type="pos" size={68} />
             <Text style={styles.actionTileLabel}>Kasir Lapak</Text>
           </TouchableOpacity>
 
@@ -124,7 +124,7 @@ export const DashboardScreen = ({ navigation }) => {
             activeOpacity={0.8}
             onPress={() => navigation.navigate('Consignment')}
           >
-            <PastelReferenceIcon type="canteen" size={64} />
+            <PastelReferenceIcon type="canteen" size={68} />
             <Text style={styles.actionTileLabel}>Titip Kantin</Text>
           </TouchableOpacity>
 
@@ -133,7 +133,7 @@ export const DashboardScreen = ({ navigation }) => {
             activeOpacity={0.8}
             onPress={() => navigation.navigate('Stock')}
           >
-            <PastelReferenceIcon type="stock" size={64} />
+            <PastelReferenceIcon type="stock" size={68} />
             <Text style={styles.actionTileLabel}>Gudang Stok</Text>
           </TouchableOpacity>
 
@@ -142,7 +142,7 @@ export const DashboardScreen = ({ navigation }) => {
             activeOpacity={0.8}
             onPress={() => navigation.navigate('MarketShopping')}
           >
-            <PastelReferenceIcon type="market" size={64} />
+            <PastelReferenceIcon type="market" size={68} />
             <Text style={styles.actionTileLabel}>Belanja Pasar</Text>
           </TouchableOpacity>
         </View>
@@ -302,13 +302,13 @@ export const DashboardScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#FFFFFF',
   },
   topHeader: {
     paddingHorizontal: 22,
     paddingTop: 16,
     paddingBottom: 14,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: '#FFFFFF',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -364,15 +364,21 @@ const styles = StyleSheet.create({
   filterIconBtn: {
     padding: 4,
   },
+  // 3. HERO KARTU KAS ASLI (PUTIH SOLID BERGARIS TEGAS SEPERTI DI HP FISIK USER)
   heroWalletCard: {
-    backgroundColor: '#FFFBEB',
+    backgroundColor: '#FFFFFF',
     borderRadius: 24,
-    padding: 20,
+    padding: 18,
     borderWidth: 1.5,
-    borderColor: '#FDE68A',
-    borderBottomWidth: 4,
-    borderBottomColor: '#F59E0B',
-    marginBottom: 18,
+    borderColor: '#E4E4E7',
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#D4D4D8',
+    elevation: 3,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    marginBottom: 16,
   },
   walletHeaderRow: {
     flexDirection: 'row',
@@ -382,13 +388,14 @@ const styles = StyleSheet.create({
   walletLabelBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   walletLabelText: {
-    fontSize: 11,
-    fontWeight: '900',
-    color: '#92400E',
-    letterSpacing: 0.5,
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#71717A',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
   },
   eyeBtn: {
     padding: 4,
@@ -402,28 +409,28 @@ const styles = StyleSheet.create({
   walletAmountText: {
     fontSize: 28,
     fontWeight: '900',
-    color: '#78350F',
-    letterSpacing: -0.8,
+    color: '#18181B',
+    letterSpacing: -0.5,
   },
   coinBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#FEF3C7',
     borderWidth: 1.5,
     borderColor: '#FDE68A',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  // KARTU KAS CATATAN BERSATU (ANTI AI-SLOP)
+  // KARTU KAS CATATAN BERSATU (KONTRAS TINGGI, BUKAN PILLS AI SLOP)
   cashFlowLedgerWrap: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8FAFC',
     borderRadius: 14,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#FED7AA',
-    gap: 6,
-    marginTop: 8,
+    borderColor: '#E2E8F0',
+    gap: 7,
+    marginTop: 4,
   },
   ledgerRow: {
     flexDirection: 'row',
@@ -434,70 +441,78 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#10B981',
-    marginRight: 6,
+    backgroundColor: '#059669',
+    marginRight: 8,
   },
   ledgerDotRed: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#EF4444',
-    marginRight: 6,
+    backgroundColor: '#DC2626',
+    marginRight: 8,
   },
   ledgerLabel: {
     flex: 1,
-    fontSize: 11.5,
+    fontSize: 12,
     fontWeight: '600',
-    color: '#475569',
+    color: '#334155',
   },
   ledgerValGreen: {
-    fontSize: 12.5,
-    fontWeight: '800',
+    fontSize: 13,
+    fontWeight: '900',
     color: '#059669',
   },
   ledgerValRed: {
-    fontSize: 12.5,
-    fontWeight: '800',
+    fontSize: 13,
+    fontWeight: '900',
     color: '#DC2626',
   },
 
   // KARTU JAJANAN KREM MENTEGA (#FFF9D6) + 25 LAKU
   foodCardButter: {
-    width: 155,
+    width: 154,
     backgroundColor: '#FFF9D6',
-    borderRadius: 20,
-    padding: 12,
+    borderRadius: 22,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
     borderWidth: 1.5,
     borderColor: '#FEF08A',
     borderBottomWidth: 3.5,
     borderBottomColor: '#FDE047',
     elevation: 2,
-    shadowColor: '#0F172A',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 5,
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    marginBottom: 6,
   },
   foodCardNameButter: {
     fontSize: 13.5,
     fontWeight: '800',
     color: '#0F172A',
     marginTop: 6,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   foodPriceLakuRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
     justifyContent: 'space-between',
+    marginTop: 2,
   },
   foodPriceTextButter: {
-    fontSize: 13,
+    fontSize: 13.5,
     fontWeight: '900',
     color: '#EA580C',
   },
   foodLakuTextButter: {
-    fontSize: 10.5,
+    fontSize: 11,
     fontWeight: '700',
-    color: '#64748B',
+    color: '#475569',
+  },
+  foodCarouselScroll: {
+    paddingRight: 22,
+    paddingBottom: 8,
+    gap: 12,
   },
   analyticsSectionWrap: {
     marginVertical: 10,
@@ -513,17 +528,16 @@ const styles = StyleSheet.create({
     width: (width - 44 - 36) / 4,
   },
   actionIconBox: {
-    width: 62,
-    height: 62,
-    borderRadius: 20,
+    width: 68,
+    height: 68,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
     elevation: 3,
-    shadowColor: '#0F172A',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
   },
   actionTileLabel: {
     fontSize: 11,
