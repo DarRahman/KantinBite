@@ -19,35 +19,35 @@ export const ModernBottomNav = ({ activeTab = 'Home', navigation }) => {
         <Text style={[styles.tabLabel, activeTab === 'Home' && styles.tabLabelActive]}>Beranda</Text>
       </TouchableOpacity>
 
-      {/* 2. ACTIVITY / AKTIVITAS KONSINYASI */}
+      {/* 2. ACTIVITY / AKTIVITAS KONSINYASI (ETALASE GERAI KANTIN) */}
       <TouchableOpacity 
         style={styles.tabBtn} 
         activeOpacity={0.7}
         onPress={() => navigation.navigate('Consignment')}
       >
         <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={activeTab === 'Activity' ? '#EA580C' : '#64748B'} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-          <Path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-          <Path d="M14 2v6h6" />
-          <Path d="M16 13H8" />
-          <Path d="M16 17H8" />
-          <Path d="M10 9H8" />
+          <Path d="M3 9l2-5h14l2 5" />
+          <Path d="M21 9v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9" />
+          <Path d="M9 22V12h6v10" />
         </Svg>
-        <Text style={[styles.tabLabel, activeTab === 'Activity' && styles.tabLabelActive]}>Aktivitas</Text>
+        <Text style={[styles.tabLabel, activeTab === 'Activity' && styles.tabLabelActive]}>Titip Kantin</Text>
       </TouchableOpacity>
 
-      {/* 3. CENTER ELEVATED ACTION BUTTON (PAY / KASIR SCAN) */}
+      {/* 3. CENTER ELEVATED ACTION BUTTON (KASIR / POS) */}
       <View style={styles.centerFabAnchor}>
         <TouchableOpacity 
           style={styles.centerFabBtn} 
           activeOpacity={0.85}
           onPress={() => navigation.navigate('Pos')}
         >
-          {/* ICON QRIS / POS SCANNER */}
+          {/* ICON MESIN KASIR / STRUK TRANSAKSI */}
           <Svg width={26} height={26} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-            <Rect x="3" y="3" width="7" height="7" rx="1.5" />
-            <Rect x="14" y="3" width="7" height="7" rx="1.5" />
-            <Rect x="14" y="14" width="7" height="7" rx="1.5" />
-            <Rect x="3" y="14" width="7" height="7" rx="1.5" />
+            <Rect x="2" y="7" width="20" height="14" rx="2" />
+            <Path d="M6 3h12v4H6z" />
+            <Path d="M6 12h4" />
+            <Path d="M14 12h4" />
+            <Path d="M6 16h4" />
+            <Path d="M14 16h4" />
           </Svg>
           <Text style={styles.fabLabel}>KASIR</Text>
         </TouchableOpacity>

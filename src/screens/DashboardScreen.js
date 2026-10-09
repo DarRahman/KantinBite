@@ -4,6 +4,8 @@ import Svg, { Path, Rect, Circle } from 'react-native-svg';
 import { ModernBottomNav } from '../components/ModernBottomNav';
 import AssetVisual from '../components/AssetVisual';
 import { PastelReferenceIcon } from '../components/PastelReferenceIcon';
+import { WeeklyBarChart } from '../components/WeeklyBarChart';
+import { DonutIncomeRatio } from '../components/DonutIncomeRatio';
 import { getCashflow, getProfile } from '../db/storage';
 import { formatRupiah } from '../utils/formatters';
 
@@ -67,11 +69,11 @@ export const DashboardScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* 3. HERO CASH WALLET CARD BERBOBOT NYATA (DENGAN ASET BERVOLUME) */}
+        {/* 3. HERO CASH WALLET CARD BERBOBOT NYATA (CATATAN KAS BERSATU, ZERO AI-SLOP PILLS) */}
         <View style={styles.heroWalletCard}>
           <View style={styles.walletHeaderRow}>
             <View style={styles.walletLabelBox}>
-              <AssetVisual name="wallet_purse" size={24} />
+              <AssetVisual name="wallet_purse" size={26} />
               <Text style={styles.walletLabelText}>Uang Kas di Dompet</Text>
             </View>
             <TouchableOpacity onPress={() => setHideBalance(!hideBalance)} style={styles.eyeBtn}>
@@ -91,15 +93,17 @@ export const DashboardScreen = ({ navigation }) => {
             </View>
           </View>
 
-          {/* DUA KAPSUL ARUS KAS MASUK & KELUAR */}
-          <View style={styles.cashflowPillsRow}>
-            <View style={styles.cashInPill}>
-              <Text style={styles.cashInLabel}>Pemasukan Hari Ini</Text>
-              <Text style={styles.cashInVal}>+Rp 320.000</Text>
+          {/* ARUS KAS MENYATU BERSIH (CATATAN KAS LAPANGAN, BUKAN PILLS AI SLOP) */}
+          <View style={styles.cashFlowLedgerWrap}>
+            <View style={styles.ledgerRow}>
+              <View style={styles.ledgerDotGreen} />
+              <Text style={styles.ledgerLabel}>Kas Masuk Hari Ini:</Text>
+              <Text style={styles.ledgerValGreen}>+Rp 320.000</Text>
             </View>
-            <View style={styles.cashOutPill}>
-              <Text style={styles.cashOutLabel}>Belanja Pasar Subuh</Text>
-              <Text style={styles.cashOutVal}>-Rp 150.000</Text>
+            <View style={styles.ledgerRow}>
+              <View style={styles.ledgerDotRed} />
+              <Text style={styles.ledgerLabel}>Belanja Pasar Subuh:</Text>
+              <Text style={styles.ledgerValRed}>-Rp 150.000</Text>
             </View>
           </View>
         </View>
@@ -164,7 +168,7 @@ export const DashboardScreen = ({ navigation }) => {
           </ScrollView>
         </View>
 
-        {/* 6. POPULAR / FAVORITE FOOD CAROUSEL ALAMI TANPA BADGE PARASIT */}
+        {/* 6. POPULAR / FAVORITE FOOD CAROUSEL ASLI (GAYA KARTU KREM MENTEGA #FFF9D6 + '25 LAKU') */}
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle}>Katalog Jajanan Unggulan</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Hpp')}>
@@ -174,36 +178,49 @@ export const DashboardScreen = ({ navigation }) => {
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.foodCarouselScroll}>
           {[
-            { id: '1', name: 'Risoles Rogout', price: 2500, profit: 500, titip: '40 pcs titip', icon: 'risoles_rogout', bg: '#FFFBEB' },
-            { id: '2', name: 'Pastel Sayur Telur', price: 2500, profit: 600, titip: '35 pcs titip', icon: 'pastel_telur', bg: '#FEF3C7' },
-            { id: '3', name: 'Dadar Gulung Pandan', price: 2000, profit: 450, titip: '30 pcs titip', icon: 'dadar_gulung', bg: '#DCFCE7' },
-            { id: '4', name: 'Lemper Ayam Harum', price: 2500, profit: 550, titip: '25 pcs titip', icon: 'lemper_ayam', bg: '#F1F5F9' },
+            { id: '1', name: 'Risoles Rogout', price: 1200, laku: '25 laku', icon: 'risoles_rogout' },
+            { id: '2', name: 'Pastel Sayur', price: 1500, laku: '18 laku', icon: 'pastel_telur' },
+            { id: '3', name: 'Dadar Gulung', price: 1000, laku: '30 laku', icon: 'dadar_gulung' },
+            { id: '4', name: 'Lemper Ayam', price: 1500, laku: '22 laku', icon: 'lemper_ayam' },
           ].map((item) => (
             <TouchableOpacity 
               key={item.id}
               activeOpacity={0.85}
               onPress={() => navigation.navigate('Hpp')}
-              style={[styles.foodCard, { backgroundColor: item.bg }]}
+              style={styles.foodCardButter}
             >
-              {/* GAMBAR MAKANAN BERVOLUME DI ATAS ALAMI */}
+              {/* GAMBAR MAKANAN BERVOLUME DENGAN BAYANGAN MENGAMBANG */}
               <View style={styles.foodImageCenter}>
-                <AssetVisual name={item.icon} size={68} />
+                <AssetVisual name={item.icon} size={64} />
               </View>
 
-              {/* NAMA KUE */}
-              <Text style={styles.foodCardName} numberOfLines={1}>{item.name}</Text>
+              {/* NAMA KUE TEBAL NAVY */}
+              <Text style={styles.foodCardNameButter} numberOfLines={1}>{item.name}</Text>
               
-              {/* HARGA JUAL */}
-              <Text style={styles.foodPriceText}>{formatRupiah(item.price)}</Text>
-
-              {/* DETAIL MARGIN DAN TITIP ALAMI DI BAWAH TANPA BADGE PARASIT */}
-              <View style={styles.foodMetaBottomRow}>
-                <Text style={styles.profitNaturalText}>+Untung {formatRupiah(item.profit)}</Text>
-                <Text style={styles.titipCountText}>{item.titip}</Text>
+              {/* BARIS HARGA ORANYE & METRIK LAKU ALAMI PEDAGANG */}
+              <View style={styles.foodPriceLakuRow}>
+                <Text style={styles.foodPriceTextButter}>{formatRupiah(item.price)}</Text>
+                <Text style={styles.foodLakuTextButter}>{item.laku}</Text>
               </View>
             </TouchableOpacity>
           ))}
         </ScrollView>
+
+        {/* 7. DUA GRAFIK ANALITIK ASLI YANG DIKEMBALIKAN (TREN 7 HARI & DONUT RASIO) */}
+        <View style={styles.analyticsSectionWrap}>
+          <WeeklyBarChart 
+            data={[
+              { day: 'Sen', amount: 280000 },
+              { day: 'Sel', amount: 310000 },
+              { day: 'Rab', amount: 290000 },
+              { day: 'Kam', amount: 350000 },
+              { day: 'Jum', amount: 320000 },
+              { day: 'Sab', amount: 410000 },
+              { day: 'Min', amount: 330000 },
+            ]}
+          />
+          <DonutIncomeRatio posAmount={145000} consignmentAmount={175000} />
+        </View>
 
         {/* 7. TARGET OPERASIONAL & METRIK HARIAN */}
         <View style={styles.targetBanner}>
@@ -398,50 +415,92 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#FDE68A',
   },
-  cashflowPillsRow: {
-    flexDirection: 'row',
-    gap: 12,
+  // KARTU KAS CATATAN BERSATU (ANTI AI-SLOP)
+  cashFlowLedgerWrap: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#FED7AA',
+    gap: 6,
     marginTop: 8,
   },
-  cashInPill: {
+  ledgerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  ledgerDotGreen: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#10B981',
+    marginRight: 6,
+  },
+  ledgerDotRed: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#EF4444',
+    marginRight: 6,
+  },
+  ledgerLabel: {
     flex: 1,
-    backgroundColor: '#DCFCE7',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 14,
-    borderWidth: 1.2,
-    borderColor: '#BBF7D0',
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: '#475569',
   },
-  cashInLabel: {
-    fontSize: 10,
-    color: '#15803D',
-    fontWeight: '700',
+  ledgerValGreen: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#059669',
   },
-  cashInVal: {
-    fontSize: 14,
+  ledgerValRed: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#DC2626',
+  },
+
+  // KARTU JAJANAN KREM MENTEGA (#FFF9D6) + 25 LAKU
+  foodCardButter: {
+    width: 155,
+    backgroundColor: '#FFF9D6',
+    borderRadius: 20,
+    padding: 12,
+    borderWidth: 1.5,
+    borderColor: '#FEF08A',
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#FDE047',
+    elevation: 2,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 5,
+  },
+  foodCardNameButter: {
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginTop: 6,
+    marginBottom: 4,
+  },
+  foodPriceLakuRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+  },
+  foodPriceTextButter: {
+    fontSize: 13,
     fontWeight: '900',
-    color: '#166534',
-    marginTop: 2,
+    color: '#EA580C',
   },
-  cashOutPill: {
-    flex: 1,
-    backgroundColor: '#FEE2E2',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 14,
-    borderWidth: 1.2,
-    borderColor: '#FECACA',
-  },
-  cashOutLabel: {
-    fontSize: 10,
-    color: '#B91C1C',
+  foodLakuTextButter: {
+    fontSize: 10.5,
     fontWeight: '700',
+    color: '#64748B',
   },
-  cashOutVal: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: '#991B1B',
-    marginTop: 2,
+  analyticsSectionWrap: {
+    marginVertical: 10,
   },
   quickActionGrid: {
     flexDirection: 'row',
