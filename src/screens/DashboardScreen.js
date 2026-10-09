@@ -117,13 +117,13 @@ export const DashboardScreen = ({ navigation }) => {
           <TouchableOpacity 
             style={[styles.actionTile, { backgroundColor: '#FEF08A', borderColor: '#FDE047' }]}
             activeOpacity={0.85}
-            onPress={() => navigation.navigate('Consignment', { mode: 'pagi' })}
+            onPress={() => navigation.navigate('Stock')}
           >
             <View style={styles.actionVisual}>
-              <AssetVisual name="canteen_shop" size={36} />
+              <AssetVisual name="wheat_flour" size={36} />
             </View>
-            <Text style={styles.actionTileTitle}>Titip Pagi</Text>
-            <Text style={styles.actionTileDesc}>Drop 06:30 subuh</Text>
+            <Text style={styles.actionTileTitle}>Gudang Bahan</Text>
+            <Text style={styles.actionTileDesc}>Sisa stok & alert</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
@@ -139,15 +139,15 @@ export const DashboardScreen = ({ navigation }) => {
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={[styles.actionTile, { backgroundColor: '#DCFCE7', borderColor: '#BBF7D0' }]}
+            style={[styles.actionTile, { backgroundColor: '#FEE2E2', borderColor: '#FECACA' }]}
             activeOpacity={0.85}
-            onPress={() => navigation.navigate('Hpp')}
+            onPress={() => navigation.navigate('DebtLedger')}
           >
             <View style={styles.actionVisual}>
-              <AssetVisual name="cooking_pan" size={36} />
+              <AssetVisual name="money_cash" size={36} />
             </View>
-            <Text style={styles.actionTileTitle}>Katalog HPP</Text>
-            <Text style={styles.actionTileDesc}>Hitung modal resep</Text>
+            <Text style={styles.actionTileTitle}>Buku Piutang</Text>
+            <Text style={styles.actionTileDesc}>Tagihan kantin</Text>
           </TouchableOpacity>
 
         </View>
