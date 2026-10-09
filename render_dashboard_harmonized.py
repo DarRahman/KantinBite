@@ -411,7 +411,7 @@ html_content = """<!DOCTYPE html>
       </svg>
     </div>
 
-    <!-- 3. Hero Uang Kas Di Dompet (Putih Solid Bergaris Tegas) -->
+    <!-- 3. Hero Uang Kas Di Dompet (Putih Solid Ramping & Elegan) -->
     <div class="hero-wallet-card">
       <div class="wallet-header">
         <div class="wallet-tag">
@@ -432,29 +432,11 @@ html_content = """<!DOCTYPE html>
       <div class="wallet-main-row">
         <div class="wallet-balance-big">Rp 850.000</div>
         <!-- Koin Emas Asli yang Pernah Dibuat -->
-        <svg width="34" height="34" viewBox="0 0 48 48">
+        <svg width="36" height="36" viewBox="0 0 48 48">
           <circle cx="24" cy="24" r="20" fill="#F59E0B" stroke="#B45309" stroke-width="2.5"/>
           <circle cx="24" cy="24" r="16" fill="#FBBF24" stroke="#D97706" stroke-width="1.5"/>
           <text x="24" y="29" font-size="14" font-weight="900" fill="#78350F" text-anchor="middle">Rp</text>
         </svg>
-      </div>
-
-      <!-- Arus Kas Menyatu Konsisten (Kontras Tinggi) -->
-      <div class="cash-flow-ledger">
-        <div class="flow-row">
-          <div class="flow-left">
-            <div class="dot-in"></div>
-            <span>Kas Masuk Hari Ini (Lapak & Setoran)</span>
-          </div>
-          <span class="val-in">+Rp 320.000</span>
-        </div>
-        <div class="flow-row">
-          <div class="flow-left">
-            <div class="dot-out"></div>
-            <span>Belanja Bahan Pasar Subuh</span>
-          </div>
-          <span class="val-out">-Rp 150.000</span>
-        </div>
       </div>
     </div>
 

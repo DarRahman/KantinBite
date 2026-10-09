@@ -69,15 +69,15 @@ export const DashboardScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* 3. HERO CASH WALLET CARD BERBOBOT NYATA (CATATAN KAS BERSATU, ZERO AI-SLOP PILLS) */}
+        {/* 3. HERO CASH WALLET CARD RAMPING & ELEGAN (TANPA SUB-BOX KAS/BELANJA) */}
         <View style={styles.heroWalletCard}>
           <View style={styles.walletHeaderRow}>
             <View style={styles.walletLabelBox}>
-              <AssetVisual name="wallet_purse" size={26} />
+              <AssetVisual name="wallet_purse" size={24} />
               <Text style={styles.walletLabelText}>Uang Kas di Dompet</Text>
             </View>
             <TouchableOpacity onPress={() => setHideBalance(!hideBalance)} style={styles.eyeBtn}>
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#78350F" strokeWidth={2}>
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#71717A" strokeWidth={2}>
                 <Path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                 <Circle cx="12" cy="12" r="3" />
               </Svg>
@@ -90,20 +90,6 @@ export const DashboardScreen = ({ navigation }) => {
             </Text>
             <View style={styles.coinBadge}>
               <AssetVisual name="coin_gold" size={32} />
-            </View>
-          </View>
-
-          {/* ARUS KAS MENYATU BERSIH (CATATAN KAS LAPANGAN, BUKAN PILLS AI SLOP) */}
-          <View style={styles.cashFlowLedgerWrap}>
-            <View style={styles.ledgerRow}>
-              <View style={styles.ledgerDotGreen} />
-              <Text style={styles.ledgerLabel}>Kas Masuk Hari Ini:</Text>
-              <Text style={styles.ledgerValGreen}>+Rp 320.000</Text>
-            </View>
-            <View style={styles.ledgerRow}>
-              <View style={styles.ledgerDotRed} />
-              <Text style={styles.ledgerLabel}>Belanja Pasar Subuh:</Text>
-              <Text style={styles.ledgerValRed}>-Rp 150.000</Text>
             </View>
           </View>
         </View>
@@ -364,11 +350,12 @@ const styles = StyleSheet.create({
   filterIconBtn: {
     padding: 4,
   },
-  // 3. HERO KARTU KAS ASLI (PUTIH SOLID BERGARIS TEGAS SEPERTI DI HP FISIK USER)
+  // 3. HERO KARTU KAS ASLI (PUTIH SOLID BERGARIS TEGAS & RAMPING ELEGAN)
   heroWalletCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    padding: 18,
+    borderRadius: 22,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
     borderWidth: 1.5,
     borderColor: '#E4E4E7',
     borderBottomWidth: 3.5,
@@ -376,9 +363,9 @@ const styles = StyleSheet.create({
     elevation: 3,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.04,
     shadowRadius: 8,
-    marginBottom: 16,
+    marginBottom: 18,
   },
   walletHeaderRow: {
     flexDirection: 'row',
@@ -404,13 +391,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 10,
+    marginTop: 8,
+    marginBottom: 2,
   },
   walletAmountText: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: '900',
     color: '#18181B',
-    letterSpacing: -0.5,
+    letterSpacing: -0.6,
   },
   coinBadge: {
     width: 38,
