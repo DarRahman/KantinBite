@@ -12,6 +12,8 @@ import { ConsignmentScreen } from './src/screens/ConsignmentScreen';
 import { StockScreen } from './src/screens/StockScreen';
 import { MarketShoppingScreen } from './src/screens/MarketShoppingScreen';
 import { DebtLedgerScreen } from './src/screens/DebtLedgerScreen';
+import { RecipeEditorScreen } from './src/screens/RecipeEditorScreen';
+import { PartnerDirectoryScreen } from './src/screens/PartnerDirectoryScreen';
 import { ReceiptScreen } from './src/screens/ReceiptScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
 
@@ -40,6 +42,8 @@ export default function App() {
           <Stack.Screen name="Stock" component={StockScreen} />
           <Stack.Screen name="MarketShopping" component={MarketShoppingScreen} />
           <Stack.Screen name="DebtLedger" component={DebtLedgerScreen} />
+          <Stack.Screen name="RecipeEditor" component={RecipeEditorScreen} />
+          <Stack.Screen name="PartnerDirectory" component={PartnerDirectoryScreen} />
           <Stack.Screen name="Receipt" component={ReceiptScreen} />
           <Stack.Screen name="Settings" component={SettingsScreen} />
         </Stack.Navigator>

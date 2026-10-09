@@ -130,6 +130,17 @@ export const HppScreen = ({ navigation }) => {
         </TactileButton>
       </View>
 
+      {/* CELEBRATION BANNER ALA LINGKARAN HIJAU 12 */}
+      <BentoCard bg="#DCFCE7" accentBorder="#BBF7D0" style={{ marginHorizontal: 20, marginTop: 10, padding: 12, borderBottomWidth: 3.5, borderBottomColor: '#10B981' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <AssetVisual name="mascot_celebrate" size={40} />
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 13, fontWeight: '900', color: '#15803D' }}>Pencapaian Omzet Hari Ini!</Text>
+            <Text style={{ fontSize: 11, color: '#166534', marginTop: 1 }}>93 pcs aneka kue laku di kantin mitra & kasir lapak.</Text>
+          </View>
+        </View>
+      </BentoCard>
+
       {/* HORIZONTAL CATEGORY PILLS ALA UIVERSE.IO */}
       <View style={styles.filterBar}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
@@ -232,6 +243,18 @@ export const HppScreen = ({ navigation }) => {
             );
           })
         )}
+
+        {/* BOTTON ACTION: RACIK RESEP BARU */}
+        <View style={{ paddingHorizontal: 20, marginTop: 12 }}>
+          <TactileButton
+            size="md"
+            variant="accent"
+            icon={<AssetVisual name="cooking_pan" size={20} />}
+            onPress={() => navigation.navigate('RecipeEditor')}
+          >
+            + Racik & Simulasi Resep Baru
+          </TactileButton>
+        </View>
 
         <View style={{ height: 100 }} />
       </ScrollView>

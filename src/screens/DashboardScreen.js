@@ -129,13 +129,13 @@ export const DashboardScreen = ({ navigation }) => {
           <TouchableOpacity 
             style={[styles.actionTile, { backgroundColor: '#E0E7FF', borderColor: '#C7D2FE' }]}
             activeOpacity={0.85}
-            onPress={() => navigation.navigate('Consignment', { mode: 'sore' })}
+            onPress={() => navigation.navigate('PartnerDirectory')}
           >
             <View style={styles.actionVisual}>
-              <AssetVisual name="check_badge" size={36} />
+              <AssetVisual name="canteen_shop" size={36} />
             </View>
-            <Text style={styles.actionTileTitle}>Rekap Sore</Text>
-            <Text style={styles.actionTileDesc}>Retur & setoran</Text>
+            <Text style={styles.actionTileTitle}>Mitra Kantin</Text>
+            <Text style={styles.actionTileDesc}>Direktori & kontak</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
@@ -151,6 +151,87 @@ export const DashboardScreen = ({ navigation }) => {
           </TouchableOpacity>
 
         </View>
+
+        {/* CAROUSEL MENU HORIZONTAL ALA REFERENSI LINGKARAN HIJAU 5 */}
+        <View style={{ marginBottom: 16 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <AssetVisual name="mascot_star" size={18} />
+              <Text style={{ fontSize: 13, fontWeight: '900', color: '#1E293B' }}>Katalog Jajanan Favorit</Text>
+            </View>
+            <TouchableOpacity onPress={() => navigation.navigate('Hpp')}>
+              <Text style={{ fontSize: 11, fontWeight: '800', color: '#EA580C' }}>Lihat Semua →</Text>
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
+            {[
+              { name: 'Risoles Rogout', price: 'Rp 1.200', sold: '25 laku', icon: 'risoles_rogout', bg: '#FFFBEB' },
+              { name: 'Pastel Telur', price: 'Rp 1.500', sold: '18 laku', icon: 'pastel_telur', bg: '#FEF3C7' },
+              { name: 'Dadar Gulung', price: 'Rp 1.000', sold: '30 laku', icon: 'dadar_gulung', bg: '#DCFCE7' },
+              { name: 'Lemper Ayam', price: 'Rp 1.500', sold: '20 laku', icon: 'lemper_ayam', bg: '#F1F5F9' },
+            ].map((item, idx) => (
+              <TouchableOpacity 
+                key={idx}
+                activeOpacity={0.85}
+                onPress={() => navigation.navigate('Hpp')}
+                style={{
+                  width: 130,
+                  backgroundColor: item.bg,
+                  borderRadius: 18,
+                  padding: 12,
+                  alignItems: 'center',
+                  borderWidth: 1.5,
+                  borderColor: '#E2E8F0',
+                  borderBottomWidth: 3.5,
+                  borderBottomColor: '#CBD5E1',
+                }}
+              >
+                <AssetVisual name={item.icon} size={54} />
+                <Text style={{ fontSize: 12, fontWeight: '800', color: '#1E293B', marginTop: 8, textAlign: 'center' }} numberOfLines={1}>
+                  {item.name}
+                </Text>
+                <Text style={{ fontSize: 11, fontWeight: '900', color: '#EA580C', marginTop: 2 }}>{item.price}</Text>
+                <View style={{ backgroundColor: '#FFFFFF', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, marginTop: 4 }}>
+                  <Text style={{ fontSize: 9, fontWeight: '800', color: '#15803D' }}>{item.sold}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* DAILY HABIT TRACKER / TARGET PRODUKSI HARIAN ALA LINGKARAN HIJAU 13 */}
+        <BentoCard bg="#FFFBEB" accentBorder="#FDE68A" style={{ padding: 16, marginBottom: 16, borderBottomWidth: 4, borderBottomColor: '#F59E0B' }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <View>
+              <Text style={{ fontSize: 10, fontWeight: '900', color: '#B45309', letterSpacing: 0.6 }}>TARGET OPERASIONAL HARIAN</Text>
+              <Text style={{ fontSize: 15, fontWeight: '900', color: '#1E293B' }}>Produksi & Serapan Lapak</Text>
+            </View>
+            <View style={{ backgroundColor: '#FEF3C7', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}>
+              <AssetVisual name="mascot_fire" size={24} />
+            </View>
+          </View>
+
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <View style={{ flex: 1, backgroundColor: '#FFFFFF', padding: 10, borderRadius: 12, borderWidth: 1, borderColor: '#FDE68A' }}>
+              <Text style={{ fontSize: 10, color: '#78350F', fontWeight: '700' }}>Kue Terjual</Text>
+              <Text style={{ fontSize: 15, fontWeight: '900', color: '#1E293B', marginTop: 2 }}>93 / 110</Text>
+              <Text style={{ fontSize: 9, color: '#15803D', fontWeight: '800', marginTop: 2 }}>84.5% Sukses</Text>
+            </View>
+
+            <View style={{ flex: 1, backgroundColor: '#FFFFFF', padding: 10, borderRadius: 12, borderWidth: 1, borderColor: '#FDE68A' }}>
+              <Text style={{ fontSize: 10, color: '#78350F', fontWeight: '700' }}>Retur Fisik</Text>
+              <Text style={{ fontSize: 15, fontWeight: '900', color: '#DC2626', marginTop: 2 }}>5 Pcs</Text>
+              <Text style={{ fontSize: 9, color: '#64748B', fontWeight: '800', marginTop: 2 }}>Terkendali</Text>
+            </View>
+
+            <View style={{ flex: 1, backgroundColor: '#FFFFFF', padding: 10, borderRadius: 12, borderWidth: 1, borderColor: '#FDE68A' }}>
+              <Text style={{ fontSize: 10, color: '#78350F', fontWeight: '700' }}>Sisa Kas</Text>
+              <Text style={{ fontSize: 14, fontWeight: '900', color: '#15803D', marginTop: 2 }}>Rp 850k</Text>
+              <Text style={{ fontSize: 9, color: '#059669', fontWeight: '800', marginTop: 2 }}>Arus Sehat</Text>
+            </View>
+          </View>
+        </BentoCard>
 
         {/* GRAFIK ANALITIK TREN 7 HARI (NATIVE SVG) */}
         <View style={styles.chartSection}>

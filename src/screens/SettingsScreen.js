@@ -158,16 +158,13 @@ export const SettingsScreen = ({ navigation }) => {
           </View>
         </BentoCard>
 
-        {/* ANGGOTA KELOMPOK C (BADAR RAHMAN #1) */}
+        {/* ANGGOTA KELOMPOK C (FORMAT SETARA TANPA JABATAN) */}
         <Text style={styles.sectionTitle}>Tim Pengembang Kelompok C</Text>
         <BentoCard bg="#F8FAFC" accentBorder="#CBD5E1" style={styles.teamCard}>
           <Text style={styles.teamHeaderTitle}>STIKOM Poltek Cirebon • Teknik Informatika</Text>
           
           <View style={styles.memberList}>
-            <View style={styles.leaderRow}>
-              <AssetVisual name="chef_mascot" size={20} />
-              <Text style={styles.leaderText}>1. Badar Rahman (14524303) - Ketua Kelompok</Text>
-            </View>
+            <Text style={styles.memberText}>1. Badar Rahman (14524303)</Text>
             <Text style={styles.memberText}>2. Avivah (14524013)</Text>
             <Text style={styles.memberText}>3. Cindy Septiani (24525404)</Text>
             <Text style={styles.memberText}>4. Nezla Veronika Putri (14524214)</Text>
@@ -318,25 +315,10 @@ const styles = StyleSheet.create({
   memberList: {
     gap: 6,
   },
-  leaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#FFFBEB',
-    padding: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-  },
-  leaderText: {
-    fontSize: 12,
-    fontWeight: '900',
-    color: '#B45309',
-  },
   memberText: {
     fontSize: 12,
-    color: '#64748B',
-    fontWeight: '600',
-    marginLeft: 6,
+    color: '#334155',
+    fontWeight: '700',
+    paddingVertical: 2,
   },
 });
