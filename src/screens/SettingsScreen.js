@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, SafeAreaView, StatusBar, Platform, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, StatusBar, Alert } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import Svg, { Path, Rect } from 'react-native-svg';
-import { ScreenHeader } from '../components/ScreenHeader';
 import { BottomNav } from '../components/BottomNav';
-import { getProfile, saveProfile, exportBackupJSON, restoreBackupJSON } from '../db/storage';
-import { colors } from '../theme/tokens';
+import AssetVisual from '../components/AssetVisual';
+import { BentoCard, TactileButton } from '../components/PlayfulComponents';
+import { getProfile, exportBackupJSON, restoreBackupJSON } from '../db/storage';
 
 export const SettingsScreen = ({ navigation }) => {
   const [profile, setProfile] = useState({
@@ -29,7 +28,7 @@ export const SettingsScreen = ({ navigation }) => {
       await Clipboard.setStringAsync(json);
       Alert.alert(
         'Cadangan Berhasil Disalin',
-        'Data seluruh resep, transaksi kasir, dan konsinyasi kantin telah disalin ke papan klip (clipboard). Simpan teks ini di catatan aman.'
+        'Data seluruh resep, transaksi kasir, dan konsinyasi kantin telah disalin ke clipboard.'
       );
     } catch {
       Alert.alert('Gagal', 'Terjadi kesalahan saat mengekspor data cadangan.');
@@ -70,77 +69,117 @@ export const SettingsScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      <ScreenHeader
-        title="Pengaturan & Data"
-        subtitle="Manajemen Profil & Arsip Cadangan"
-      />
+      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+      
+      {/* HEADER AMAN PLAYFUL */}
+      <View style={styles.header}>
+        <View>
+          <View style={styles.headerTag}>
+            <AssetVisual name="chef_mascot" size={16} />
+            <Text style={styles.headerTagText}>PENGATURAN & IDENTITAS SISTEM</Text>
+          </View>
+          <Text style={styles.headerTitle}>Profil Usaha & Cadangan</Text>
+        </View>
+      </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
-        {/* SEKSI PROFIL USAHA */}
-        <Text style={styles.sectionTitle}>Profil Usaha</Text>
-        <View style={styles.cardSurface}>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Nama Gerai / Usaha</Text>
-            <Text style={styles.infoValue}>{profile.businessName}</Text>
+        {/* HERO KARTU PROFIL USAHA UNIVERSAL */}
+        <BentoCard bg="#FFFBEB" accentBorder="#FDE68A" style={styles.heroBento}>
+          <View style={styles.heroTopRow}>
+            <View style={styles.chefVisualBox}>
+              <AssetVisual name="chef_mascot" size={54} />
+            </View>
+            <View style={{ flex: 1, marginLeft: 14 }}>
+              <View style={styles.tagUniversal}>
+                <Text style={styles.tagUniversalText}>UNIVERSAL SAAS UMKM</Text>
+              </View>
+              <Text style={styles.businessNameText}>{profile.businessName}</Text>
+              <Text style={styles.ownerNameText}>Pemilik: {profile.ownerName}</Text>
+              <Text style={styles.phoneText}>WA: {profile.phone}</Text>
+            </View>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Nama Pemilik</Text>
-            <Text style={styles.infoValue}>{profile.ownerName}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Nomor WhatsApp</Text>
-            <Text style={styles.infoValue}>{profile.phone || '-'}</Text>
-          </View>
-          <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
-            <Text style={styles.infoLabel}>PIN Masuk</Text>
-            <Text style={styles.infoValue}>••••••</Text>
-          </View>
+        </BentoCard>
+
+        {/* SHORTCUT MENU BARU */}
+        <Text style={styles.sectionTitle}>Fitur Tambahan Operasional</Text>
+        <View style={styles.shortcutRow}>
+          <TouchableOpacity 
+            style={styles.shortcutBtn} 
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('Stock')}
+          >
+            <AssetVisual name="wheat_flour" size={28} />
+            <Text style={styles.shortcutLabel}>Gudang Stok</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.shortcutBtn} 
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('MarketShopping')}
+          >
+            <AssetVisual name="market_cart" size={28} />
+            <Text style={styles.shortcutLabel}>Belanja Subuh</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.shortcutBtn} 
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('DebtLedger')}
+          >
+            <AssetVisual name="money_cash" size={28} />
+            <Text style={styles.shortcutLabel}>Buku Piutang</Text>
+          </TouchableOpacity>
         </View>
 
-        {/* SEKSI CADANGAN DATA (BACKUP / RESTORE) */}
-        <Text style={styles.sectionTitle}>Pencadangan & Pemulihan (Arsip Mandiri)</Text>
-        <View style={styles.cardSurface}>
+        {/* CADANGAN DATA OFFLINE DENGAN CLIPBOARD */}
+        <Text style={styles.sectionTitle}>Pencadangan & Pemulihan (SQLite Lokal)</Text>
+        <BentoCard bg="#FFFFFF" accentBorder="#E2E8F0" style={{ padding: 16, marginBottom: 16 }}>
           <Text style={styles.descText}>
             Simpan data resep kue, piutang kantin, dan riwayat kas harian agar tidak hilang saat berganti ponsel.
           </Text>
 
-          <TouchableOpacity style={styles.actionRow} activeOpacity={0.7} onPress={handleExportClipboard}>
-            <View style={styles.actionIconWrap}>
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#EA580C" strokeWidth="2">
-                <Path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-                <Rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
-              </Svg>
-            </View>
-            <View style={styles.actionTextWrap}>
-              <Text style={styles.actionTitle}>Salin Cadangan Data (Backup)</Text>
-              <Text style={styles.actionSubtitle}>Salin seluruh data aplikasi ke Clipboard</Text>
-            </View>
-          </TouchableOpacity>
+          <View style={{ gap: 10, marginTop: 10 }}>
+            <TactileButton
+              variant="secondary"
+              icon={<AssetVisual name="package_box" size={20} />}
+              onPress={handleExportClipboard}
+            >
+              Salin Cadangan Data (Backup JSON)
+            </TactileButton>
 
-          <TouchableOpacity style={[styles.actionRow, { borderBottomWidth: 0 }]} activeOpacity={0.7} onPress={handleRestoreClipboard}>
-            <View style={[styles.actionIconWrap, { backgroundColor: '#ECFDF5' }]}>
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2">
-                <Path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <Path d="M7 10l5 5 5-5" />
-                <Path d="M12 15V3" />
-              </Svg>
-            </View>
-            <View style={styles.actionTextWrap}>
-              <Text style={styles.actionTitle}>Pulihkan Data (Restore)</Text>
-              <Text style={styles.actionSubtitle}>Terapkan data cadangan dari Clipboard</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
+            <TactileButton
+              variant="accent"
+              icon={<AssetVisual name="check_badge" size={20} />}
+              onPress={handleRestoreClipboard}
+            >
+              Pulihkan Data dari Clipboard
+            </TactileButton>
+          </View>
+        </BentoCard>
 
-        {/* INFORMASI VERSI APLIKASI */}
-        <View style={styles.appMetaCard}>
-          <Text style={styles.appMetaTitle}>KantinBite v1.0.0 (Tugas Akhir Pemvis)</Text>
-          <Text style={styles.appMetaDesc}>STIKOM Poltek Cirebon • Kelompok C • React Native</Text>
-        </View>
+        {/* ANGGOTA KELOMPOK C (BADAR RAHMAN #1) */}
+        <Text style={styles.sectionTitle}>Tim Pengembang Kelompok C</Text>
+        <BentoCard bg="#F8FAFC" accentBorder="#CBD5E1" style={styles.teamCard}>
+          <Text style={styles.teamHeaderTitle}>STIKOM Poltek Cirebon • Teknik Informatika</Text>
+          
+          <View style={styles.memberList}>
+            <View style={styles.leaderRow}>
+              <AssetVisual name="chef_mascot" size={20} />
+              <Text style={styles.leaderText}>1. Badar Rahman (14524303) - Ketua Kelompok</Text>
+            </View>
+            <Text style={styles.memberText}>2. Avivah (14524013)</Text>
+            <Text style={styles.memberText}>3. Cindy Septiani (24525404)</Text>
+            <Text style={styles.memberText}>4. Nezla Veronika Putri (14524214)</Text>
+            <Text style={styles.memberText}>5. Raehan Pramudia Nugraha (14524304)</Text>
+            <Text style={styles.memberText}>6. Raihan Al Farizi (14524302)</Text>
+            <Text style={styles.memberText}>7. Wisnu Hadi Pradana (14524309)</Text>
+          </View>
+        </BentoCard>
 
+        <View style={{ height: 100 }} />
       </ScrollView>
+
       <BottomNav activeTab="Settings" navigation={navigation} />
     </View>
   );
@@ -149,89 +188,155 @@ export const SettingsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF'
+    backgroundColor: '#FAF8F5',
   },
-  scrollContent: {
+  header: {
     paddingHorizontal: 20,
     paddingTop: 16,
-    paddingBottom: 24
+    paddingBottom: 12,
+    backgroundColor: '#FAF8F5',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1EFEA',
+  },
+  headerTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 2,
+  },
+  headerTagText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#EA580C',
+    letterSpacing: 0.5,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#1E293B',
+    letterSpacing: -0.4,
+  },
+  scrollContent: {
+    padding: 18,
+  },
+  heroBento: {
+    padding: 18,
+    marginBottom: 18,
+    borderBottomWidth: 4,
+    borderBottomColor: '#F59E0B',
+  },
+  heroTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  chefVisualBox: {
+    width: 64,
+    height: 64,
+    borderRadius: 22,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#FDE68A',
+  },
+  tagUniversal: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    marginBottom: 4,
+  },
+  tagUniversalText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#B45309',
+  },
+  businessNameText: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#1E293B',
+  },
+  ownerNameText: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: '700',
+    marginTop: 1,
+  },
+  phoneText: {
+    fontSize: 11,
+    color: '#94A3B8',
+    marginTop: 1,
   },
   sectionTitle: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '800',
-    color: '#18181B',
-    marginBottom: 8,
-    marginTop: 6
+    color: '#1E293B',
+    marginBottom: 10,
+    marginTop: 4,
   },
-  cardSurface: {
-    backgroundColor: '#FAFAFA',
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 16
-  },
-  infoRow: {
+  shortcutRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F4F4F5'
+    gap: 10,
+    marginBottom: 18,
   },
-  infoLabel: {
-    fontSize: 13,
-    color: '#71717A'
+  shortcutBtn: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#CBD5E1',
+    gap: 6,
   },
-  infoValue: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#18181B'
+  shortcutLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#334155',
   },
   descText: {
     fontSize: 12,
-    color: '#71717A',
+    color: '#64748B',
     lineHeight: 18,
-    marginBottom: 12
   },
-  actionRow: {
+  teamCard: {
+    padding: 16,
+    marginBottom: 16,
+    borderBottomWidth: 3,
+    borderBottomColor: '#CBD5E1',
+  },
+  teamHeaderTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#475569',
+    marginBottom: 10,
+  },
+  memberList: {
+    gap: 6,
+  },
+  leaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F4F4F5'
-  },
-  actionIconWrap: {
-    width: 36,
-    height: 36,
+    gap: 6,
+    backgroundColor: '#FFFBEB',
+    padding: 8,
     borderRadius: 10,
-    backgroundColor: '#FFF7ED',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12
+    borderWidth: 1,
+    borderColor: '#FDE68A',
   },
-  actionTextWrap: {
-    flex: 1
-  },
-  actionTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#18181B'
-  },
-  actionSubtitle: {
-    fontSize: 11,
-    color: '#71717A',
-    marginTop: 1
-  },
-  appMetaCard: {
-    alignItems: 'center',
-    paddingVertical: 20
-  },
-  appMetaTitle: {
+  leaderText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#A1A1AA'
+    fontWeight: '900',
+    color: '#B45309',
   },
-  appMetaDesc: {
-    fontSize: 11,
-    color: '#D4D4D8',
-    marginTop: 2
-  }
+  memberText: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: '600',
+    marginLeft: 6,
+  },
 });
