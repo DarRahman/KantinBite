@@ -69,11 +69,11 @@ export const DashboardScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* 3. HERO CASH WALLET CARD RAMPING & ELEGAN (TANPA SUB-BOX KAS/BELANJA) */}
+        {/* 3. HERO CASH WALLET CARD RAMPING, PADAT & KONSISTEN */}
         <View style={styles.heroWalletCard}>
           <View style={styles.walletHeaderRow}>
             <View style={styles.walletLabelBox}>
-              <AssetVisual name="wallet_purse" size={24} />
+              <AssetVisual name="coin_gold" size={22} />
               <Text style={styles.walletLabelText}>Uang Kas di Dompet</Text>
             </View>
             <TouchableOpacity onPress={() => setHideBalance(!hideBalance)} style={styles.eyeBtn}>
@@ -88,9 +88,7 @@ export const DashboardScreen = ({ navigation }) => {
             <Text style={styles.walletAmountText}>
               {hideBalance ? 'Rp ••••••••' : 'Rp 850.000'}
             </Text>
-            <View style={styles.coinBadge}>
-              <AssetVisual name="coin_gold" size={32} />
-            </View>
+            <AssetVisual name="wallet_purse" size={26} />
           </View>
         </View>
 
@@ -350,22 +348,22 @@ const styles = StyleSheet.create({
   filterIconBtn: {
     padding: 4,
   },
-  // 3. HERO KARTU KAS ASLI (PUTIH SOLID BERGARIS TEGAS & RAMPING ELEGAN)
+  // 3. HERO KARTU KAS ASLI (PUTIH SOLID, RAMPING & PADAT)
   heroWalletCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    paddingVertical: 16,
+    borderRadius: 20,
+    paddingVertical: 14,
     paddingHorizontal: 18,
     borderWidth: 1.5,
     borderColor: '#E4E4E7',
     borderBottomWidth: 3.5,
     borderBottomColor: '#D4D4D8',
-    elevation: 3,
+    elevation: 2,
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 3 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
-    shadowRadius: 8,
-    marginBottom: 18,
+    shadowRadius: 6,
+    marginBottom: 16,
   },
   walletHeaderRow: {
     flexDirection: 'row',
@@ -391,24 +389,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 6,
     marginBottom: 2,
   },
   walletAmountText: {
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: '900',
     color: '#18181B',
-    letterSpacing: -0.6,
-  },
-  coinBadge: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#FEF3C7',
-    borderWidth: 1.5,
-    borderColor: '#FDE68A',
-    alignItems: 'center',
-    justifyContent: 'center',
+    letterSpacing: -0.5,
   },
   // KARTU KAS CATATAN BERSATU (KONTRAS TINGGI, BUKAN PILLS AI SLOP)
   cashFlowLedgerWrap: {

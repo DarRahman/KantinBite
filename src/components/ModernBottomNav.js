@@ -33,10 +33,13 @@ export const ModernBottomNav = ({ activeTab = 'Home', navigation }) => {
         <Text style={[styles.tabLabel, activeTab === 'Activity' && styles.tabLabelActive]}>Titip Kantin</Text>
       </TouchableOpacity>
 
-      {/* 3. CENTER ELEVATED ACTION BUTTON (KASIR / POS) */}
+      {/* 3. CENTER ELEVATED ACTION BUTTON (PAY / KASIR SCAN) */}
       <View style={styles.centerFabAnchor}>
         <TouchableOpacity 
-          style={styles.centerFabBtn} 
+          style={[
+            styles.centerFabBtn,
+            activeTab === 'Kasir' && styles.centerFabBtnActive
+          ]} 
           activeOpacity={0.85}
           onPress={() => navigation.navigate('Pos')}
         >
@@ -132,13 +135,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#EA580C',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 3.5,
+    borderWidth: 4,
     borderColor: '#FFFFFF',
-    elevation: 8,
+    elevation: 6,
     shadowColor: '#EA580C',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.35,
-    shadowRadius: 8,
+    shadowRadius: 10,
+  },
+  centerFabBtnActive: {
+    borderWidth: 4,
+    borderColor: '#FED7AA',
+    elevation: 8,
+    shadowOpacity: 0.5,
+    shadowRadius: 14,
   },
   fabLabel: {
     fontSize: 9,

@@ -1,72 +1,94 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, StatusBar } from 'react-native';
-import Svg, { Path, Circle } from 'react-native-svg';
-import { colors } from '../theme/tokens';
+import Svg, { Path } from 'react-native-svg';
 
-export const ScreenHeader = ({ title, subtitle, rightElement }) => {
+/**
+ * ScreenHeader Terstandarisasi untuk Seluruh Halaman KantinBite
+ * Menjamin konsistensi tipografi, padding, tombol aksi oranye, dan keselarasan UI
+ */
+export const ScreenHeader = ({ 
+  title, 
+  subtitle, 
+  actionLabel, 
+  onActionPress,
+  rightElement 
+}) => {
   return (
     <View style={styles.headerContainer}>
       <View style={styles.textWrap}>
         {subtitle ? <Text style={styles.subtitleText}>{subtitle}</Text> : null}
         <Text style={styles.titleText}>{title}</Text>
       </View>
-      {rightElement ? <View style={styles.rightWrap}>{rightElement}</View> : null}
+
+      {actionLabel ? (
+        <TouchableOpacity 
+          style={styles.actionBtn} 
+          activeOpacity={0.85} 
+          onPress={onActionPress}
+        >
+          <Text style={styles.actionBtnText}>{actionLabel}</Text>
+        </TouchableOpacity>
+      ) : rightElement ? (
+        <View style={styles.rightWrap}>{rightElement}</View>
+      ) : null}
     </View>
   );
 };
 
 export const PrimaryActionBadge = ({ label, onPress }) => {
   return (
-    <TouchableOpacity style={styles.primaryBadge} activeOpacity={0.8} onPress={onPress}>
-      <Text style={styles.primaryBadgeText}>{label}</Text>
+    <TouchableOpacity style={styles.actionBtn} activeOpacity={0.85} onPress={onPress}>
+      <Text style={styles.actionBtnText}>{label}</Text>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   headerContainer: {
-    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 12 : 16,
+    paddingTop: 16,
     paddingHorizontal: 20,
-    paddingBottom: 14,
+    paddingBottom: 12,
     backgroundColor: '#FFFFFF',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#F4F4F5'
+    borderBottomColor: '#F1EFEA',
   },
   textWrap: {
-    flex: 1
+    flex: 1,
   },
   subtitleText: {
-    fontSize: 12,
-    color: '#71717A',
-    fontWeight: '500',
-    marginBottom: 2
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '600',
+    marginBottom: 2,
   },
   titleText: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#18181B',
-    letterSpacing: -0.5
+    fontSize: 21,
+    fontWeight: '900',
+    color: '#0F172A',
+    letterSpacing: -0.4,
   },
   rightWrap: {
-    marginLeft: 12
+    marginLeft: 12,
   },
-  primaryBadge: {
-    backgroundColor: '#18181B',
+  actionBtn: {
+    backgroundColor: '#EA580C',
+    borderRadius: 12,
     paddingVertical: 7,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    shadowColor: '#000',
+    paddingHorizontal: 13,
+    elevation: 2,
+    shadowColor: '#EA580C',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 2
+    marginLeft: 12,
   },
-  primaryBadgeText: {
+  actionBtnText: {
     color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '700'
-  }
+    fontSize: 11,
+    fontWeight: '800',
+    whiteSpace: 'nowrap',
+  },
 });
