@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, StatusBar, Alert, Modal } from 'react-native';
-import { FoodIcon } from '../components/FoodIcon';
-import { ScreenHeader } from '../components/ScreenHeader';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, StatusBar, Alert, Modal, Dimensions } from 'react-native';
 import { BottomNav } from '../components/BottomNav';
+import AssetVisual from '../components/AssetVisual';
+import { BentoCard, TactileButton, TactilePill } from '../components/PlayfulComponents';
 import { getProducts, addPosTransaction, addProduct } from '../db/storage';
 import { formatRupiah } from '../utils/formatters';
-import { colors } from '../theme/tokens';
+
+const { width } = Dimensions.get('window');
 
 export const PosScreen = ({ navigation }) => {
   const [products, setProducts] = useState([]);
-  const [cart, setCart] = useState({ p1: 10, p3: 5 }); // Default terpilih sesuai mockup
+  const [cart, setCart] = useState({ p1: 10, p3: 5 }); // Default terpilih 15 pcs
   const [cashReceived, setCashReceived] = useState('20000');
   const [activeCategory, setActiveCategory] = useState('Semua');
   const [searchQuery, setSearchQuery] = useState('');
@@ -18,35 +19,41 @@ export const PosScreen = ({ navigation }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newName, setNewName] = useState('');
   const [newPrice, setNewPrice] = useState('');
-  const [newCategory, setNewCategory] = useState('Asin');
+  const [newCategory, setNewCategory] = useState('Gorengan');
+  const [newType, setNewType] = useState('risoles');
 
   useEffect(() => {
     loadProducts();
-  }, []);
+    const unsub = navigation.addListener('focus', loadProducts);
+    return unsub;
+  }, [navigation]);
 
   const loadProducts = async () => {
     const p = await getProducts();
     setProducts(p);
   };
 
-  const categories = ['Semua', 'Asin', 'Manis'];
+  const categories = ['Semua', 'Gorengan', 'Kue Basah', 'Asin', 'Manis'];
 
   const filteredProducts = products.filter((item) => {
-    const matchCat = activeCategory === 'Semua' || (item.category || 'Asin') === activeCategory;
+    const matchCat = activeCategory === 'Semua' 
+      || item.category === activeCategory 
+      || (activeCategory === 'Gorengan' && (item.type === 'risoles' || item.type === 'pastel'));
     const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchCat && matchSearch;
   });
 
-  const toggleProduct = (id) => {
+  const updateQuantity = (id, delta) => {
     setCart((prev) => {
       const current = prev[id] || 0;
-      if (current > 0) {
-        const next = { ...prev };
+      const nextQty = Math.max(0, current + delta);
+      const next = { ...prev };
+      if (nextQty === 0) {
         delete next[id];
-        return next;
       } else {
-        return { ...prev, [id]: 1 };
+        next[id] = nextQty;
       }
+      return next;
     });
   };
 
@@ -81,9 +88,14 @@ export const PosScreen = ({ navigation }) => {
       return;
     }
     await addPosTransaction(total, count);
-    Alert.alert('Sukses', `Transaksi ${formatRupiah(total)} selesai. Kembalian: ${formatRupiah(changeNum)}`, [
-      { text: 'OK', onPress: () => navigation.navigate('Dashboard') }
-    ]);
+    navigation.navigate('Receipt', {
+      total,
+      count,
+      received: receivedNum,
+      change: changeNum,
+      cart,
+      products
+    });
   };
 
   const handleAddNewProduct = async () => {
@@ -95,127 +107,175 @@ export const PosScreen = ({ navigation }) => {
       name: newName.trim(),
       price: Number(newPrice) || 1000,
       cost: Math.round(Number(newPrice) * 0.5),
+      canteenCut: 500,
+      yieldQty: 50,
       category: newCategory,
-      type: newCategory === 'Manis' ? 'dadar' : 'risoles'
+      type: newType
     });
     setNewName('');
     setNewPrice('');
     setIsModalOpen(false);
     await loadProducts();
-    Alert.alert('Sukses', 'Menu jajanan baru berhasil ditambahkan ke katalog.');
+    Alert.alert('Sukses', 'Menu jajanan baru berhasil ditambahkan.');
   };
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      <ScreenHeader
-        title="Kasir Kilat"
-        subtitle="Penjualan Langsung di Tempat"
-        rightElement={
-          <TouchableOpacity style={styles.addMenuBtn} activeOpacity={0.7} onPress={() => setIsModalOpen(true)}>
-            <Text style={styles.addMenuText}>+ Menu Baru</Text>
-          </TouchableOpacity>
-        }
-      />
+      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+      
+      {/* HEADER AMAN PLAYFUL */}
+      <View style={styles.header}>
+        <View>
+          <View style={styles.headerTag}>
+            <AssetVisual name="receipt_bill" size={16} />
+            <Text style={styles.headerTagText}>KASIR POS KILAT</Text>
+          </View>
+          <Text style={styles.headerTitle}>Penjualan Langsung</Text>
+        </View>
+
+        <TactileButton size="sm" variant="accent" onPress={() => setIsModalOpen(true)}>
+          + Menu Baru
+        </TactileButton>
+      </View>
+
       <View style={styles.bodyWrap}>
         
-        {/* PENCARIAN & FILTER KATEGORI */}
+        {/* PENCARIAN & FILTER KATEGORI EMPUK */}
         <View style={styles.filterSection}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Cari jajanan..."
-            placeholderTextColor="#A1A1AA"
+            placeholder="Cari risoles, pastel, lemper..."
+            placeholderTextColor="#94A3B8"
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
-          <View style={styles.categoryPills}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScroll}>
             {categories.map((cat) => (
-              <TouchableOpacity
+              <TactilePill
                 key={cat}
-                style={[styles.categoryPill, activeCategory === cat && styles.categoryPillActive]}
-                activeOpacity={0.7}
+                label={cat}
+                active={activeCategory === cat}
                 onPress={() => setActiveCategory(cat)}
-              >
-                <Text style={[styles.categoryText, activeCategory === cat && styles.categoryTextActive]}>
-                  {cat}
-                </Text>
-              </TouchableOpacity>
+              />
             ))}
-          </View>
+          </ScrollView>
         </View>
 
-        {/* CATALOG GRID WITH FOOD ICONS */}
+        {/* CATALOG GRID WITH 72PX VOLUMETRIC FOOD ICONS & PLUS/MINUS COUNTERS */}
         <ScrollView contentContainerStyle={styles.gridScroll} showsVerticalScrollIndicator={false}>
           <View style={styles.catalogGrid}>
             {filteredProducts.map((item) => {
               const qty = cart[item.id] || 0;
               const isSelected = qty > 0;
               return (
-                <TouchableOpacity
+                <BentoCard
                   key={item.id}
-                  style={[styles.catalogItem, isSelected && styles.catalogItemActive]}
-                  activeOpacity={0.7}
-                  onPress={() => toggleProduct(item.id)}
+                  bg={isSelected ? '#FFFBEB' : '#FFFFFF'}
+                  accentBorder={isSelected ? '#F59E0B' : '#E2E8F0'}
+                  style={[styles.catalogCard, isSelected && styles.catalogCardActive]}
                 >
-                  {isSelected && <Text style={styles.itemBadge}>{qty}</Text>}
-                  <FoodIcon type={item.type || 'risoles'} size={46} />
-                  <Text style={styles.itemName}>{item.name}</Text>
-                  <Text style={[styles.itemPrice, isSelected && styles.itemPriceActive]}>
-                    {formatRupiah(item.price)}
-                  </Text>
-                </TouchableOpacity>
+                  <View style={styles.foodVisualBox}>
+                    <AssetVisual name={item.type || 'risoles'} size={60} />
+                    {isSelected && (
+                      <View style={styles.qtyBadge}>
+                        <Text style={styles.qtyBadgeText}>{qty}</Text>
+                      </View>
+                    )}
+                  </View>
+
+                  <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
+                  <Text style={styles.itemPrice}>{formatRupiah(item.price)}</Text>
+
+                  {/* COUNTER EMPUK +/- */}
+                  <View style={styles.counterRow}>
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      style={[styles.counterBtn, qty === 0 && styles.counterBtnDisabled]}
+                      onPress={() => updateQuantity(item.id, -1)}
+                      disabled={qty === 0}
+                    >
+                      <Text style={styles.counterBtnText}>-</Text>
+                    </TouchableOpacity>
+
+                    <Text style={styles.counterQtyText}>{qty}</Text>
+
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      style={[styles.counterBtn, styles.counterBtnAdd]}
+                      onPress={() => updateQuantity(item.id, 1)}
+                    >
+                      <Text style={[styles.counterBtnText, styles.counterBtnAddText]}>+</Text>
+                    </TouchableOpacity>
+                  </View>
+                </BentoCard>
               );
             })}
           </View>
+          <View style={{ height: 260 }} />
         </ScrollView>
 
-        {/* CART DOCK BOTTOM WITH QUICK CASH BUTTONS */}
-        <View style={styles.cartNativeDock}>
+        {/* CART DOCK BOTTOM PLAYFUL ALA MOBBIN & UIVERSE.IO */}
+        <View style={styles.cartBottomDock}>
           
-          {/* TOMBOL PECAHAN UANG CEPAT */}
-          <View style={styles.quickCashRow}>
-            <TouchableOpacity style={styles.quickCashBtn} onPress={() => handleQuickCash(total)}>
-              <Text style={styles.quickCashText}>Uang Pas</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.quickCashBtn} onPress={() => handleQuickCash(10000)}>
-              <Text style={styles.quickCashText}>10rb</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.quickCashBtn} onPress={() => handleQuickCash(20000)}>
-              <Text style={styles.quickCashText}>20rb</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.quickCashBtn} onPress={() => handleQuickCash(50000)}>
-              <Text style={styles.quickCashText}>50rb</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.quickCashBtn} onPress={() => handleQuickCash(100000)}>
-              <Text style={styles.quickCashText}>100rb</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.dockRow}>
-            <Text style={styles.dockLabel}>Total Belanja ({count} pcs)</Text>
-            <Text style={styles.dockTotal}>{formatRupiah(total)}</Text>
-          </View>
-          
-          <View style={styles.dockSubRow}>
-            <View style={styles.cashInputWrap}>
-              <Text style={styles.cashInputLabel}>Diterima: Rp</Text>
-              <TextInput
-                style={styles.cashInput}
-                value={cashReceived}
-                onChangeText={setCashReceived}
-                keyboardType="number-pad"
-                placeholder="0"
-                placeholderTextColor={colors.textPlaceholder}
-              />
+          {/* CHIPS CEPAT PECAHAN UANG DENGAN KOIN EMAS */}
+          <View style={styles.quickCashBar}>
+            <View style={styles.quickCashIcon}>
+              <AssetVisual name="coin_gold" size={20} />
             </View>
-            <Text style={styles.changeLabel}>
-              Kembalian: <Text style={styles.changeValue}>{formatRupiah(changeNum)}</Text>
-            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickCashScroll}>
+              <TouchableOpacity style={styles.cashChip} onPress={() => handleQuickCash(total)}>
+                <Text style={styles.cashChipText}>Uang Pas</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.cashChip} onPress={() => handleQuickCash(10000)}>
+                <Text style={styles.cashChipText}>10rb</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.cashChip} onPress={() => handleQuickCash(20000)}>
+                <Text style={styles.cashChipText}>20rb</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.cashChip} onPress={() => handleQuickCash(50000)}>
+                <Text style={styles.cashChipText}>50rb</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.cashChip} onPress={() => handleQuickCash(100000)}>
+                <Text style={styles.cashChipText}>100rb</Text>
+              </TouchableOpacity>
+            </ScrollView>
           </View>
 
-          <TouchableOpacity style={styles.btnPrimary} activeOpacity={0.8} onPress={handleCheckout}>
-            <Text style={styles.btnPrimaryText}>Bayar & Simpan</Text>
-          </TouchableOpacity>
+          {/* TOTAL & KEMBALIAN ROW */}
+          <View style={styles.totalSummaryRow}>
+            <View>
+              <Text style={styles.totalCountLabel}>Total Belanja ({count} pcs):</Text>
+              <Text style={styles.totalValueText}>{formatRupiah(total)}</Text>
+            </View>
+
+            <View style={styles.changeBox}>
+              <View style={styles.cashInputWrap}>
+                <Text style={styles.cashInputLabel}>Bayar:</Text>
+                <TextInput
+                  style={styles.cashInput}
+                  value={cashReceived}
+                  onChangeText={setCashReceived}
+                  keyboardType="number-pad"
+                  placeholder="0"
+                  placeholderTextColor="#94A3B8"
+                />
+              </View>
+              <Text style={styles.changeText}>
+                Kembali: <Text style={styles.changeValHighlight}>{formatRupiah(changeNum)}</Text>
+              </Text>
+            </View>
+          </View>
+
+          {/* TOMBOL BAYAR BESAR JEMPOL BAWAH */}
+          <TactileButton
+            size="lg"
+            variant="primary"
+            onPress={handleCheckout}
+            icon={<AssetVisual name="receipt_bill" size={24} />}
+          >
+            Bayar & Cetak Struk
+          </TactileButton>
+
         </View>
 
         <BottomNav activeTab="Pos" navigation={navigation} />
@@ -225,12 +285,36 @@ export const PosScreen = ({ navigation }) => {
       <Modal visible={isModalOpen} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Tambah Menu Jajanan Baru</Text>
             
+            <View style={styles.modalHeaderRow}>
+              <Text style={styles.modalTitle}>Tambah Menu Jajanan Baru</Text>
+              <TouchableOpacity onPress={() => setIsModalOpen(false)} style={styles.closeBtn}>
+                <Text style={styles.closeText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.formLabel}>Pilih Ikon Kue</Text>
+            <View style={styles.modalTypeRow}>
+              {['risoles', 'pastel', 'dadar', 'lemper'].map((t) => (
+                <TouchableOpacity
+                  key={t}
+                  activeOpacity={0.8}
+                  onPress={() => setNewType(t)}
+                  style={[styles.modalTypeTile, newType === t && styles.modalTypeTileActive]}
+                >
+                  <AssetVisual name={t} size={36} />
+                  <Text style={[styles.modalTypeText, newType === t && styles.modalTypeTextActive]}>
+                    {t.charAt(0).toUpperCase() + t.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
             <Text style={styles.formLabel}>Nama Jajanan</Text>
             <TextInput
               style={styles.formInput}
-              placeholder="Contoh: Kue Lapis Legit"
+              placeholder="Contoh: Kue Lapis Rainbow"
+              placeholderTextColor="#94A3B8"
               value={newName}
               onChangeText={setNewName}
             />
@@ -239,32 +323,21 @@ export const PosScreen = ({ navigation }) => {
             <TextInput
               style={styles.formInput}
               placeholder="Contoh: 1500"
+              placeholderTextColor="#94A3B8"
               keyboardType="number-pad"
               value={newPrice}
               onChangeText={setNewPrice}
             />
 
-            <Text style={styles.formLabel}>Kategori Rasa</Text>
-            <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
-              {['Asin', 'Manis'].map((cat) => (
-                <TouchableOpacity
-                  key={cat}
-                  style={[styles.modalCatBtn, newCategory === cat && styles.modalCatBtnActive]}
-                  onPress={() => setNewCategory(cat)}
-                >
-                  <Text style={[styles.modalCatText, newCategory === cat && styles.modalCatTextActive]}>{cat}</Text>
-                </TouchableOpacity>
-              ))}
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
+              <TactileButton variant="secondary" style={{ flex: 1 }} onPress={() => setIsModalOpen(false)}>
+                Batal
+              </TactileButton>
+              <TactileButton variant="primary" style={{ flex: 2 }} onPress={handleAddNewProduct}>
+                Simpan Menu
+              </TactileButton>
             </View>
 
-            <View style={{ flexDirection: 'row', gap: 10 }}>
-              <TouchableOpacity style={styles.modalBtnCancel} onPress={() => setIsModalOpen(false)}>
-                <Text style={styles.modalCancelText}>Batal</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.modalBtnSave} onPress={handleAddNewProduct}>
-                <Text style={styles.modalSaveText}>Simpan Menu</Text>
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
       </Modal>
@@ -274,294 +347,334 @@ export const PosScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FFFFFF'
-  },
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF'
+    backgroundColor: '#FAF8F5',
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
+    backgroundColor: '#FAF8F5',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1EFEA',
+  },
+  headerTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 2,
+  },
+  headerTagText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#EA580C',
+    letterSpacing: 0.5,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#1E293B',
+    letterSpacing: -0.4,
   },
   bodyWrap: {
-    flex: 1
-  },
-  addMenuBtn: {
-    backgroundColor: '#FFF7ED',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#FED7AA'
-  },
-  addMenuText: {
-    color: '#EA580C',
-    fontSize: 11,
-    fontWeight: '700'
+    flex: 1,
   },
   filterSection: {
     paddingHorizontal: 20,
-    paddingVertical: 8
+    paddingVertical: 10,
+    backgroundColor: '#FAF8F5',
   },
   searchInput: {
-    backgroundColor: '#F4F4F5',
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
     fontSize: 13,
-    color: '#18181B',
-    marginBottom: 8
+    color: '#1E293B',
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
-  categoryPills: {
-    flexDirection: 'row',
-    gap: 8
-  },
-  categoryPill: {
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: '#F4F4F5'
-  },
-  categoryPillActive: {
-    backgroundColor: '#EA580C'
-  },
-  categoryText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#71717A'
-  },
-  categoryTextActive: {
-    color: '#FFFFFF',
-    fontWeight: '700'
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    marginBottom: 8
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#18181B'
-  },
-  headerSubtitle: {
-    fontSize: 12,
-    color: '#EA580C',
-    fontWeight: '700'
+  categoryScroll: {
+    gap: 8,
   },
   gridScroll: {
-    paddingHorizontal: 20,
-    paddingBottom: 16
+    paddingHorizontal: 18,
+    paddingTop: 4,
   },
   catalogGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
-    justifyContent: 'space-between'
+    gap: 12,
+    justifyContent: 'space-between',
   },
-  catalogItem: {
-    width: '48%',
-    backgroundColor: '#FAFAFA',
-    borderRadius: 16,
-    padding: 12,
+  catalogCard: {
+    width: (width - 36 - 12) / 2,
+    padding: 14,
     alignItems: 'center',
-    position: 'relative'
+    borderBottomWidth: 4,
+    borderBottomColor: '#CBD5E1',
   },
-  catalogItemActive: {
-    backgroundColor: '#FFF7ED',
-    borderWidth: 1.5,
-    borderColor: '#EA580C'
+  catalogCardActive: {
+    borderBottomColor: '#F59E0B',
   },
-  itemBadge: {
+  foodVisualBox: {
+    width: 72,
+    height: 72,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    marginBottom: 6,
+  },
+  qtyBadge: {
     position: 'absolute',
-    top: 8,
-    right: 8,
+    top: -4,
+    right: -4,
     backgroundColor: '#EA580C',
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: '800',
-    paddingHorizontal: 6,
+    paddingHorizontal: 7,
     paddingVertical: 2,
-    borderRadius: 6
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+  },
+  qtyBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '900',
   },
   itemName: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#18181B',
-    marginTop: 4
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#1E293B',
+    textAlign: 'center',
+    marginBottom: 2,
   },
   itemPrice: {
     fontSize: 13,
-    color: '#18181B',
-    fontWeight: '800',
-    marginTop: 2
+    fontWeight: '900',
+    color: '#EA580C',
+    marginBottom: 10,
   },
-  itemPriceActive: {
-    color: '#EA580C'
+  counterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    borderRadius: 14,
+    padding: 3,
+    gap: 10,
   },
-  cartNativeDock: {
-    borderTopWidth: 1,
-    borderTopColor: '#F4F4F5',
+  counterBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  counterBtnDisabled: {
+    opacity: 0.4,
+  },
+  counterBtnAdd: {
+    backgroundColor: '#EA580C',
+    borderColor: '#C2410C',
+  },
+  counterBtnText: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#475569',
+  },
+  counterBtnAddText: {
+    color: '#FFFFFF',
+  },
+  counterQtyText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#1E293B',
+    minWidth: 16,
+    textAlign: 'center',
+  },
+  cartBottomDock: {
+    position: 'absolute',
+    bottom: 60,
+    left: 0,
+    right: 0,
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 26,
+    borderTopRightRadius: 26,
+    borderTopWidth: 2,
+    borderTopColor: '#F1EFEA',
     paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 8,
-    backgroundColor: '#FFFFFF'
+    paddingTop: 12,
+    paddingBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    elevation: 8,
   },
-  quickCashRow: {
+  quickCashBar: {
     flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  quickCashIcon: {
+    marginRight: 8,
+  },
+  quickCashScroll: {
     gap: 6,
-    marginBottom: 8
   },
-  quickCashBtn: {
-    flex: 1,
-    backgroundColor: '#F4F4F5',
-    paddingVertical: 6,
-    borderRadius: 8,
-    alignItems: 'center'
+  cashChip: {
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1.5,
+    borderColor: '#FDE68A',
+    borderBottomWidth: 3,
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    borderRadius: 14,
   },
-  quickCashText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#52525B'
-  },
-  dockRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
-    marginBottom: 4
-  },
-  dockLabel: {
-    fontSize: 12,
-    color: '#71717A'
-  },
-  dockTotal: {
-    fontSize: 20,
+  cashChipText: {
+    fontSize: 11,
     fontWeight: '800',
-    color: '#EA580C'
+    color: '#B45309',
   },
-  dockSubRow: {
+  totalSummaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8
+    marginBottom: 12,
+  },
+  totalCountLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  totalValueText: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#1E293B',
+    letterSpacing: -0.5,
+  },
+  changeBox: {
+    alignItems: 'flex-end',
   },
   cashInputWrap: {
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
+    gap: 4,
   },
   cashInputLabel: {
-    fontSize: 12,
-    color: '#71717A'
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748B',
   },
   cashInput: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#18181B',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 8,
     paddingVertical: 2,
-    paddingHorizontal: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: '#D1D5DB',
-    minWidth: 50
+    paddingHorizontal: 8,
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#1E293B',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    minWidth: 70,
+    textAlign: 'right',
   },
-  changeLabel: {
-    fontSize: 12,
-    color: '#71717A'
-  },
-  changeValue: {
-    color: '#059669',
-    fontWeight: '700'
-  },
-  btnPrimary: {
-    backgroundColor: '#EA580C',
-    borderRadius: 14,
-    paddingVertical: 12,
-    alignItems: 'center',
-    shadowColor: '#EA580C',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 3
-  },
-  btnPrimaryText: {
-    color: '#FFFFFF',
+  changeText: {
+    fontSize: 11,
     fontWeight: '700',
-    fontSize: 14
+    color: '#64748B',
+    marginTop: 2,
+  },
+  changeValHighlight: {
+    color: '#15803D',
+    fontWeight: '900',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end'
+    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+    justifyContent: 'flex-end',
   },
   modalContent: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: 20,
+    paddingBottom: 28,
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   modalTitle: {
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#1E293B',
+  },
+  closeBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeText: {
+    fontSize: 14,
     fontWeight: '800',
-    color: '#18181B',
-    marginBottom: 14
+    color: '#64748B',
+  },
+  modalTypeRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 14,
+  },
+  modalTypeTile: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 8,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    backgroundColor: '#FAF8F5',
+  },
+  modalTypeTileActive: {
+    borderColor: '#EA580C',
+    backgroundColor: '#FFF7ED',
+  },
+  modalTypeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#64748B',
+    marginTop: 4,
+  },
+  modalTypeTextActive: {
+    color: '#EA580C',
+    fontWeight: '800',
   },
   formLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#52525B',
-    marginBottom: 4
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#475569',
+    marginBottom: 5,
   },
   formInput: {
-    backgroundColor: '#F4F4F5',
-    borderRadius: 10,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
     paddingVertical: 10,
-    paddingHorizontal: 12,
-    fontSize: 14,
-    color: '#18181B',
-    marginBottom: 12
-  },
-  modalCatBtn: {
-    flex: 1,
-    backgroundColor: '#F4F4F5',
-    paddingVertical: 8,
-    borderRadius: 8,
-    alignItems: 'center'
-  },
-  modalCatBtnActive: {
-    backgroundColor: '#EA580C'
-  },
-  modalCatText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#71717A'
-  },
-  modalCatTextActive: {
-    color: '#FFFFFF',
-    fontWeight: '700'
-  },
-  modalBtnCancel: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    backgroundColor: '#F4F4F5',
-    borderRadius: 12
-  },
-  modalCancelText: {
+    paddingHorizontal: 14,
     fontSize: 13,
-    fontWeight: '700',
-    color: '#71717A'
+    color: '#1E293B',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
-  modalBtnSave: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    backgroundColor: '#EA580C',
-    borderRadius: 12
-  },
-  modalSaveText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#FFFFFF'
-  }
 });
