@@ -1,0 +1,16 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Ground Shadow -->
+  <ellipse cx="64" cy="110" rx="46" ry="9" fill="#CBD5E1"/>
+  <!-- Badan Pastel Renyah (Setengah Lingkaran Bervolume) -->
+  <path d="M20 86 C20 40, 108 40, 108 86 Z" fill="#FBBF24" stroke="#18181B" stroke-width="3.5"/>
+  <!-- Layer Shading Bawah -->
+  <path d="M24 84 C30 52, 98 52, 104 84 Z" fill="#F59E0B" opacity="0.4"/>
+  <!-- Highlight Atas -->
+  <path d="M36 54 Q64 42 92 54" stroke="#FFFBEB" stroke-width="4" stroke-linecap="round"/>
+  <!-- Pilinan Ulir Khas Pastel Pinggiran Bawah -->
+  <path d="M20 86 Q29 93 38 86 Q47 93 56 86 Q65 93 74 86 Q83 93 92 86 Q101 93 108 86" stroke="#9A3412" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <!-- Gelembung Crust Renyah Kering -->
+  <circle cx="50" cy="66" r="3.5" fill="#D97706"/>
+  <circle cx="68" cy="62" r="4" fill="#D97706"/>
+  <circle cx="82" cy="70" r="3" fill="#D97706"/>
+</svg>

@@ -1,0 +1,20 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Ground Shadow Lembut Ber-depth -->
+  <ellipse cx="64" cy="108" rx="46" ry="10" fill="#E2E8F0"/>
+  <ellipse cx="64" cy="107" rx="36" ry="7" fill="#CBD5E1"/>
+  <!-- Badan Risoles Keemasan Berbalut Tepung Roti -->
+  <rect x="18" y="38" width="92" height="54" rx="27" fill="#F59E0B" stroke="#18181B" stroke-width="3.5"/>
+  <!-- Lapisan Crust Remah Roti Dalam -->
+  <rect x="22" y="42" width="84" height="46" rx="23" fill="#D97706" opacity="0.35"/>
+  <!-- Highlight Pantulan Cahaya Atas -->
+  <path d="M34 46 Q64 38 94 46" stroke="#FEF3C7" stroke-width="4.5" stroke-linecap="round"/>
+  <!-- Tekstur Serat Gorengan Renyah -->
+  <line x1="38" y1="55" x2="44" y2="76" stroke="#B45309" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="56" y1="52" x2="62" y2="78" stroke="#B45309" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="74" y1="54" x2="80" y2="75" stroke="#B45309" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="90" y1="58" x2="94" y2="72" stroke="#B45309" stroke-width="3" stroke-linecap="round"/>
+  <!-- Taburan Butir Breadcrumb Emas -->
+  <circle cx="48" cy="62" r="2.5" fill="#FEF3C7"/>
+  <circle cx="68" cy="66" r="2" fill="#FEF3C7"/>
+  <circle cx="84" cy="60" r="2" fill="#FEF3C7"/>
+</svg>
