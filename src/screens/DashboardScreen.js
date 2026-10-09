@@ -25,31 +25,32 @@ export const DashboardScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
 
-      {/* 1. TOP HEADER: GREETING & PROFILE AVATAR DENGAN NOTIFIKASI */}
+      {/* 1. TOP HEADER: GREETING & PROFILE AVATAR (CLEAN ANTI-SLOP, ZERO EMOJI, ZERO DEV JARGON) */}
       <View style={styles.topHeader}>
         <View style={styles.greetingWrap}>
-          <Text style={styles.greetingSub}>Halo, Selamat Berjualan 👋</Text>
-          <Text style={styles.businessTitle}>{profile.businessName}</Text>
+          <Text style={styles.greetingSub}>Selamat Pagi, Bunda</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 }}>
+            <Svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="#EA580C" strokeWidth={2.5}>
+              <Circle cx="12" cy="12" r="10" />
+              <Path d="M12 6v6l4 2" />
+            </Svg>
+            <Text style={{ fontSize: 12, fontWeight: '700', color: '#64748B' }}>Sesi Pagi: Drop Kantin & Lapak</Text>
+          </View>
         </View>
 
         <View style={styles.headerRightActions}>
-          {/* BADGE LURING PROTECTED ALA DANA */}
           <View style={styles.securityBadge}>
-            <Svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="#15803D" strokeWidth={2.5}>
-              <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </Svg>
-            <Text style={styles.securityBadgeText}>SQLite Luring</Text>
+            <Text style={styles.securityBadgeText}>Luring Aktif</Text>
           </View>
 
-          {/* AVATAR PENGUSAHA DENGAN MASKOT BITEY */}
           <TouchableOpacity 
             style={styles.avatarBtn} 
             activeOpacity={0.8}
             onPress={() => navigation.navigate('Settings')}
           >
-            <AssetVisual name="chef_mascot" size={38} />
+            <Text style={{ fontSize: 16, fontWeight: '900', color: '#EA580C' }}>DB</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -104,17 +105,17 @@ export const DashboardScreen = ({ navigation }) => {
           {/* DUA KAPSUL ARUS KAS MASUK & KELUAR */}
           <View style={styles.cashflowPillsRow}>
             <View style={styles.cashInPill}>
-              <Text style={styles.cashInLabel}>+ Masuk Hari Ini</Text>
-              <Text style={styles.cashInVal}>Rp 320.000</Text>
+              <Text style={styles.cashInLabel}>Pemasukan Hari Ini</Text>
+              <Text style={styles.cashInVal}>+Rp 320.000</Text>
             </View>
             <View style={styles.cashOutPill}>
-              <Text style={styles.cashOutLabel}>- Belanja Pasar</Text>
-              <Text style={styles.cashOutVal}>Rp 150.000</Text>
+              <Text style={styles.cashOutLabel}>Belanja Pasar Subuh</Text>
+              <Text style={styles.cashOutVal}>-Rp 150.000</Text>
             </View>
           </View>
         </View>
 
-        {/* 4. 4 TOMBOL AKSI CEPAT (QUICK ACTION ICONS) */}
+        {/* 4. 4 TOMBOL AKSI CEPAT (PROPORSI IKON PENUH 60% SQUIRCLE, BERSIH) */}
         <View style={styles.quickActionGrid}>
           <TouchableOpacity 
             style={styles.quickActionTile}
@@ -122,9 +123,14 @@ export const DashboardScreen = ({ navigation }) => {
             onPress={() => navigation.navigate('Pos')}
           >
             <View style={[styles.actionIconBox, { backgroundColor: '#FFEDD5', borderColor: '#FED7AA' }]}>
-              <AssetVisual name="receipt_bill" size={26} />
+              <Svg width={30} height={30} viewBox="0 0 24 24" fill="none" stroke="#EA580C" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+                <Rect x="2" y="3" width="20" height="14" rx="2" />
+                <Path d="M8 21h8" />
+                <Path d="M12 17v4" />
+                <Path d="M7 8h10" />
+              </Svg>
             </View>
-            <Text style={styles.actionTileLabel}>Kasir Kilat</Text>
+            <Text style={styles.actionTileLabel}>Kasir Lapak</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
@@ -133,7 +139,10 @@ export const DashboardScreen = ({ navigation }) => {
             onPress={() => navigation.navigate('Consignment')}
           >
             <View style={[styles.actionIconBox, { backgroundColor: '#FEF08A', borderColor: '#FDE047' }]}>
-              <AssetVisual name="canteen_shop" size={26} />
+              <Svg width={30} height={30} viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+                <Path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <Path d="M9 22V12h6v10" />
+              </Svg>
             </View>
             <Text style={styles.actionTileLabel}>Titip Kantin</Text>
           </TouchableOpacity>
@@ -144,7 +153,11 @@ export const DashboardScreen = ({ navigation }) => {
             onPress={() => navigation.navigate('Stock')}
           >
             <View style={[styles.actionIconBox, { backgroundColor: '#E0E7FF', borderColor: '#C7D2FE' }]}>
-              <AssetVisual name="wheat_flour" size={26} />
+              <Svg width={30} height={30} viewBox="0 0 24 24" fill="none" stroke="#4338CA" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+                <Path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                <Path d="m3.3 7 8.7 5 8.7-5" />
+                <Path d="M12 22V12" />
+              </Svg>
             </View>
             <Text style={styles.actionTileLabel}>Gudang Stok</Text>
           </TouchableOpacity>
@@ -155,9 +168,13 @@ export const DashboardScreen = ({ navigation }) => {
             onPress={() => navigation.navigate('MarketShopping')}
           >
             <View style={[styles.actionIconBox, { backgroundColor: '#DCFCE7', borderColor: '#BBF7D0' }]}>
-              <AssetVisual name="market_cart" size={26} />
+              <Svg width={30} height={30} viewBox="0 0 24 24" fill="none" stroke="#15803D" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+                <Circle cx="9" cy="21" r="1" />
+                <Circle cx="20" cy="21" r="1" />
+                <Path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+              </Svg>
             </View>
-            <Text style={styles.actionTileLabel}>Belanja Subuh</Text>
+            <Text style={styles.actionTileLabel}>Belanja Pasar</Text>
           </TouchableOpacity>
         </View>
 
@@ -184,12 +201,9 @@ export const DashboardScreen = ({ navigation }) => {
 
         {/* 6. POPULAR / FAVORITE FOOD CAROUSEL BERNAFAS */}
         <View style={styles.sectionHeaderRow}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <AssetVisual name="mascot_star" size={20} />
-            <Text style={styles.sectionTitle}>Katalog Jajanan Unggulan</Text>
-          </View>
+          <Text style={styles.sectionTitle}>Katalog Jajanan Unggulan</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Hpp')}>
-            <Text style={styles.sectionSeeAll}>Lihat Semua →</Text>
+            <Text style={styles.sectionSeeAll}>Lihat Semua</Text>
           </TouchableOpacity>
         </View>
 
@@ -229,9 +243,6 @@ export const DashboardScreen = ({ navigation }) => {
             <View>
               <Text style={styles.targetSubLabel}>TARGET OPERASIONAL HARIAN</Text>
               <Text style={styles.targetTitle}>Produksi & Serapan Lapak</Text>
-            </View>
-            <View style={styles.fireIconWrap}>
-              <AssetVisual name="mascot_fire" size={24} />
             </View>
           </View>
 
@@ -306,13 +317,13 @@ export const DashboardScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: '#F8FAFC',
   },
   topHeader: {
     paddingHorizontal: 22,
     paddingTop: 16,
-    paddingBottom: 12,
-    backgroundColor: '#FAF8F5',
+    paddingBottom: 14,
+    backgroundColor: '#F8FAFC',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -321,16 +332,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   greetingSub: {
-    fontSize: 12,
-    color: '#64748B',
-    fontWeight: '700',
-  },
-  businessTitle: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#1E293B',
-    letterSpacing: -0.4,
-    marginTop: 2,
+    fontSize: 20,
+    color: '#0F172A',
+    fontWeight: '800',
+    letterSpacing: -0.5,
   },
   headerRightActions: {
     flexDirection: 'row',
@@ -442,16 +447,16 @@ const styles = StyleSheet.create({
   },
   cashflowPillsRow: {
     flexDirection: 'row',
-    gap: 10,
-    marginTop: 4,
+    gap: 12,
+    marginTop: 8,
   },
   cashInPill: {
     flex: 1,
     backgroundColor: '#DCFCE7',
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 12,
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: 14,
+    borderWidth: 1.2,
     borderColor: '#BBF7D0',
   },
   cashInLabel: {
@@ -460,18 +465,18 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   cashInVal: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '900',
     color: '#166534',
-    marginTop: 1,
+    marginTop: 2,
   },
   cashOutPill: {
     flex: 1,
     backgroundColor: '#FEE2E2',
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 12,
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: 14,
+    borderWidth: 1.2,
     borderColor: '#FECACA',
   },
   cashOutLabel: {
@@ -480,10 +485,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   cashOutVal: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '900',
     color: '#991B1B',
-    marginTop: 1,
+    marginTop: 2,
   },
   quickActionGrid: {
     flexDirection: 'row',
@@ -496,8 +501,8 @@ const styles = StyleSheet.create({
     width: (width - 44 - 36) / 4,
   },
   actionIconBox: {
-    width: 56,
-    height: 56,
+    width: 58,
+    height: 58,
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
@@ -573,14 +578,16 @@ const styles = StyleSheet.create({
   },
   foodCardBadge: {
     backgroundColor: '#DCFCE7',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
     alignSelf: 'flex-start',
+    zIndex: 10,
+    marginBottom: 4,
   },
   foodCardBadgeText: {
-    fontSize: 9,
-    fontWeight: '900',
+    fontSize: 10,
+    fontWeight: '800',
     color: '#15803D',
   },
   foodImageCenter: {
