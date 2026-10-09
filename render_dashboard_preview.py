@@ -1,0 +1,490 @@
+import os
+import subprocess
+
+BASE_DIR = r"C:\Users\Pongo\Documents\Codingan\kantinbite"
+HTML_PATH = os.path.join(BASE_DIR, "preview_dashboard_new.html")
+PNG_PATH = os.path.join(BASE_DIR, "preview_dashboard_new.png")
+
+html_content = """<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Preview Dashboard KantinBite Rebuild</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', Roboto, sans-serif; }
+  body {
+    background: #0B1120;
+    padding: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .phone-frame {
+    width: 390px;
+    height: 844px;
+    background: #FAF8F5;
+    border-radius: 44px;
+    border: 9px solid #1E293B;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .top-header {
+    padding: 18px 20px 12px;
+    background: #FAF8F5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .greeting-sub { font-size: 11px; color: #64748B; font-weight: 700; }
+  .biz-title { font-size: 17px; font-weight: 900; color: #1E293B; letter-spacing: -0.3px; margin-top: 2px; }
+  .security-badge {
+    background: #DCFCE7;
+    border: 1px solid #BBF7D0;
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 800;
+    color: #15803D;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .avatar-box {
+    width: 42px;
+    height: 42px;
+    border-radius: 21px;
+    background: #FFFFFF;
+    border: 2px solid #EA580C;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .scroll-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 20px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .search-bar {
+    background: #FFFFFF;
+    border-radius: 18px;
+    padding: 10px 14px;
+    border: 1.5px solid #E2E8F0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #94A3B8;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .hero-wallet {
+    background: #FFFBEB;
+    border-radius: 24px;
+    padding: 18px;
+    border: 1.5px solid #FDE68A;
+    border-bottom: 4px solid #F59E0B;
+  }
+  .wallet-label { font-size: 11px; font-weight: 900; color: #92400E; display: flex; align-items: center; gap: 6px; }
+  .wallet-amt { font-size: 30px; font-weight: 900; color: #78350F; letter-spacing: -0.8px; margin: 8px 0; }
+  .pills-row { display: flex; gap: 8px; }
+  .pill-in { flex: 1; background: #DCFCE7; border: 1px solid #BBF7D0; padding: 8px 10px; border-radius: 12px; }
+  .pill-out { flex: 1; background: #FEE2E2; border: 1px solid #FECACA; padding: 8px 10px; border-radius: 12px; }
+  .pill-label { font-size: 9px; font-weight: 700; }
+  .pill-val { font-size: 12px; font-weight: 900; margin-top: 1px; }
+
+  .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    text-align: center;
+  }
+  .action-box {
+    width: 54px;
+    height: 54px;
+    border-radius: 18px;
+    margin: 0 auto 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid rgba(0,0,0,0.06);
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04);
+  }
+  .action-label { font-size: 11px; font-weight: 800; color: #334155; }
+
+  .chips-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: hidden;
+  }
+  .chip {
+    padding: 7px 14px;
+    border-radius: 14px;
+    font-size: 11px;
+    font-weight: 800;
+    background: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    color: #64748B;
+  }
+  .chip-active {
+    background: #EA580C;
+    border-color: #EA580C;
+    color: #FFFFFF;
+  }
+
+  .sec-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 900;
+    color: #1E293B;
+  }
+  .sec-link { font-size: 11px; font-weight: 800; color: #EA580C; }
+
+  .carousel-row {
+    display: flex;
+    gap: 12px;
+    overflow-x: hidden;
+  }
+  .food-card {
+    width: 140px;
+    flex-shrink: 0;
+    border-radius: 20px;
+    padding: 12px;
+    border: 1.5px solid #E2E8F0;
+    border-bottom: 3.5px solid #CBD5E1;
+  }
+
+  .target-card {
+    background: #FFFFFF;
+    border-radius: 20px;
+    padding: 14px;
+    border: 1.5px solid #E2E8F0;
+    border-bottom: 3.5px solid #CBD5E1;
+  }
+  .target-grid { display: flex; gap: 8px; margin-top: 10px; }
+  .target-box { flex: 1; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 8px; text-align: center; }
+
+  .activity-row {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 12px;
+    border: 1.5px solid #E2E8F0;
+    border-bottom: 3px solid #CBD5E1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .act-icon { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+
+  /* BOTTOM NAV ELEVATED FAB DANA STYLE */
+  .bottom-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: #FFFFFF;
+    border-top: 1.5px solid #F1EFEA;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 10px;
+  }
+  .nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #64748B;
+  }
+  .nav-active { color: #EA580C; font-weight: 900; }
+  .center-fab-anchor {
+    margin-top: -28px;
+  }
+  .center-fab-btn {
+    width: 58px;
+    height: 58px;
+    border-radius: 29px;
+    background: #EA580C;
+    border: 3.5px solid #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4);
+    color: #FFF;
+  }
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+  <!-- TOP HEADER -->
+  <div class="top-header">
+    <div>
+      <div class="greeting-sub">Halo, Selamat Berjualan 👋</div>
+      <div class="biz-title">Dapur Berkah Bunda</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div class="security-badge">
+        <span>🛡️</span>
+        <span>SQLite Luring</span>
+      </div>
+      <div class="avatar-box">
+        <img src="assets/openmoji/chef_mascot.svg" style="width:28px; height:28px;">
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-body">
+    <!-- SEARCH BAR -->
+    <div class="search-bar">
+      <span>🔍</span>
+      <span style="flex:1;">Cari jajanan, resep HPP, mitra...</span>
+      <span style="color:#EA580C;">⚙️</span>
+    </div>
+
+    <!-- HERO WALLET -->
+    <div class="hero-wallet">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="wallet-label">
+          <img src="assets/openmoji/wallet_purse.svg" style="width:18px; height:18px;">
+          UANG KAS DI DOMPET
+        </div>
+        <span>👁️</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="wallet-amt">Rp 850.000</div>
+        <img src="assets/openmoji/coin_gold.svg" style="width:36px; height:36px;">
+      </div>
+      <div class="pills-row">
+        <div class="pill-in">
+          <div class="pill-label" style="color:#15803D;">+ Masuk Hari Ini</div>
+          <div class="pill-val" style="color:#166534;">Rp 320.000</div>
+        </div>
+        <div class="pill-out">
+          <div class="pill-label" style="color:#B91C1C;">- Belanja Pasar</div>
+          <div class="pill-val" style="color:#991B1B;">Rp 150.000</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 TOMBOL AKSI CEPAT -->
+    <div class="actions-grid">
+      <div>
+        <div class="action-box" style="background:#FFEDD5;">
+          <img src="assets/openmoji/receipt_bill.svg" style="width:28px; height:28px;">
+        </div>
+        <div class="action-label">Kasir Kilat</div>
+      </div>
+      <div>
+        <div class="action-box" style="background:#FEF08A;">
+          <img src="assets/openmoji/canteen_shop.svg" style="width:28px; height:28px;">
+        </div>
+        <div class="action-label">Titip Kantin</div>
+      </div>
+      <div>
+        <div class="action-box" style="background:#E0E7FF;">
+          <img src="assets/openmoji/wheat_flour.svg" style="width:28px; height:28px;">
+        </div>
+        <div class="action-label">Gudang Stok</div>
+      </div>
+      <div>
+        <div class="action-box" style="background:#DCFCE7;">
+          <img src="assets/openmoji/market_cart.svg" style="width:28px; height:28px;">
+        </div>
+        <div class="action-label">Belanja Subuh</div>
+      </div>
+    </div>
+
+    <!-- HORIZONTAL CATEGORY CHIPS -->
+    <div class="chips-row">
+      <div class="chip chip-active">Semua</div>
+      <div class="chip">Gorengan</div>
+      <div class="chip">Kue Basah</div>
+      <div class="chip">Titip Kantin</div>
+    </div>
+
+    <!-- CAROUSEL JAJANAN UNGGULAN -->
+    <div>
+      <div class="sec-header">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <img src="assets/openmoji/mascot_star.svg" style="width:18px; height:18px;">
+          <span>Katalog Jajanan Unggulan</span>
+        </div>
+        <div class="sec-link">Lihat Semua →</div>
+      </div>
+      <div class="carousel-row" style="margin-top:10px;">
+        <div class="food-card" style="background:#FFFBEB;">
+          <div style="font-size:8px; font-weight:900; color:#15803D; background:#DCFCE7; padding:2px 4px; border-radius:4px; display:inline-block;">+Untung 500</div>
+          <div style="text-align:center; margin:8px 0;">
+            <img src="assets/food/risoles_rogout.svg" style="width:58px; height:58px;">
+          </div>
+          <div style="font-size:12px; font-weight:800; color:#1E293B;">Risoles Rogout</div>
+          <div style="display:flex; justify-content:space-between; margin-top:2px;">
+            <span style="font-size:11px; font-weight:900; color:#EA580C;">Rp 1.200</span>
+            <span style="font-size:9px; color:#64748B;">25 laku</span>
+          </div>
+        </div>
+
+        <div class="food-card" style="background:#FEF3C7;">
+          <div style="font-size:8px; font-weight:900; color:#15803D; background:#DCFCE7; padding:2px 4px; border-radius:4px; display:inline-block;">+Untung 600</div>
+          <div style="text-align:center; margin:8px 0;">
+            <img src="assets/food/pastel_telur.svg" style="width:58px; height:58px;">
+          </div>
+          <div style="font-size:12px; font-weight:800; color:#1E293B;">Pastel Sayur</div>
+          <div style="display:flex; justify-content:space-between; margin-top:2px;">
+            <span style="font-size:11px; font-weight:900; color:#EA580C;">Rp 1.500</span>
+            <span style="font-size:9px; color:#64748B;">18 laku</span>
+          </div>
+        </div>
+
+        <div class="food-card" style="background:#DCFCE7;">
+          <div style="font-size:8px; font-weight:900; color:#15803D; background:#DCFCE7; padding:2px 4px; border-radius:4px; display:inline-block;">+Untung 450</div>
+          <div style="text-align:center; margin:8px 0;">
+            <img src="assets/food/dadar_gulung.svg" style="width:58px; height:58px;">
+          </div>
+          <div style="font-size:12px; font-weight:800; color:#1E293B;">Dadar Gulung</div>
+          <div style="display:flex; justify-content:space-between; margin-top:2px;">
+            <span style="font-size:11px; font-weight:900; color:#EA580C;">Rp 1.000</span>
+            <span style="font-size:9px; color:#64748B;">30 laku</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TARGET OPERASIONAL HARIAN -->
+    <div class="target-card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-size:9px; font-weight:900; color:#EA580C; letter-spacing:0.5px;">TARGET OPERASIONAL HARIAN</div>
+          <div style="font-size:13px; font-weight:900; color:#1E293B;">Produksi & Serapan Lapak</div>
+        </div>
+        <img src="assets/openmoji/mascot_fire.svg" style="width:24px; height:24px;">
+      </div>
+      <div class="target-grid">
+        <div class="target-box">
+          <div style="font-size:9px; color:#64748B; font-weight:700;">Kue Terjual</div>
+          <div style="font-size:13px; font-weight:900; color:#1E293B; margin:1px 0;">93 / 110</div>
+          <div style="font-size:8px; color:#15803D; font-weight:800;">84.5% Sukses</div>
+        </div>
+        <div class="target-box">
+          <div style="font-size:9px; color:#64748B; font-weight:700;">Sisa Retur</div>
+          <div style="font-size:13px; font-weight:900; color:#DC2626; margin:1px 0;">5 Pcs</div>
+          <div style="font-size:8px; color:#64748B; font-weight:800;">Terkendali</div>
+        </div>
+        <div class="target-box">
+          <div style="font-size:9px; color:#64748B; font-weight:700;">Setoran Bersih</div>
+          <div style="font-size:13px; font-weight:900; color:#15803D; margin:1px 0;">Rp 175k</div>
+          <div style="font-size:8px; color:#15803D; font-weight:800;">Lunas Sore</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOG AKTIVITAS -->
+    <div>
+      <div class="sec-header">
+        <span>Aktivitas & Riwayat Transaksi</span>
+        <div class="sec-link">Riwayat</div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+        <div class="activity-row">
+          <div class="act-icon" style="background:#DCFCE7;">
+            <img src="assets/openmoji/canteen_shop.svg" style="width:22px; height:22px;">
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:12px; font-weight:800; color:#1E293B;">Setoran Kantin Fak. Teknik</div>
+            <div style="font-size:10px; color:#94A3B8;">15:20 WIB • Pak Joko</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:12px; font-weight:900; color:#15803D;">+Rp 50.000</div>
+            <span style="font-size:8px; font-weight:900; color:#15803D; background:#DCFCE7; padding:1px 4px; border-radius:4px;">LUNAS</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV BAR WITH ICON-ONLY ELEVATED CENTER FAB (DANA STYLE) -->
+  <div class="bottom-nav">
+    <div class="nav-btn nav-active">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      <span>Beranda</span>
+    </div>
+
+    <div class="nav-btn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+      </svg>
+      <span>Aktivitas</span>
+    </div>
+
+    <!-- ELEVATED FAB (PAY / KASIR) -->
+    <div class="center-fab-anchor">
+      <div class="center-fab-btn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+          <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+          <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+          <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+        </svg>
+        <span style="font-size:8px; font-weight:900; margin-top:2px;">KASIR</span>
+      </div>
+    </div>
+
+    <div class="nav-btn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+      </svg>
+      <span>Katalog</span>
+    </div>
+
+    <div class="nav-btn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+      </svg>
+      <span>Saya</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
+"""
+
+with open(HTML_PATH, "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+edge_path = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+if not os.path.exists(edge_path):
+    edge_path = r"C:\Program Files\Microsoft\Edge\Application\msedge.exe"
+
+file_url = f"file:///{HTML_PATH.replace(os.sep, '/')}"
+
+cmd = [
+    edge_path,
+    "--headless",
+    "--disable-gpu",
+    "--window-size=500,980",
+    f"--screenshot={PNG_PATH}",
+    file_url
+]
+
+subprocess.run(cmd, check=True)
+print("Preview rendered to", PNG_PATH)
