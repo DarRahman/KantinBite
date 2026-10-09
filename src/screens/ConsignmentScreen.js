@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, StatusBar, Alert, Modal, Linking } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
-import { ScreenHeader, PrimaryActionBadge } from '../components/ScreenHeader';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, StatusBar, Alert, Modal, Linking, Dimensions } from 'react-native';
 import { BottomNav } from '../components/BottomNav';
-import { FoodVisual } from '../components/FoodVisual';
+import AssetVisual from '../components/AssetVisual';
+import { BentoCard, TactileButton, TactilePill } from '../components/PlayfulComponents';
 import { getConsignment, getCanteens, addCanteen, saveConsignment, getProducts } from '../db/storage';
 import { formatRupiah } from '../utils/formatters';
 import { calculateConsignmentSettlement } from '../utils/calculations';
-import { colors } from '../theme/tokens';
+
+const { width } = Dimensions.get('window');
 
 export const ConsignmentScreen = ({ route, navigation }) => {
   const [canteens, setCanteens] = useState([]);
@@ -15,9 +15,9 @@ export const ConsignmentScreen = ({ route, navigation }) => {
   const [activeMode, setActiveMode] = useState('sore'); // 'pagi' (nitip) atau 'sore' (rekap)
   
   const [sessionData, setSessionData] = useState({
-    c1: { initialQty: 30, returnQty: 5, unitPrice: 1000, isPaid: true, itemName: 'Risoles Rogout' },
-    c2: { initialQty: 25, returnQty: 0, unitPrice: 1500, isPaid: false, itemName: 'Pastel Telur' },
-    c3: { initialQty: 20, returnQty: 3, unitPrice: 1000, isPaid: true, itemName: 'Dadar Gulung' }
+    c1: { initialQty: 30, returnQty: 5, unitPrice: 1000, isPaid: true, itemName: 'Risoles Rogout', itemType: 'risoles' },
+    c2: { initialQty: 25, returnQty: 0, unitPrice: 1500, isPaid: false, itemName: 'Pastel Telur', itemType: 'pastel' },
+    c3: { initialQty: 20, returnQty: 3, unitPrice: 1000, isPaid: true, itemName: 'Dadar Gulung', itemType: 'dadar' }
   });
 
   const [returInput, setReturInput] = useState('5');
@@ -31,7 +31,9 @@ export const ConsignmentScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     loadData();
-  }, []);
+    const unsub = navigation.addListener('focus', loadData);
+    return unsub;
+  }, [navigation]);
 
   const loadData = async () => {
     const cList = await getCanteens();
@@ -43,7 +45,7 @@ export const ConsignmentScreen = ({ route, navigation }) => {
   };
 
   const currentSession = sessionData[selectedCanteenId] || {
-    initialQty: 30, returnQty: 5, unitPrice: 1000, isPaid: true, itemName: 'Risoles Rogout'
+    initialQty: 30, returnQty: 5, unitPrice: 1000, isPaid: true, itemName: 'Risoles Rogout', itemType: 'risoles'
   };
 
   const initialQty = Number(titipInput) || currentSession.initialQty;
@@ -53,7 +55,7 @@ export const ConsignmentScreen = ({ route, navigation }) => {
 
   const handleSelectCanteen = (cId) => {
     setSelectedCanteenId(cId);
-    const sess = sessionData[cId] || { initialQty: 20, returnQty: 0, unitPrice: 1000, isPaid: true, itemName: 'Risoles Rogout' };
+    const sess = sessionData[cId] || { initialQty: 20, returnQty: 0, unitPrice: 1000, isPaid: true, itemName: 'Risoles Rogout', itemType: 'risoles' };
     setTitipInput(sess.initialQty.toString());
     setReturInput(sess.returnQty.toString());
   };
@@ -73,10 +75,18 @@ export const ConsignmentScreen = ({ route, navigation }) => {
     setSessionData(updated);
 
     Alert.alert(
-      'Sesi Rekap Tersimpan',
-      `Setoran ${formatRupiah(totalDue)} dari ${currentCanteen.name} (${currentSession.isPaid ? 'LUNAS' : 'UTANG'}) tercatat di buku kas.`,
+      'Sesi Rekap Berhasil Disimpan',
+      `Setoran ${formatRupiah(totalDue)} dari ${currentCanteen.name} (${currentSession.isPaid ? 'LUNAS' : 'PIUTANG'}) tercatat di buku kas.`,
       [
-        { text: 'Kirim Nota WA', onPress: () => navigation.navigate('Receipt') },
+        { text: 'Kirim Nota WhatsApp', onPress: () => navigation.navigate('Receipt', {
+          canteenName: currentCanteen.name,
+          pic: currentCanteen.pic,
+          total: totalDue,
+          sold: soldQty,
+          retur: returnQty,
+          titip: initialQty,
+          item: currentSession.itemName
+        })},
         { text: 'Selesai', onPress: () => navigation.navigate('Dashboard') }
       ]
     );
@@ -102,59 +112,68 @@ export const ConsignmentScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      <ScreenHeader
-        title="Titip Kantin"
-        subtitle="Pagi Nitip, Sore Ambil Uang"
-        rightElement={
-          <PrimaryActionBadge label="+ Kantin Baru" onPress={() => setIsModalOpen(true)} />
-        }
-      />
+      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+      
+      {/* HEADER AMAN PLAYFUL */}
+      <View style={styles.header}>
+        <View>
+          <View style={styles.headerTag}>
+            <AssetVisual name="canteen_shop" size={16} />
+            <Text style={styles.headerTagText}>REKONSILIASI KONSINYASI</Text>
+          </View>
+          <Text style={styles.headerTitle}>Titip & Rekap Kantin</Text>
+        </View>
+
+        <TactileButton size="sm" variant="accent" onPress={() => setIsModalOpen(true)}>
+          + Kantin Baru
+        </TactileButton>
+      </View>
+
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
-        {/* BANNER TANGGAL OPERASIONAL SEPERTI DAPUR-RN */}
+        {/* BANNER TANGGAL OPERASIONAL BER-JAM SUBUH */}
         <View style={styles.dateBar}>
-          <Text style={styles.dateBarText}>HARI INI (Kamis, 8 Okt 2026)</Text>
+          <AssetVisual name="clock_time" size={18} />
+          <Text style={styles.dateBarText}>HARI INI (Kamis, 8 Okt 2026) • Drop 06:30 • Rekap 15:00</Text>
         </View>
 
-        {/* DAFTAR KANTIN HORIZONTAL CARD COMPACT & PADAT */}
-        <Text style={styles.sectionTitle}>Pilih Kantin Rekanan</Text>
-        <View style={{ height: 85, marginBottom: 16 }}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ alignItems: 'flex-start' }}>
-            {canteens.map((c) => {
-              const isSelected = c.id === selectedCanteenId;
-              return (
-                <TouchableOpacity
-                  key={c.id}
-                  style={[styles.canteenCard, isSelected && styles.canteenCardActive]}
-                  activeOpacity={0.8}
-                  onPress={() => handleSelectCanteen(c.id)}
-                >
-                  <View style={styles.canteenTopRow}>
-                    <FoodVisual type="canteen_shop" size={26} />
-                    <View style={[styles.canteenDebtChip, c.debt > 0 ? styles.debtChipRed : styles.debtChipGreen]}>
-                      <Text style={[styles.canteenDebtText, c.debt > 0 ? styles.textRed : styles.textGreen]}>
-                        {c.debt > 0 ? `Piutang ${formatRupiah(c.debt)}` : 'Lunas'}
-                      </Text>
-                    </View>
+        {/* DAFTAR KANTIN HORIZONTAL BENTO CARDS */}
+        <Text style={styles.sectionTitle}>Pilih Mitra Kantin Rekanan</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.canteenScroll}>
+          {canteens.map((c) => {
+            const isSelected = c.id === selectedCanteenId;
+            return (
+              <TouchableOpacity
+                key={c.id}
+                style={[styles.canteenCard, isSelected && styles.canteenCardActive]}
+                activeOpacity={0.85}
+                onPress={() => handleSelectCanteen(c.id)}
+              >
+                <View style={styles.canteenTopRow}>
+                  <AssetVisual name="canteen_shop" size={28} />
+                  <View style={[styles.debtChip, c.debt > 0 ? styles.debtChipRed : styles.debtChipGreen]}>
+                    <Text style={[styles.debtChipText, { color: c.debt > 0 ? '#B91C1C' : '#15803D' }]}>
+                      {c.debt > 0 ? `Piutang ${formatRupiah(c.debt)}` : 'Lunas'}
+                    </Text>
                   </View>
+                </View>
 
-                  <Text style={[styles.canteenCardName, isSelected && styles.textOrange]} numberOfLines={1}>
-                    {c.name}
-                  </Text>
-                  <Text style={styles.canteenCardPic} numberOfLines={1}>
-                    PIC: {c.pic}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-        </View>
+                <Text style={[styles.canteenCardName, isSelected && styles.textOrange]} numberOfLines={1}>
+                  {c.name}
+                </Text>
+                <Text style={styles.canteenCardPic} numberOfLines={1}>
+                  PIC: {c.pic}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
 
-        {/* SESI LAPAK KANTIN TERPILIH */}
-        <View style={styles.lapakCard}>
+        {/* SESI LAPAK KANTIN TERPILIH PLAYFUL BENTO */}
+        <BentoCard bg="#FFFFFF" accentBorder="#E2E8F0" style={styles.lapakBento}>
+          
           <View style={styles.lapakHeader}>
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={styles.lapakTitle}>{currentCanteen.name}</Text>
               <Text style={styles.lapakSubtitle}>PIC: {currentCanteen.pic} • {currentCanteen.phone}</Text>
             </View>
@@ -167,104 +186,134 @@ export const ConsignmentScreen = ({ route, navigation }) => {
             </TouchableOpacity>
           </View>
 
-          {/* TOGGLE SESI PAGI / SORE */}
-          <View style={styles.sessionToggle}>
+          {/* TOGGLE SESI PAGI / SORE TACTILE */}
+          <View style={styles.sessionToggleBar}>
             <TouchableOpacity
               style={[styles.toggleBtn, activeMode === 'pagi' && styles.toggleBtnActive]}
               onPress={() => setActiveMode('pagi')}
             >
-              <Text style={[styles.toggleBtnText, activeMode === 'pagi' && styles.textOrange]}>Sesi Pagi (Nitip)</Text>
+              <AssetVisual name="clock_time" size={16} />
+              <Text style={[styles.toggleBtnText, activeMode === 'pagi' && styles.toggleBtnTextActive]}>
+                Sesi Pagi (Nitip)
+              </Text>
             </TouchableOpacity>
+
             <TouchableOpacity
               style={[styles.toggleBtn, activeMode === 'sore' && styles.toggleBtnActive]}
               onPress={() => setActiveMode('sore')}
             >
-              <Text style={[styles.toggleBtnText, activeMode === 'sore' && styles.textOrange]}>Sesi Sore (Rekap)</Text>
+              <AssetVisual name="check_badge" size={16} />
+              <Text style={[styles.toggleBtnText, activeMode === 'sore' && styles.toggleBtnTextActive]}>
+                Sesi Sore (Rekap)
+              </Text>
             </TouchableOpacity>
           </View>
 
-          {/* ITEM PENITIPAN KANTIN DENGAN ASET VEKTOR MAKANAN */}
+          {/* ITEM PENITIPAN KANTIN DENGAN THUMBNAIL BESAR */}
           <View style={styles.itemPenitipanRow}>
-            <FoodVisual type="risoles" size={48} />
+            <View style={styles.itemVisualBox}>
+              <AssetVisual name={currentSession.itemType || 'risoles'} size={52} />
+            </View>
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={styles.itemPenitipanTitle}>{currentSession.itemName}</Text>
-              <Text style={styles.itemPenitipanPrice}>Harga Titip: {formatRupiah(currentSession.unitPrice)} / pcs</Text>
+              <Text style={styles.itemPenitipanPrice}>Harga Titip Bersih: <Text style={{ color: '#EA580C', fontWeight: '900' }}>{formatRupiah(currentSession.unitPrice)}/pcs</Text></Text>
             </View>
           </View>
 
           {/* FORM SESI PAGI / SORE */}
           {activeMode === 'pagi' ? (
             <View style={styles.lapakFormArea}>
-              <Text style={styles.fLabel}>Jumlah Kue Dititipkan (Pagi):</Text>
+              <Text style={styles.fLabel}>Jumlah Kue Dititipkan Pagi Ini:</Text>
               <TextInput
                 style={styles.fInputLarge}
                 value={titipInput}
                 onChangeText={setTitipInput}
                 keyboardType="number-pad"
               />
-              <Text style={styles.helpText}>Kue dititipkan pagi ini dengan status aktif menunggu penarikan sore.</Text>
+              <Text style={styles.helpText}>Kue didrop di etalase kantin jam 06:30. Rekonsiliasi fisik dilakukan sore nanti.</Text>
             </View>
           ) : (
             <View style={styles.lapakFormArea}>
+              
               <View style={styles.calcRow}>
                 <Text style={styles.calcLabel}>Titip Pagi:</Text>
                 <Text style={styles.calcVal}>{initialQty} pcs</Text>
               </View>
 
               <View style={styles.calcRow}>
-                <Text style={styles.calcLabel}>Sisa Retur Fisik:</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={styles.calcLabel}>Sisa Retur Fisik (Tidak Laku):</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                   <TextInput
                     style={styles.returInput}
                     value={returInput}
                     onChangeText={setReturInput}
                     keyboardType="number-pad"
                   />
-                  <Text style={{ fontSize: 13, color: '#71717A', marginLeft: 4 }}>pcs</Text>
+                  <Text style={{ fontSize: 13, fontWeight: '700', color: '#64748B' }}>pcs</Text>
                 </View>
               </View>
 
               <View style={styles.calcRow}>
-                <Text style={styles.calcLabel}>Kue Terjual Laku:</Text>
-                <Text style={[styles.calcVal, { color: '#059669', fontWeight: '800' }]}>{soldQty} pcs</Text>
+                <Text style={styles.calcLabel}>Kue Terjual Bersih:</Text>
+                <Text style={[styles.calcVal, { color: '#15803D', fontWeight: '900', fontSize: 16 }]}>{soldQty} pcs</Text>
               </View>
 
-              <View style={styles.totalSetoranRow}>
-                <Text style={styles.totalSetoranLabel}>Wajib Setor (@{formatRupiah(currentSession.unitPrice)}):</Text>
-                <Text style={styles.totalSetoranVal}>{formatRupiah(totalDue)}</Text>
+              {/* TOTAL WAJIB SETOR DENGAN STAMP LUNAS */}
+              <View style={styles.totalSetoranBox}>
+                <View>
+                  <Text style={styles.totalSetoranLabel}>Uang Wajib Setor:</Text>
+                  <Text style={styles.totalSetoranVal}>{formatRupiah(totalDue)}</Text>
+                </View>
+                <View style={styles.stampBadge}>
+                  <AssetVisual name="check_badge" size={20} />
+                  <Text style={styles.stampBadgeText}>SIAP SETOR</Text>
+                </View>
               </View>
+
             </View>
           )}
 
-          {/* TOMBOL AKSI SIMPAN */}
-          <TouchableOpacity style={styles.btnPrimary} activeOpacity={0.8} onPress={handleSaveSession}>
-            <Text style={styles.btnPrimaryText}>
-              {activeMode === 'pagi' ? 'Terbitkan Nota Titip Pagi' : 'Simpan Rekap ke Buku Kas'}
-            </Text>
-          </TouchableOpacity>
+          {/* TOMBOL AKSI SIMPAN EMPUK */}
+          <TactileButton
+            size="lg"
+            variant="primary"
+            onPress={handleSaveSession}
+            icon={<AssetVisual name={activeMode === 'pagi' ? 'canteen_shop' : 'check_badge'} size={22} />}
+          >
+            {activeMode === 'pagi' ? 'Terbitkan Nota Titip Pagi' : 'Simpan Rekap ke Buku Kas'}
+          </TactileButton>
 
-        </View>
+        </BentoCard>
 
+        <View style={{ height: 100 }} />
       </ScrollView>
 
       {/* MODAL TAMBAH KANTIN BARU */}
       <Modal visible={isModalOpen} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Tambah Mitra Kantin Baru</Text>
+            
+            <View style={styles.modalHeaderRow}>
+              <Text style={styles.modalTitle}>Tambah Mitra Kantin Baru</Text>
+              <TouchableOpacity onPress={() => setIsModalOpen(false)} style={styles.closeBtn}>
+                <Text style={styles.closeText}>✕</Text>
+              </TouchableOpacity>
+            </View>
 
             <Text style={styles.formLabel}>Nama Kantin</Text>
             <TextInput
               style={styles.formInput}
               placeholder="Contoh: Kantin Gedung Kuliah B"
+              placeholderTextColor="#94A3B8"
               value={newCanteenName}
               onChangeText={setNewCanteenName}
             />
 
-            <Text style={styles.formLabel}>Nama PIC / Penjaga</Text>
+            <Text style={styles.formLabel}>Nama PIC / Penjaga Lapak</Text>
             <TextInput
               style={styles.formInput}
               placeholder="Contoh: Bu Ratna"
+              placeholderTextColor="#94A3B8"
               value={newPic}
               onChangeText={setNewPic}
             />
@@ -273,19 +322,21 @@ export const ConsignmentScreen = ({ route, navigation }) => {
             <TextInput
               style={styles.formInput}
               placeholder="Contoh: 08123456789"
+              placeholderTextColor="#94A3B8"
               keyboardType="phone-pad"
               value={newPhone}
               onChangeText={setNewPhone}
             />
 
-            <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
-              <TouchableOpacity style={styles.modalBtnCancel} onPress={() => setIsModalOpen(false)}>
-                <Text style={styles.modalCancelText}>Batal</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.modalBtnSave} onPress={handleAddNewCanteen}>
-                <Text style={styles.modalSaveText}>Simpan Kantin</Text>
-              </TouchableOpacity>
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
+              <TactileButton variant="secondary" style={{ flex: 1 }} onPress={() => setIsModalOpen(false)}>
+                Batal
+              </TactileButton>
+              <TactileButton variant="primary" style={{ flex: 2 }} onPress={handleAddNewCanteen}>
+                Simpan Kantin
+              </TactileButton>
             </View>
+
           </View>
         </View>
       </Modal>
@@ -296,324 +347,363 @@ export const ConsignmentScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FFFFFF'
-  },
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF'
+    backgroundColor: '#FAF8F5',
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
+    backgroundColor: '#FAF8F5',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1EFEA',
+  },
+  headerTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 2,
+  },
+  headerTagText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#EA580C',
+    letterSpacing: 0.5,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#1E293B',
+    letterSpacing: -0.4,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 24,
-    flexGrow: 1
+    padding: 18,
   },
   dateBar: {
-    backgroundColor: '#ECFDF5',
-    borderRadius: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: '#A7F3D0'
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#DCFCE7',
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: '#BBF7D0',
   },
   dateBarText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '800',
-    color: '#059669',
-    textAlign: 'center'
+    color: '#15803D',
   },
   sectionTitle: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '800',
-    color: '#18181B',
-    marginBottom: 8
+    color: '#1E293B',
+    marginBottom: 10,
   },
   canteenScroll: {
-    marginBottom: 16
+    gap: 10,
+    marginBottom: 18,
   },
   canteenCard: {
-    backgroundColor: '#FAFAFA',
-    borderRadius: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    width: 140,
-    height: 76,
-    marginRight: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    width: 154,
     borderWidth: 1.5,
-    borderColor: '#F4F4F5'
+    borderColor: '#E2E8F0',
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#CBD5E1',
   },
   canteenCardActive: {
-    backgroundColor: '#FFF7ED',
-    borderColor: '#EA580C'
+    backgroundColor: '#FFFBEB',
+    borderColor: '#F59E0B',
+    borderBottomColor: '#D97706',
   },
   canteenTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4
+    marginBottom: 8,
   },
-  canteenCardName: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#18181B',
-    marginBottom: 1
-  },
-  canteenCardPic: {
-    fontSize: 10,
-    color: '#71717A'
-  },
-  canteenDebtChip: {
-    borderRadius: 6,
+  debtChip: {
+    paddingHorizontal: 6,
     paddingVertical: 2,
-    paddingHorizontal: 6
+    borderRadius: 6,
   },
   debtChipRed: {
-    backgroundColor: '#FEE2E2'
+    backgroundColor: '#FEE2E2',
   },
   debtChipGreen: {
-    backgroundColor: '#ECFDF5'
+    backgroundColor: '#DCFCE7',
   },
-  canteenDebtText: {
+  debtChipText: {
     fontSize: 9,
-    fontWeight: '700'
+    fontWeight: '900',
   },
-  lapakCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#F4F4F5',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2
+  canteenCardName: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#1E293B',
+    marginBottom: 2,
+  },
+  canteenCardPic: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  textOrange: {
+    color: '#EA580C',
+  },
+  lapakBento: {
+    padding: 18,
+    borderBottomWidth: 4,
+    borderBottomColor: '#CBD5E1',
   },
   lapakHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
-    paddingBottom: 10,
+    marginBottom: 14,
+    paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F4F4F5'
+    borderBottomColor: '#F1F5F9',
   },
   lapakTitle: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#18181B'
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#1E293B',
   },
   lapakSubtitle: {
-    fontSize: 11,
-    color: '#71717A',
-    marginTop: 2
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+    fontWeight: '600',
   },
   waBtn: {
     backgroundColor: '#22C55E',
     paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    elevation: 2,
   },
   waBtnText: {
     color: '#FFFFFF',
     fontSize: 11,
-    fontWeight: '700'
+    fontWeight: '900',
   },
-  sessionToggle: {
+  sessionToggleBar: {
     flexDirection: 'row',
-    backgroundColor: '#F4F4F5',
-    borderRadius: 10,
-    padding: 3,
-    marginBottom: 14
+    backgroundColor: '#F1F5F9',
+    borderRadius: 14,
+    padding: 4,
+    marginBottom: 16,
+    gap: 6,
   },
   toggleBtn: {
     flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 6,
-    borderRadius: 8
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 12,
   },
   toggleBtnActive: {
     backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 1
+    elevation: 2,
   },
   toggleBtnText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#71717A'
+    color: '#64748B',
+  },
+  toggleBtnTextActive: {
+    color: '#EA580C',
+    fontWeight: '900',
   },
   itemPenitipanRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FAFAFA',
-    borderRadius: 14,
-    padding: 10,
-    marginBottom: 12
+    backgroundColor: '#FAF8F5',
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#F1EFEA',
+  },
+  itemVisualBox: {
+    width: 60,
+    height: 60,
+    borderRadius: 16,
+    backgroundColor: '#FFFBEB',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
   },
   itemPenitipanTitle: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '800',
-    color: '#18181B'
+    color: '#1E293B',
   },
   itemPenitipanPrice: {
     fontSize: 12,
-    color: '#71717A',
-    marginTop: 2
+    color: '#64748B',
+    marginTop: 2,
+    fontWeight: '600',
   },
   lapakFormArea: {
-    marginBottom: 14
+    marginBottom: 16,
   },
   fLabel: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#52525B',
-    marginBottom: 4
+    fontWeight: '700',
+    color: '#475569',
+    marginBottom: 6,
   },
   fInputLarge: {
-    backgroundColor: '#F4F4F5',
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#18181B',
-    marginBottom: 6
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#1E293B',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    marginBottom: 6,
   },
   helpText: {
     fontSize: 11,
-    color: '#71717A',
-    lineHeight: 16
+    color: '#64748B',
+    lineHeight: 16,
   },
   calcRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 6,
+    paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#F4F4F5'
+    borderBottomColor: '#F8FAFC',
   },
   calcLabel: {
-    fontSize: 12,
-    color: '#52525B'
+    fontSize: 13,
+    color: '#475569',
+    fontWeight: '600',
   },
   calcVal: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#18181B'
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#1E293B',
   },
   returInput: {
     backgroundColor: '#FEE2E2',
-    color: '#DC2626',
-    fontWeight: '800',
-    fontSize: 13,
-    borderRadius: 6,
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-    minWidth: 36,
-    textAlign: 'center'
+    color: '#B91C1C',
+    fontWeight: '900',
+    fontSize: 14,
+    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    minWidth: 46,
+    textAlign: 'center',
+    borderWidth: 1,
+    borderColor: '#FECACA',
   },
-  totalSetoranRow: {
+  totalSetoranBox: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'baseline',
-    paddingTop: 10,
-    marginTop: 4
+    alignItems: 'center',
+    backgroundColor: '#DCFCE7',
+    borderRadius: 16,
+    padding: 14,
+    marginTop: 10,
+    borderWidth: 1.5,
+    borderColor: '#BBF7D0',
   },
   totalSetoranLabel: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '800',
-    color: '#18181B'
+    color: '#15803D',
+    marginBottom: 2,
   },
   totalSetoranVal: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#059669'
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#15803D',
   },
-  textOrange: {
-    color: '#EA580C'
-  },
-  textGreen: {
-    color: '#059669'
-  },
-  textRed: {
-    color: '#DC2626'
-  },
-  btnPrimary: {
-    backgroundColor: '#EA580C',
-    borderRadius: 14,
-    paddingVertical: 13,
+  stampBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#EA580C',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 3
+    gap: 4,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
   },
-  btnPrimaryText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 14
+  stampBadgeText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#15803D',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'flex-end'
+    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+    justifyContent: 'flex-end',
   },
   modalContent: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: 20,
+    paddingBottom: 28,
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   modalTitle: {
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#1E293B',
+  },
+  closeBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeText: {
+    fontSize: 14,
     fontWeight: '800',
-    color: '#18181B',
-    marginBottom: 14
+    color: '#64748B',
   },
   formLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#52525B',
-    marginBottom: 4
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#475569',
+    marginBottom: 5,
   },
   formInput: {
-    backgroundColor: '#F4F4F5',
-    borderRadius: 10,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
     paddingVertical: 10,
-    paddingHorizontal: 12,
-    fontSize: 14,
-    color: '#18181B',
-    marginBottom: 12
-  },
-  modalBtnCancel: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    backgroundColor: '#F4F4F5',
-    borderRadius: 12
-  },
-  modalCancelText: {
+    paddingHorizontal: 14,
     fontSize: 13,
-    fontWeight: '700',
-    color: '#71717A'
+    color: '#1E293B',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
-  modalBtnSave: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    backgroundColor: '#EA580C',
-    borderRadius: 12
-  },
-  modalSaveText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#FFFFFF'
-  }
 });
