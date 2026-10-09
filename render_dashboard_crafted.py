@@ -1,0 +1,657 @@
+import os
+import subprocess
+
+BASE_DIR = r"C:\Users\Pongo\Documents\Codingan\kantinbite"
+HTML_PATH = os.path.join(BASE_DIR, "preview_dashboard_crafted.html")
+PNG_PATH = os.path.join(BASE_DIR, "preview_dashboard_crafted.png")
+
+HTML_CONTENT = """<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KantinBite Human Crafted Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+  body {
+    background-color: #0F172A;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 30px 10px;
+    font-family: -apple-system, BlinkMacSystemFont, "Plus Jakarta Sans", "Outfit", "Inter", Roboto, sans-serif;
+  }
+  .phone-frame {
+    width: 390px;
+    height: 844px;
+    background: #FAF8F5;
+    border-radius: 46px;
+    border: 10px solid #1E293B;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.45);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .status-bar {
+    height: 44px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 28px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0F172A;
+  }
+  .scroll-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 20px 110px;
+  }
+  .scroll-body::-webkit-scrollbar { display: none; }
+
+  /* Top Bar */
+  .top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .business-title {
+    font-size: 20px;
+    font-weight: 900;
+    color: #0F172A;
+    letter-spacing: -0.5px;
+  }
+  .owner-sub {
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748B;
+    margin-top: 2px;
+  }
+  .avatar-chef {
+    width: 46px;
+    height: 46px;
+    border-radius: 23px;
+    background: #FFFFFF;
+    border: 2px solid #EA580C;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 8px rgba(234, 88, 12, 0.15);
+  }
+
+  /* Search */
+  .search-bar {
+    display: flex;
+    align-items: center;
+    background: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 18px;
+    padding: 11px 16px;
+    margin-bottom: 20px;
+    gap: 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+  }
+  .search-input {
+    border: none;
+    outline: none;
+    font-size: 13px;
+    color: #334155;
+    font-weight: 600;
+    flex: 1;
+    background: transparent;
+  }
+
+  /* Hero Dompet */
+  .wallet-card {
+    background: #FFFBEB;
+    border: 1.5px solid #FDE68A;
+    border-bottom: 4px solid #F59E0B;
+    border-radius: 24px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 6px 18px rgba(245, 158, 11, 0.08);
+  }
+  .wallet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .wallet-title-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 900;
+    color: #92400E;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .wallet-amount {
+    font-size: 32px;
+    font-weight: 900;
+    color: #78350F;
+    letter-spacing: -1px;
+    margin: 10px 0 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .cashflow-row {
+    display: flex;
+    gap: 12px;
+  }
+  .cash-pill {
+    flex: 1;
+    border-radius: 14px;
+    padding: 10px 14px;
+  }
+  .cash-green {
+    background: #DCFCE7;
+    border: 1.2px solid #BBF7D0;
+  }
+  .cash-red {
+    background: #FEE2E2;
+    border: 1.2px solid #FECACA;
+  }
+  .cash-lbl {
+    font-size: 10px;
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+  .cash-green-lbl { color: #15803D; }
+  .cash-red-lbl { color: #B91C1C; }
+  .cash-val {
+    font-size: 14px;
+    font-weight: 900;
+  }
+  .cash-green-val { color: #166534; }
+  .cash-red-val { color: #991B1B; }
+
+  /* 4 Aksi Cepat dengan Aset Terisi Penuh */
+  .section-heading {
+    font-size: 15px;
+    font-weight: 900;
+    color: #0F172A;
+    margin-bottom: 12px;
+  }
+  .action-grid {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .action-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .action-squircle {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    border: 1.5px solid #E2E8F0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+  }
+  .action-lbl {
+    font-size: 11px;
+    font-weight: 800;
+    color: #334155;
+  }
+
+  /* Carousel Makanan Alami */
+  .carousel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .see-all-link {
+    font-size: 12px;
+    font-weight: 800;
+    color: #EA580C;
+    cursor: pointer;
+  }
+  .food-scroll {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    margin: 0 -20px 24px;
+    padding: 0 20px;
+  }
+  .food-card {
+    min-width: 156px;
+    background: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    border-bottom: 3.5px solid #CBD5E1;
+    border-radius: 22px;
+    padding: 14px;
+    flex-shrink: 0;
+  }
+  .food-img-wrap {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .food-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #0F172A;
+    margin-bottom: 3px;
+  }
+  .food-price {
+    font-size: 14px;
+    font-weight: 900;
+    color: #EA580C;
+    margin-bottom: 8px;
+  }
+  .food-meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 6px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+  }
+  .profit-natural {
+    font-size: 10px;
+    font-weight: 800;
+    color: #16A34A;
+  }
+  .titip-count {
+    font-size: 9px;
+    font-weight: 700;
+    color: #64748B;
+  }
+
+  /* Target Operasional Harian */
+  .target-box {
+    background: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    border-bottom: 3.5px solid #CBD5E1;
+    border-radius: 22px;
+    padding: 16px;
+  }
+  .target-title-top {
+    font-size: 10px;
+    font-weight: 900;
+    color: #EA580C;
+    letter-spacing: 0.5px;
+  }
+  .target-title-main {
+    font-size: 14px;
+    font-weight: 900;
+    color: #0F172A;
+    margin: 2px 0 10px;
+  }
+  .target-cols {
+    display: flex;
+    gap: 8px;
+  }
+  .target-subitem {
+    flex: 1;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 8px;
+    text-align: center;
+  }
+  .ts-lbl { font-size: 10px; font-weight: 700; color: #64748B; }
+  .ts-num { font-size: 14px; font-weight: 900; color: #0F172A; margin: 2px 0; }
+  .ts-badge { font-size: 9px; font-weight: 800; color: #16A34A; }
+
+  /* Bottom Navigation Vektor Murni */
+  .bottom-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 76px;
+    background: #FFFFFF;
+    border-top: 1.5px solid #E2E8F0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 6px 10px;
+    z-index: 50;
+  }
+  .nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    cursor: pointer;
+  }
+  .nav-txt {
+    font-size: 10px;
+    font-weight: 700;
+    color: #94A3B8;
+    margin-top: 4px;
+  }
+  .nav-txt-active {
+    color: #EA580C;
+  }
+  .fab-dock {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    top: -16px;
+  }
+  .fab-core {
+    width: 58px;
+    height: 58px;
+    border-radius: 29px;
+    background: #EA580C;
+    border: 3.5px solid #FFFFFF;
+    box-shadow: 0 6px 16px rgba(234, 88, 12, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .fab-txt {
+    font-size: 10px;
+    font-weight: 900;
+    color: #EA580C;
+    margin-top: 3px;
+  }
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span>07:30</span>
+    <div style="display:flex; gap:6px; align-items:center;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2.5"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2.5"><rect x="2" y="7" width="16" height="10" rx="2"/><path d="M22 11v2"/></svg>
+    </div>
+  </div>
+
+  <div class="scroll-body">
+    <!-- Top Bar Bersih & Bernafas (Nol Badge Parasit) -->
+    <div class="top-header">
+      <div>
+        <div class="business-title">Dapur Berkah Bunda</div>
+        <div class="owner-sub">Bunda Sumiati • Sesi Pagi 07:30</div>
+      </div>
+      <div class="avatar-chef">
+        <!-- Maskot Chef Bitey Berkarakter -->
+        <svg width="34" height="34" viewBox="0 0 72 72">
+          <ellipse cx="36" cy="42" rx="20" ry="16" fill="#FDE68A" stroke="#78350F" stroke-width="2.5"/>
+          <path d="M26 30 C26 22 46 22 46 30 Z" fill="#FFFFFF" stroke="#78350F" stroke-width="2.5"/>
+          <circle cx="36" cy="20" r="8" fill="#FFFFFF" stroke="#78350F" stroke-width="2.5"/>
+          <circle cx="31" cy="40" r="2.5" fill="#78350F"/>
+          <circle cx="41" cy="40" r="2.5" fill="#78350F"/>
+          <path d="M33 46 Q36 49 39 46" fill="none" stroke="#78350F" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-bar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input class="search-input" type="text" placeholder="Cari jajanan, titip kantin, atau resep HPP...">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2.2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+    </div>
+
+    <!-- Hero Card Dompet Kas (Dengan Aset Bervolume) -->
+    <div class="wallet-card">
+      <div class="wallet-header">
+        <div class="wallet-title-group">
+          <!-- Aset Dompet OpenMoji Bervolume -->
+          <svg width="22" height="22" viewBox="0 0 72 72">
+            <rect x="12" y="20" width="48" height="34" rx="6" fill="#D97706" stroke="#78350F" stroke-width="2.5"/>
+            <path d="M12 28 h48" stroke="#78350F" stroke-width="2.5"/>
+            <circle cx="48" cy="37" r="4" fill="#FEF3C7" stroke="#78350F" stroke-width="2"/>
+          </svg>
+          <span>Kas di Dompet Toko</span>
+        </div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#78350F" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+
+      <div class="wallet-amount">
+        <span>Rp 850.000</span>
+        <!-- Aset Koin Emas Bervolume -->
+        <svg width="34" height="34" viewBox="0 0 72 72">
+          <circle cx="36" cy="36" r="26" fill="#F59E0B" stroke="#78350F" stroke-width="2.5"/>
+          <circle cx="36" cy="36" r="20" fill="#FBBF24" stroke="#78350F" stroke-width="1.8"/>
+          <text x="36" y="44" font-size="22" font-weight="900" fill="#78350F" text-anchor="middle">Rp</text>
+        </svg>
+      </div>
+
+      <div class="cashflow-row">
+        <div class="cash-pill cash-green">
+          <div class="cash-lbl cash-green-lbl">Pemasukan Hari Ini</div>
+          <div class="cash-val cash-green-val">+Rp 320.000</div>
+        </div>
+        <div class="cash-pill cash-red">
+          <div class="cash-lbl cash-red-lbl">Belanja Pasar Subuh</div>
+          <div class="cash-val cash-red-val">-Rp 150.000</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Aksi Operasional Berisi Aset Bervolume Penuh (Sesuai Referensi 8 Icon) -->
+    <div class="section-heading">Aksi Operasional Harian</div>
+    <div class="action-grid">
+      <!-- Kasir Lapak: Squircle Oranye Pastel (#FFC87C), Mesin Cokelat Tua (#3D312A) + Putih -->
+      <div class="action-item">
+        <div class="action-squircle" style="background:#FFC87C; border:none; box-shadow:none;">
+          <svg width="42" height="42" viewBox="0 0 48 48">
+            <path d="M17 8 h14 v10 h-14 Z" fill="#FFFFFF"/>
+            <path d="M20 12 h8 M20 15 h5" stroke="#3D312A" stroke-width="1.6" stroke-linecap="round"/>
+            <rect x="10" y="16" width="28" height="22" rx="6" fill="#3D312A"/>
+            <rect x="14" y="20" width="20" height="8" rx="2.5" fill="#FFFFFF"/>
+            <circle cx="17" cy="32" r="2" fill="#FFFFFF"/>
+            <circle cx="24" cy="32" r="2" fill="#FFFFFF"/>
+            <circle cx="31" cy="32" r="2" fill="#FFFFFF"/>
+            <rect x="12" y="38" width="24" height="4" rx="2" fill="#FFE8C2"/>
+          </svg>
+        </div>
+        <span class="action-lbl">Kasir Lapak</span>
+      </div>
+
+      <!-- Titip Kantin: Squircle Mint Pastel (#98D7C2), Etalase Cokelat Tua (#3D312A) + Tenda Putih -->
+      <div class="action-item">
+        <div class="action-squircle" style="background:#98D7C2; border:none; box-shadow:none;">
+          <svg width="42" height="42" viewBox="0 0 48 48">
+            <path d="M8 18 L24 8 L40 18 L36 24 L12 24 Z" fill="#FFFFFF"/>
+            <circle cx="16" cy="24" r="3" fill="#3D312A"/>
+            <circle cx="24" cy="24" r="3" fill="#3D312A"/>
+            <circle cx="32" cy="24" r="3" fill="#3D312A"/>
+            <rect x="11" y="24" width="26" height="18" rx="4" fill="#3D312A"/>
+            <rect x="15" y="28" width="10" height="9" rx="2" fill="#FFFFFF"/>
+            <rect x="28" y="28" width="6" height="14" rx="1.5" fill="#C5ECE4"/>
+          </svg>
+        </div>
+        <span class="action-lbl">Titip Kantin</span>
+      </div>
+
+      <!-- Gudang Stok: Squircle Ungu Pastel (#C3B1E1), Karung Cokelat Tua (#3D312A) + Putih -->
+      <div class="action-item">
+        <div class="action-squircle" style="background:#C3B1E1; border:none; box-shadow:none;">
+          <svg width="42" height="42" viewBox="0 0 48 48">
+            <path d="M21 13 C21 8 27 8 27 13 Z" fill="#FFFFFF"/>
+            <circle cx="24" cy="14" r="4.5" fill="#FFFFFF"/>
+            <path d="M14 15 C13 10 35 10 34 15 L37 36 C37 42 11 42 11 36 Z" fill="#3D312A"/>
+            <circle cx="24" cy="28" r="6.5" fill="#FFFFFF"/>
+            <circle cx="24" cy="28" r="3" fill="#C3B1E1"/>
+          </svg>
+        </div>
+        <span class="action-lbl">Gudang Stok</span>
+      </div>
+
+      <!-- Belanja Pasar: Squircle Lime Pastel (#D6EC83), Troli Cokelat Tua (#3D312A) + Sayuran Putih -->
+      <div class="action-item">
+        <div class="action-squircle" style="background:#D6EC83; border:none; box-shadow:none;">
+          <svg width="42" height="42" viewBox="0 0 48 48">
+            <circle cx="21" cy="17" r="4.5" fill="#FFFFFF"/>
+            <circle cx="29" cy="16" r="5" fill="#FFC87C"/>
+            <path d="M9 13 h6 l4 16 h18 l4-12 h-23" fill="none" stroke="#3D312A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="21" cy="35" r="3.5" fill="#3D312A"/>
+            <circle cx="21" cy="35" r="1.5" fill="#FFFFFF"/>
+            <circle cx="33" cy="35" r="3.5" fill="#3D312A"/>
+            <circle cx="33" cy="35" r="1.5" fill="#FFFFFF"/>
+          </svg>
+        </div>
+        <span class="action-lbl">Belanja Pasar</span>
+      </div>
+    </div>
+
+    <!-- Katalog Jajanan Menggugah Selera (Tata Letak Alami: Foto -> Judul -> Harga -> Info) -->
+    <div class="carousel-header">
+      <div class="section-heading" style="margin-bottom:0;">Katalog Jajanan Unggulan</div>
+      <div class="see-all-link">Lihat Semua</div>
+    </div>
+
+    <div class="food-scroll">
+      <!-- Risoles Rogout -->
+      <div class="food-card">
+        <div class="food-img-wrap">
+          <svg width="68" height="68" viewBox="0 0 80 80">
+            <path d="M15 32 C15 22 65 22 65 32 L58 56 C58 64 22 64 22 56 Z" fill="#F59E0B" stroke="#92400E" stroke-width="2.8"/>
+            <path d="M24 34 Q40 38 56 34" stroke="#92400E" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="32" cy="44" r="2" fill="#92400E"/>
+            <circle cx="48" cy="46" r="2" fill="#92400E"/>
+          </svg>
+        </div>
+        <div class="food-title">Risoles Rogout</div>
+        <div class="food-price">Rp 2.500</div>
+        <div class="food-meta-row">
+          <span class="profit-natural">+Untung Rp 500</span>
+          <span class="titip-count">40 pcs titip</span>
+        </div>
+      </div>
+
+      <!-- Pastel Sayur Telur -->
+      <div class="food-card">
+        <div class="food-img-wrap">
+          <svg width="68" height="68" viewBox="0 0 80 80">
+            <path d="M16 46 C16 22 64 22 64 46 Z" fill="#FBBF24" stroke="#92400E" stroke-width="2.8"/>
+            <path d="M14 46 Q40 54 66 46" stroke="#92400E" stroke-width="3" stroke-linecap="round"/>
+            <path d="M22 36 Q40 42 58 36" stroke="#92400E" stroke-width="1.8" stroke-dasharray="3,3"/>
+          </svg>
+        </div>
+        <div class="food-title">Pastel Sayur Telur</div>
+        <div class="food-price">Rp 2.500</div>
+        <div class="food-meta-row">
+          <span class="profit-natural">+Untung Rp 600</span>
+          <span class="titip-count">35 pcs titip</span>
+        </div>
+      </div>
+
+      <!-- Dadar Gulung Pandan -->
+      <div class="food-card">
+        <div class="food-img-wrap">
+          <svg width="68" height="68" viewBox="0 0 80 80">
+            <rect x="18" y="26" width="44" height="28" rx="14" fill="#10B981" stroke="#065F46" stroke-width="2.8"/>
+            <ellipse cx="28" cy="40" rx="8" ry="12" fill="#34D399" stroke="#065F46" stroke-width="2"/>
+            <path d="M38 34 Q50 34 56 42" stroke="#065F46" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="food-title">Dadar Gulung</div>
+        <div class="food-price">Rp 2.000</div>
+        <div class="food-meta-row">
+          <span class="profit-natural">+Untung Rp 450</span>
+          <span class="titip-count">30 pcs titip</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Target Operasional Harian -->
+    <div class="target-box">
+      <div class="target-title-top">TARGET OPERASIONAL HARIAN</div>
+      <div class="target-title-main">Produksi & Serapan Lapak</div>
+      <div class="target-cols">
+        <div class="target-subitem">
+          <div class="ts-lbl">Kue Terjual</div>
+          <div class="ts-num">93 / 110</div>
+          <div class="ts-badge">84.5% Sukses</div>
+        </div>
+        <div class="target-subitem">
+          <div class="ts-lbl">Sisa Retur</div>
+          <div class="ts-num" style="color:#DC2626;">5 Pcs</div>
+          <div class="ts-badge" style="color:#64748B;">Terkendali</div>
+        </div>
+        <div class="target-subitem">
+          <div class="ts-lbl">Setoran Bersih</div>
+          <div class="ts-num" style="color:#15803D;">Rp 175k</div>
+          <div class="ts-badge">Lunas Sore</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation Vektor Murni Standar Mobile -->
+  <div class="bottom-nav">
+    <div class="nav-btn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>
+      </svg>
+      <span class="nav-txt nav-txt-active">Beranda</span>
+    </div>
+
+    <div class="nav-btn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>
+      </svg>
+      <span class="nav-txt">Titip Kantin</span>
+    </div>
+
+    <div class="fab-dock">
+      <div class="fab-core">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/>
+        </svg>
+      </div>
+      <span class="fab-txt">KASIR</span>
+    </div>
+
+    <div class="nav-btn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M12 6v6"/><path d="M9 9h6"/>
+      </svg>
+      <span class="nav-txt">Resep HPP</span>
+    </div>
+
+    <div class="nav-btn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span class="nav-txt">Saya</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
+"""
+
+with open(HTML_PATH, "w", encoding="utf-8") as f:
+    f.write(HTML_CONTENT)
+
+cmd = [
+    r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+    "--headless",
+    "--disable-gpu",
+    "--window-size=500,980",
+    f"--screenshot={PNG_PATH}",
+    HTML_PATH
+]
+
+subprocess.run(cmd, check=True)
+print(f"Crafted dashboard screenshot rendered to {PNG_PATH}")

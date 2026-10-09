@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, StyleSheet, StatusBar, TextIn
 import Svg, { Path, Rect, Circle } from 'react-native-svg';
 import { ModernBottomNav } from '../components/ModernBottomNav';
 import AssetVisual from '../components/AssetVisual';
+import { PastelReferenceIcon } from '../components/PastelReferenceIcon';
 import { getCashflow, getProfile } from '../db/storage';
 import { formatRupiah } from '../utils/formatters';
 
@@ -25,34 +26,22 @@ export const DashboardScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
 
-      {/* 1. TOP HEADER: GREETING & PROFILE AVATAR (CLEAN ANTI-SLOP, ZERO EMOJI, ZERO DEV JARGON) */}
+      {/* 1. TOP HEADER: BERSIH & BERNAFAS (ZERO PARASITE BADGES, ZERO DEV JARGON) */}
       <View style={styles.topHeader}>
         <View style={styles.greetingWrap}>
-          <Text style={styles.greetingSub}>Selamat Pagi, Bunda</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 }}>
-            <Svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="#EA580C" strokeWidth={2.5}>
-              <Circle cx="12" cy="12" r="10" />
-              <Path d="M12 6v6l4 2" />
-            </Svg>
-            <Text style={{ fontSize: 12, fontWeight: '700', color: '#64748B' }}>Sesi Pagi: Drop Kantin & Lapak</Text>
-          </View>
+          <Text style={styles.businessTitle}>{profile.businessName || 'Dapur Berkah Bunda'}</Text>
+          <Text style={styles.greetingSub}>{profile.ownerName || 'Bunda Sumiati'} • Sesi Pagi</Text>
         </View>
 
-        <View style={styles.headerRightActions}>
-          <View style={styles.securityBadge}>
-            <Text style={styles.securityBadgeText}>Luring Aktif</Text>
-          </View>
-
-          <TouchableOpacity 
-            style={styles.avatarBtn} 
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('Settings')}
-          >
-            <Text style={{ fontSize: 16, fontWeight: '900', color: '#EA580C' }}>DB</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity 
+          style={styles.avatarBtn} 
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('Settings')}
+        >
+          <AssetVisual name="chef_mascot" size={38} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView 
@@ -78,15 +67,15 @@ export const DashboardScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* 3. HERO CASH WALLET CARD MELAYANG (Pola FinTech DANA + Claymorphism) */}
+        {/* 3. HERO CASH WALLET CARD BERBOBOT NYATA (DENGAN ASET BERVOLUME) */}
         <View style={styles.heroWalletCard}>
           <View style={styles.walletHeaderRow}>
             <View style={styles.walletLabelBox}>
-              <AssetVisual name="wallet_purse" size={20} />
+              <AssetVisual name="wallet_purse" size={24} />
               <Text style={styles.walletLabelText}>Uang Kas di Dompet</Text>
             </View>
             <TouchableOpacity onPress={() => setHideBalance(!hideBalance)} style={styles.eyeBtn}>
-              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#78350F" strokeWidth={2}>
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#78350F" strokeWidth={2}>
                 <Path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                 <Circle cx="12" cy="12" r="3" />
               </Svg>
@@ -98,7 +87,7 @@ export const DashboardScreen = ({ navigation }) => {
               {hideBalance ? 'Rp ••••••••' : 'Rp 850.000'}
             </Text>
             <View style={styles.coinBadge}>
-              <AssetVisual name="coin_gold" size={28} />
+              <AssetVisual name="coin_gold" size={32} />
             </View>
           </View>
 
@@ -115,21 +104,14 @@ export const DashboardScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* 4. 4 TOMBOL AKSI CEPAT (PROPORSI IKON PENUH 60% SQUIRCLE, BERSIH) */}
+        {/* 4. 4 TOMBOL AKSI OPERASIONAL 1:1 GAYA REFERENSI PASTEL 8-ICON */}
         <View style={styles.quickActionGrid}>
           <TouchableOpacity 
             style={styles.quickActionTile}
             activeOpacity={0.8}
             onPress={() => navigation.navigate('Pos')}
           >
-            <View style={[styles.actionIconBox, { backgroundColor: '#FFEDD5', borderColor: '#FED7AA' }]}>
-              <Svg width={30} height={30} viewBox="0 0 24 24" fill="none" stroke="#EA580C" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-                <Rect x="2" y="3" width="20" height="14" rx="2" />
-                <Path d="M8 21h8" />
-                <Path d="M12 17v4" />
-                <Path d="M7 8h10" />
-              </Svg>
-            </View>
+            <PastelReferenceIcon type="pos" size={64} />
             <Text style={styles.actionTileLabel}>Kasir Lapak</Text>
           </TouchableOpacity>
 
@@ -138,12 +120,7 @@ export const DashboardScreen = ({ navigation }) => {
             activeOpacity={0.8}
             onPress={() => navigation.navigate('Consignment')}
           >
-            <View style={[styles.actionIconBox, { backgroundColor: '#FEF08A', borderColor: '#FDE047' }]}>
-              <Svg width={30} height={30} viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-                <Path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                <Path d="M9 22V12h6v10" />
-              </Svg>
-            </View>
+            <PastelReferenceIcon type="canteen" size={64} />
             <Text style={styles.actionTileLabel}>Titip Kantin</Text>
           </TouchableOpacity>
 
@@ -152,13 +129,7 @@ export const DashboardScreen = ({ navigation }) => {
             activeOpacity={0.8}
             onPress={() => navigation.navigate('Stock')}
           >
-            <View style={[styles.actionIconBox, { backgroundColor: '#E0E7FF', borderColor: '#C7D2FE' }]}>
-              <Svg width={30} height={30} viewBox="0 0 24 24" fill="none" stroke="#4338CA" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-                <Path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
-                <Path d="m3.3 7 8.7 5 8.7-5" />
-                <Path d="M12 22V12" />
-              </Svg>
-            </View>
+            <PastelReferenceIcon type="stock" size={64} />
             <Text style={styles.actionTileLabel}>Gudang Stok</Text>
           </TouchableOpacity>
 
@@ -167,13 +138,7 @@ export const DashboardScreen = ({ navigation }) => {
             activeOpacity={0.8}
             onPress={() => navigation.navigate('MarketShopping')}
           >
-            <View style={[styles.actionIconBox, { backgroundColor: '#DCFCE7', borderColor: '#BBF7D0' }]}>
-              <Svg width={30} height={30} viewBox="0 0 24 24" fill="none" stroke="#15803D" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-                <Circle cx="9" cy="21" r="1" />
-                <Circle cx="20" cy="21" r="1" />
-                <Path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-              </Svg>
-            </View>
+            <PastelReferenceIcon type="market" size={64} />
             <Text style={styles.actionTileLabel}>Belanja Pasar</Text>
           </TouchableOpacity>
         </View>
@@ -199,7 +164,7 @@ export const DashboardScreen = ({ navigation }) => {
           </ScrollView>
         </View>
 
-        {/* 6. POPULAR / FAVORITE FOOD CAROUSEL BERNAFAS */}
+        {/* 6. POPULAR / FAVORITE FOOD CAROUSEL ALAMI TANPA BADGE PARASIT */}
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle}>Katalog Jajanan Unggulan</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Hpp')}>
@@ -209,10 +174,10 @@ export const DashboardScreen = ({ navigation }) => {
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.foodCarouselScroll}>
           {[
-            { id: '1', name: 'Risoles Rogout', price: 1200, profit: 500, sold: '25 laku', icon: 'risoles_rogout', bg: '#FFFBEB' },
-            { id: '2', name: 'Pastel Telur Sayur', price: 1500, profit: 600, sold: '18 laku', icon: 'pastel_telur', bg: '#FEF3C7' },
-            { id: '3', name: 'Dadar Gulung Unti', price: 1000, profit: 450, sold: '30 laku', icon: 'dadar_gulung', bg: '#DCFCE7' },
-            { id: '4', name: 'Lemper Ayam Harum', price: 1500, profit: 550, sold: '20 laku', icon: 'lemper_ayam', bg: '#F1F5F9' },
+            { id: '1', name: 'Risoles Rogout', price: 2500, profit: 500, titip: '40 pcs titip', icon: 'risoles_rogout', bg: '#FFFBEB' },
+            { id: '2', name: 'Pastel Sayur Telur', price: 2500, profit: 600, titip: '35 pcs titip', icon: 'pastel_telur', bg: '#FEF3C7' },
+            { id: '3', name: 'Dadar Gulung Pandan', price: 2000, profit: 450, titip: '30 pcs titip', icon: 'dadar_gulung', bg: '#DCFCE7' },
+            { id: '4', name: 'Lemper Ayam Harum', price: 2500, profit: 550, titip: '25 pcs titip', icon: 'lemper_ayam', bg: '#F1F5F9' },
           ].map((item) => (
             <TouchableOpacity 
               key={item.id}
@@ -220,18 +185,21 @@ export const DashboardScreen = ({ navigation }) => {
               onPress={() => navigation.navigate('Hpp')}
               style={[styles.foodCard, { backgroundColor: item.bg }]}
             >
-              <View style={styles.foodCardBadge}>
-                <Text style={styles.foodCardBadgeText}>+Untung {formatRupiah(item.profit)}</Text>
-              </View>
-
+              {/* GAMBAR MAKANAN BERVOLUME DI ATAS ALAMI */}
               <View style={styles.foodImageCenter}>
-                <AssetVisual name={item.icon} size={64} />
+                <AssetVisual name={item.icon} size={68} />
               </View>
 
+              {/* NAMA KUE */}
               <Text style={styles.foodCardName} numberOfLines={1}>{item.name}</Text>
-              <View style={styles.foodPriceRow}>
-                <Text style={styles.foodPriceText}>{formatRupiah(item.price)}</Text>
-                <Text style={styles.foodSoldText}>{item.sold}</Text>
+              
+              {/* HARGA JUAL */}
+              <Text style={styles.foodPriceText}>{formatRupiah(item.price)}</Text>
+
+              {/* DETAIL MARGIN DAN TITIP ALAMI DI BAWAH TANPA BADGE PARASIT */}
+              <View style={styles.foodMetaBottomRow}>
+                <Text style={styles.profitNaturalText}>+Untung {formatRupiah(item.profit)}</Text>
+                <Text style={styles.titipCountText}>{item.titip}</Text>
               </View>
             </TouchableOpacity>
           ))}
@@ -323,7 +291,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingTop: 16,
     paddingBottom: 14,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#FAF8F5',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -331,32 +299,17 @@ const styles = StyleSheet.create({
   greetingWrap: {
     flex: 1,
   },
-  greetingSub: {
+  businessTitle: {
     fontSize: 20,
+    fontWeight: '900',
     color: '#0F172A',
-    fontWeight: '800',
     letterSpacing: -0.5,
   },
-  headerRightActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  securityBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#DCFCE7',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#BBF7D0',
-  },
-  securityBadgeText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#15803D',
+  greetingSub: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: '700',
+    marginTop: 2,
   },
   avatarBtn: {
     width: 44,
@@ -501,17 +454,17 @@ const styles = StyleSheet.create({
     width: (width - 44 - 36) / 4,
   },
   actionIconBox: {
-    width: 58,
-    height: 58,
-    borderRadius: 18,
+    width: 62,
+    height: 62,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    elevation: 3,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
   },
   actionTileLabel: {
     fontSize: 11,
@@ -568,50 +521,46 @@ const styles = StyleSheet.create({
     marginBottom: 22,
   },
   foodCard: {
-    width: 145,
+    width: 155,
     borderRadius: 22,
-    padding: 12,
+    padding: 14,
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
     borderBottomWidth: 3.5,
     borderBottomColor: '#CBD5E1',
   },
-  foodCardBadge: {
-    backgroundColor: '#DCFCE7',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-    zIndex: 10,
-    marginBottom: 4,
-  },
-  foodCardBadgeText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#15803D',
-  },
   foodImageCenter: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 10,
-  },
-  foodCardName: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#1E293B',
-  },
-  foodPriceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
+    marginBottom: 8,
     marginTop: 4,
   },
+  foodCardName: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 2,
+  },
   foodPriceText: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: '900',
     color: '#EA580C',
+    marginBottom: 6,
   },
-  foodSoldText: {
+  foodMetaBottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 6,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
+  },
+  profitNaturalText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#16A34A',
+  },
+  titipCountText: {
     fontSize: 9,
     fontWeight: '700',
     color: '#64748B',
