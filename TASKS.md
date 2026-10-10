@@ -32,11 +32,15 @@ Panduan status pengerjaan seluruh modul, layar, dan fitur proyek KantinBite sesu
   - [x] Tombol CTA utama `Bayar & Terbitkan Struk WA`.
   - [x] Bebas 100% dari emoji mentah & navigasi elevated KASIR aktif.
 
-- [ ] **Layar 4: Titip Konsinyasi Kantin (`ConsignmentScreen.js`)**
-  - [ ] Pemilihan mitra kantin aktif dengan info PIC dan status bayar.
-  - [ ] Sesi Pagi: Catat jumlah kue yang dititipkan.
-  - [ ] Sesi Sore: Masukkan retur fisik, hitung otomatis kue laku, jatah komisi kantin, dan wajib setor tunai.
-  - [ ] Lencana stempel LUNAS / PIUTANG.
+- [x] **Layar 4: Titip Konsinyasi Kantin (`ConsignmentScreen.js`)**
+  - [x] Header terstandarisasi 1:1 (`ScreenHeader`): `Titip Kantin` + `+ Kantin Baru`.
+  - [x] Date strip pill penanda sesi hari operasional.
+  - [x] Carousel pemilihan mitra kantin: status `✓ Lunas` (hijau) & `Piutang` (merah) teks elegan menyatu bebas badge kapsul slop.
+  - [x] Bar kontak PIC aktif lengkap dengan tombol integrasi WhatsApp (`Chat WA`).
+  - [x] Segmented tab sesi waktu: `Sesi Pagi (Nitip)` vs `Sesi Sore (Rekap)`.
+  - [x] Kartu rekap produk receipt ledger: angka retur fisik font 12.5px selaras dalam kotak border halus rapi, kue laku hijau, dan total `Wajib Setor Tunai` tanpa karakter `@` redundan.
+  - [x] Tombol CTA oranye solid `Simpan Rekap ke Buku Kas`.
+  - [x] Navigasi bawah dock terpadu dengan tab Titip Kantin aktif.
 
 - [ ] **Layar 5: Pengaturan Usaha & Arsip Data (`SettingsScreen.js`)**
   - [ ] Profil gerai usaha dan pengamanan PIN lokal 6 digit.
@@ -53,9 +57,13 @@ Panduan status pengerjaan seluruh modul, layar, dan fitur proyek KantinBite sesu
   - [ ] Alokasi operasional: gas LPG, minyak goreng, kemasan mika.
   - [ ] Slider / input penetapan harga jual dan margin untung.
 
-- [ ] **Layar 7: Gudang Stok Bahan Baku (`StockScreen.js`)**
-  - [ ] Monitoring sisa tepung terigu, telur, minyak, gas LPG di dapur.
-  - [ ] Indikator visual kapasitas sisa dan peringatan stok kritis (*low-stock alert*).
+- [x] **Layar 7: Gudang Stok Bahan Baku (`StockScreen.js`)**
+  - [x] Top header sub-halaman dengan tombol Back `←` (jelas anak dari tombol Beranda).
+  - [x] Kartu notifikasi restok hangat & modern (`toast-restock-card` oranye lembut dengan tombol langsung `Belanja Subuh`).
+  - [x] Segmented control filter tabs (`Semua`, `Stok Kritis`, `Bahan Kering`).
+  - [x] Grid kartu bahan memakai aset SVG asli (terigu, telur, minyak, gas LPG, gula, ayam, sayur, mika).
+  - [x] Status teks bersih menyatu dengan dot indikator warna (hijau `● Aman`, merah `● Kritis`) tanpa badge kapsul slop.
+  - [x] Progress bar kapasitas sisa stok.
 
 - [ ] **Layar 8: Daftar Belanja Pasar Subuh Otomatis (`MarketShoppingScreen.js`)**
   - [ ] Akumulasi otomatis gramatur bahan dari target produksi harian.
