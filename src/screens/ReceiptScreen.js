@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, StatusBar, Alert, Dimensions, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BottomNav } from '../components/BottomNav';
 import AssetVisual from '../components/AssetVisual';
 import { formatRupiah } from '../utils/formatters';
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, StatusBar, Linking, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BottomNav } from '../components/BottomNav';
+import { ModernBottomNav } from '../components/ModernBottomNav';
 import AssetVisual from '../components/AssetVisual';
 import { BentoCard, TactileButton } from '../components/PlayfulComponents';
 
@@ -17,6 +17,8 @@ export const PartnerDirectoryScreen = ({ navigation }) => {
       fee: 'Rp 500 / pcs',
       avgSold: '25-30 pcs / hari',
       favoriteMenu: 'Risoles Rogout Mayo',
+      absorption: '92% Laku',
+      recommendation: 'Serapan tinggi: pasokan aman dinaikkan +5 pcs',
       isActive: true,
     },
     {
@@ -29,6 +31,8 @@ export const PartnerDirectoryScreen = ({ navigation }) => {
       fee: 'Rp 500 / pcs',
       avgSold: '20-25 pcs / hari',
       favoriteMenu: 'Pastel Telur Sayur',
+      absorption: '85% Laku',
+      recommendation: 'Serapan stabil: pertahankan kuota 25 pcs',
       isActive: true,
     },
     {
@@ -41,6 +45,8 @@ export const PartnerDirectoryScreen = ({ navigation }) => {
       fee: 'Rp 400 / pcs',
       avgSold: '40-50 pcs / hari',
       favoriteMenu: 'Dadar Gulung & Lemper Ayam',
+      absorption: '68% Laku',
+      recommendation: 'Retur agak tinggi: batasi 35 pcs agar kue tidak basi',
       isActive: true,
     },
     {
@@ -53,6 +59,8 @@ export const PartnerDirectoryScreen = ({ navigation }) => {
       fee: 'Grosir Putus',
       avgSold: '60 pcs / hari',
       favoriteMenu: 'Aneka Gorengan Campur',
+      absorption: '98% Laku',
+      recommendation: 'Sangat laris: siap tambah variasi jajanan',
       isActive: true,
     },
   ]);
@@ -116,10 +124,7 @@ export const PartnerDirectoryScreen = ({ navigation }) => {
 
               <View style={{ flex: 1, marginLeft: 12 }}>
                 <View style={styles.statusBadgeRow}>
-                  <View style={styles.activePill}>
-                    <Text style={styles.activePillText}>● AKTIF BEROPERASI</Text>
-                  </View>
-                  <Text style={styles.scheduleText}>⏰ {p.dropSchedule}</Text>
+                  <Text style={styles.partnerScheduleDirect}>Jadwal drop {p.dropSchedule}</Text>
                 </View>
 
                 <Text style={styles.partnerNameText}>{p.name}</Text>
@@ -128,12 +133,15 @@ export const PartnerDirectoryScreen = ({ navigation }) => {
             </View>
 
             <View style={styles.detailBox}>
-              <Text style={styles.addressText}>📍 {p.address}</Text>
+              <Text style={styles.addressText}>{p.address}</Text>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Komisi: <Text style={{ color: '#EA580C', fontWeight: '800' }}>{p.fee}</Text></Text>
-                <Text style={styles.metaLabel}>Rata-rata: <Text style={{ color: '#15803D', fontWeight: '800' }}>{p.avgSold}</Text></Text>
+                <Text style={styles.metaLabel}>Serapan: <Text style={{ color: '#059669', fontWeight: '900' }}>{p.absorption}</Text></Text>
               </View>
-              <Text style={styles.favText}>⭐ Menu Favorit: {p.favoriteMenu}</Text>
+              <Text style={styles.favText}>Menu Terlaris: {p.favoriteMenu}</Text>
+              <View style={styles.recomWrap}>
+                <Text style={styles.recomText}>Saran: {p.recommendation}</Text>
+              </View>
             </View>
 
             <View style={styles.actionBtnRow}>
@@ -164,7 +172,7 @@ export const PartnerDirectoryScreen = ({ navigation }) => {
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      <BottomNav activeTab="Consignment" navigation={navigation} />
+      <ModernBottomNav activeTab="Activity" navigation={navigation} />
     </SafeAreaView>
   );
 };
@@ -292,21 +300,10 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 3,
   },
-  activePill: {
-    backgroundColor: '#DCFCE7',
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: 6,
-  },
-  activePillText: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#15803D',
-  },
-  scheduleText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#64748B',
+  partnerScheduleDirect: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#059669',
   },
   partnerNameText: {
     fontSize: 14,
@@ -345,6 +342,17 @@ const styles = StyleSheet.create({
     color: '#334155',
     fontWeight: '700',
     marginTop: 3,
+  },
+  recomWrap: {
+    marginTop: 6,
+    paddingTop: 6,
+    borderTopWidth: 1,
+    borderTopColor: '#F1EFEA',
+  },
+  recomText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#059669',
   },
   actionBtnRow: {
     flexDirection: 'row',

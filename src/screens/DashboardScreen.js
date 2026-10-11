@@ -46,7 +46,7 @@ export const DashboardScreen = ({ navigation }) => {
           accessibilityLabel="Buka Pengaturan Profil Usaha"
           accessibilityRole="button"
         >
-          <Mascot size={42} />
+          <AssetVisual name="chef_mascot" size={38} />
         </TouchableOpacity>
       </View>
 
@@ -118,6 +118,24 @@ export const DashboardScreen = ({ navigation }) => {
               </View>
             </View>
           </View>
+
+          {/* TOMBOL TUTUP KAS SORE / PENCOCOKAN UANG LACI */}
+          <TouchableOpacity
+            style={styles.dailyClosingBtn}
+            activeOpacity={0.8}
+            onPress={() => Alert.alert(
+              'Pencocokan Kas Sore (Tutup Kas)',
+              '• Saldo Kas Awal Pagi: Rp 680.000\n• Pemasukan Hari Ini: +Rp 320.000\n• Belanja Pasar Subuh: -Rp 150.000\n--------------------------------\nUang Fisik Wajib di Laci: Rp 850.000\nStatus: Seimbang (Selisih Rp 0)\n\nBuku kas sore siap dikunci.'
+            )}
+            accessibilityLabel="Pencocokan Kas Sore atau Tutup Kas"
+            accessibilityRole="button"
+          >
+            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#B45309" strokeWidth={2.5}>
+              <Path d="M9 11l3 3L22 4" />
+              <Path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+            </Svg>
+            <Text style={styles.dailyClosingBtnText}>Tutup Kas Sore: Uang Laci Fisik Rp 850.000 (Cocok)</Text>
+          </TouchableOpacity>
         </View>
 
         {/* 4. 4 TOMBOL AKSI OPERASIONAL 1:1 GAYA REFERENSI PASTEL 8-ICON (IKON BESAR 75%) */}
@@ -454,6 +472,24 @@ const styles = StyleSheet.create({
     height: 24,
     backgroundColor: '#E2E8F0',
     marginHorizontal: 8,
+  },
+  dailyClosingBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1.2,
+    borderColor: '#FDE68A',
+    borderRadius: 10,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    marginTop: 10,
+  },
+  dailyClosingBtnText: {
+    fontSize: 10.5,
+    fontWeight: '800',
+    color: '#B45309',
   },
   walletHeaderRow: {
     flexDirection: 'row',

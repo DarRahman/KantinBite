@@ -108,6 +108,22 @@ export const MarketShoppingScreen = ({ navigation }) => {
           </View>
         </View>
 
+        {/* 2B. OTOMASI PERHITUNGAN KEBUTUHAN PRODUKSI (AUTO-REPLENISHMENT) */}
+        <View style={styles.autoCalcCard}>
+          <View style={styles.autoCalcHeadRow}>
+            <Text style={styles.autoCalcBadgeTitle}>OTOMASI KEBUTUHAN BESOK</Text>
+            <TouchableOpacity 
+              onPress={() => Alert.alert('Rencana Produksi', 'Rencana esok subuh: 50 Risoles Rogout + 40 Pastel Sayur. Kebutuhan bahan otomatis disesuaikan dengan sisa stok di gudang dapur.')}
+              accessibilityLabel="Sesuaikan target produksi"
+              accessibilityRole="button"
+            >
+              <Text style={styles.autoCalcAdjustText}>Ubah Rencana ›</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.autoCalcDetailText}>Target Produksi: 50 Risoles + 40 Pastel</Text>
+          <Text style={styles.autoCalcHelperText}>Daftar belanjaan di bawah dihitung otomatis dari formulasi resep & sisa stok gudang dapur.</Text>
+        </View>
+
         {/* 3. CHECKLIST ITEM BELANJAAN SUBUH */}
         <Text style={styles.sectionLbl}>DAFTAR BAHAN YANG HARUS DIBELI ({shoppingItems.length} ITEM)</Text>
 
@@ -243,12 +259,50 @@ const styles = StyleSheet.create({
     borderBottomWidth: 3.5,
     borderBottomColor: '#CBD5E1',
     gap: 10,
-    marginBottom: 16,
+    marginBottom: 12,
     elevation: 2,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.03,
     shadowRadius: 6,
+  },
+  autoCalcCard: {
+    backgroundColor: '#FFFBEB',
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: '#FDE68A',
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#F59E0B',
+    gap: 6,
+    marginBottom: 16,
+  },
+  autoCalcHeadRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  autoCalcBadgeTitle: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#B45309',
+    letterSpacing: 0.6,
+  },
+  autoCalcAdjustText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#EA580C',
+  },
+  autoCalcDetailText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#0F172A',
+  },
+  autoCalcHelperText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#64748B',
+    lineHeight: 15,
   },
   budgetTopRow: {
     flexDirection: 'row',
