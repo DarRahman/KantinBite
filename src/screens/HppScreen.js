@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, StatusBar, Dimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ModernBottomNav } from '../components/ModernBottomNav';
 import { ScreenHeader } from '../components/ScreenHeader';
 import AssetVisual from '../components/AssetVisual';
@@ -93,7 +94,7 @@ export const HppScreen = ({ navigation }) => {
     : (products.length > 0 ? products : defaultRecipes).filter(p => p.category === filterCat);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       {/* 1. GLOBAL SCREEN HEADER (TERSTANDARISASI & KONSISTEN) */}
@@ -214,7 +215,7 @@ export const HppScreen = ({ navigation }) => {
 
       {/* 5. MODERN BOTTOM DOCK */}
       <ModernBottomNav activeTab="Wallet" navigation={navigation} />
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -292,15 +293,13 @@ const styles = StyleSheet.create({
   },
   recipeCardReal: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 22,
     padding: 16,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    elevation: 2,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
+    borderWidth: 2,
+    borderColor: '#1E293B',
+    borderBottomWidth: 4.5,
+    borderBottomColor: '#1E293B',
+    elevation: 3,
     marginBottom: 16,
     gap: 12,
   },
@@ -310,12 +309,12 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   foodThumbBox: {
-    width: 60,
-    height: 60,
-    borderRadius: 16,
+    width: 64,
+    height: 64,
+    borderRadius: 18,
     backgroundColor: '#FFFBEB',
-    borderWidth: 1.5,
-    borderColor: '#FDE68A',
+    borderWidth: 1.8,
+    borderColor: '#1E293B',
     alignItems: 'center',
     justifyContent: 'center',
   },

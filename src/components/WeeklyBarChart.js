@@ -63,9 +63,13 @@ export const WeeklyBarChart = ({ data = [] }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FAFAFA',
-    borderRadius: 16,
-    padding: 14,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 2,
+    borderColor: '#1E293B',
+    borderBottomWidth: 4,
+    borderBottomColor: '#1E293B',
     marginVertical: 12
   },
   headerRow: {

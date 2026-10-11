@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, StatusBar, Linking, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomNav } from '../components/BottomNav';
 import AssetVisual from '../components/AssetVisual';
 import { BentoCard, TactileButton } from '../components/PlayfulComponents';
@@ -62,8 +63,8 @@ export const PartnerDirectoryScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       
       {/* HEADER AMAN */}
       <View style={styles.header}>
@@ -164,7 +165,7 @@ export const PartnerDirectoryScreen = ({ navigation }) => {
       </ScrollView>
 
       <BottomNav activeTab="Consignment" navigation={navigation} />
-    </View>
+    </SafeAreaView>
   );
 };
 

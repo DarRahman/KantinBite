@@ -1,23 +1,22 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, StatusBar, Alert } from 'react-native';
-import { BottomNav } from '../components/BottomNav';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, StatusBar, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Path, Line, Circle } from 'react-native-svg';
+import { ModernBottomNav } from '../components/ModernBottomNav';
 import AssetVisual from '../components/AssetVisual';
-import { BentoCard, TactileButton } from '../components/PlayfulComponents';
 import { formatRupiah } from '../utils/formatters';
 
 export const RecipeEditorScreen = ({ navigation, route }) => {
-  const [recipeName, setRecipeName] = useState('Risoles Mayo Spesial');
+  const [recipeName, setRecipeName] = useState('Risoles Rogout Ayam');
   const [batchPortions, setBatchPortions] = useState('50');
-  const [suggestedSellingPrice, setSuggestedSellingPrice] = useState('2000');
-  const [canteenShare, setCanteenShare] = useState('500');
+  const [suggestedSellingPrice, setSuggestedSellingPrice] = useState('1200');
+  const [canteenShare, setCanteenShare] = useState('400');
 
   const [ingredients, setIngredients] = useState([
-    { id: '1', name: 'Tepung Terigu Segitiga', qty: '1', unit: 'Kg', cost: 12000, icon: 'wheat_flour' },
-    { id: '2', name: 'Telur Ayam Negeri', qty: '12', unit: 'Butir', cost: 24000, icon: 'egg_raw' },
-    { id: '3', name: 'Mayonaise & Susu Kental', qty: '1', unit: 'Pouch', cost: 18000, icon: 'oil_butter' },
-    { id: '4', name: 'Sosis Sapi & Smoked Beef', qty: '1', unit: 'Pack', cost: 28000, icon: 'meat_chicken' },
-    { id: '5', name: 'Minyak Goreng Sawit', qty: '1.5', unit: 'Liter', cost: 24000, icon: 'oil_butter' },
-    { id: '6', name: 'Gas LPG & Wadah Mika', qty: '1', unit: 'Paket', cost: 10000, icon: 'gas_cylinder' },
+    { id: '1', name: 'Tepung Terigu Segitiga', qty: '500 gram', cost: 6000, icon: 'wheat_flour' },
+    { id: '2', name: 'Telur Ayam & Minyak Goreng', qty: '2 Butir & Minyak', cost: 8000, icon: 'egg_raw' },
+    { id: '3', name: 'Ayam Suwir & Sayuran Isian', qty: 'Isian Rogout Gurih', cost: 10000, icon: 'meat_chicken' },
+    { id: '4', name: 'Gas LPG & Kemasan Mika', qty: 'Alokasi Operasional', cost: 6000, icon: 'gas_cylinder' },
   ]);
 
   const [newIngName, setNewIngName] = useState('');
@@ -39,72 +38,124 @@ export const RecipeEditorScreen = ({ navigation, route }) => {
     const newId = String(Date.now());
     setIngredients(prev => [
       ...prev,
-      { id: newId, name: newIngName.trim(), qty: '1', unit: 'Porsi', cost: Number(newIngCost) || 0, icon: 'package_box' }
+      { id: newId, name: newIngName.trim(), qty: 'Bahan Tambahan', cost: Number(newIngCost) || 0, icon: 'package_box' }
     ]);
     setNewIngName('');
     setNewIngCost('');
   };
 
   const handleRemoveIngredient = (id) => {
+    if (ingredients.length <= 1) {
+      Alert.alert('Perhatian', 'Minimal resep harus memiliki 1 bahan baku.');
+      return;
+    }
     setIngredients(prev => prev.filter(item => item.id !== id));
   };
 
   const handleSaveRecipe = () => {
-    Alert.alert('Sukses Disimpan', `Resep ${recipeName} (${batchPortions} porsi) berhasil disimpan ke katalog lokal!`, [
+    Alert.alert('Sukses Disimpan', `Resep ${recipeName} (${batchPortions} porsi) berhasil diperbarui di katalog!`, [
       { text: 'Buka Katalog HPP', onPress: () => navigation.navigate('Hpp') }
     ]);
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       
-      {/* HEADER AMAN */}
-      <View style={styles.header}>
-        <View>
-          <View style={styles.headerTag}>
-            <AssetVisual name="cooking_pan" size={16} />
-            <Text style={styles.headerTagText}>SIMULATOR & KALKULATOR MODAL</Text>
+      {/* 1. TOP HEADER SUB-LAYAR (DENGAN TOMBOL BACK) */}
+      <View style={styles.subpageHeader}>
+        <View style={styles.backBtnRow}>
+          <TouchableOpacity 
+            style={styles.backBtn}
+            activeOpacity={0.7}
+            onPress={() => navigation.goBack()}
+          >
+            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <Line x1="19" y1="12" x2="5" y2="12" />
+              <Path d="M12 19L5 12L12 5" />
+            </Svg>
+          </TouchableOpacity>
+
+          <View style={styles.headerTextCol}>
+            <Text style={styles.pageTitle}>Racik Resep & HPP</Text>
+            <Text style={styles.pageSub}>Formulasi Modal & Batas Harga Jual</Text>
           </View>
-          <Text style={styles.headerTitle}>Racik Resep Baru</Text>
         </View>
 
         <TouchableOpacity 
-          style={styles.cancelBtn}
-          activeOpacity={0.8}
-          onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
+          onPress={() => {
+            setRecipeName('');
+            setBatchPortions('50');
+            setSuggestedSellingPrice('1200');
+            setCanteenShare('400');
+          }}
         >
-          <Text style={styles.cancelBtnText}>Batal</Text>
+          <Text style={styles.resetBtn}>Reset</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
-        {/* IDENTITAS RESEP */}
-        <BentoCard bg="#FFFFFF" accentBorder="#E2E8F0" style={styles.bentoSection}>
-          <Text style={styles.labelTitle}>Nama Menu Jajanan</Text>
-          <TextInput
-            style={styles.textInput}
-            value={recipeName}
-            onChangeText={setRecipeName}
-            placeholder="Contoh: Pastel Rogout Ayam"
-            placeholderTextColor="#94A3B8"
-          />
+        {/* 2. LIVE SIMULATION RESULT CARD (DETERMINISTIK NYATA, ZERO PILL CLUTTER) */}
+        <View style={styles.simResultCard}>
+          <Text style={styles.simHeadlineLbl}>PROYEKSI LABA BERSIH PER BUTIR</Text>
 
-          <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.labelTitle}>Target Porsi (Batch):</Text>
+          <View style={styles.simBigProfitRow}>
+            <View>
+              <Text style={styles.simBigNum}>{formatRupiah(netProfitPerPiece)}</Text>
+              <Text style={styles.simUnitLbl}>Untung bersih dari modal HPP {formatRupiah(costPerPiece)}</Text>
+            </View>
+            <View style={styles.panIconBox}>
+              <AssetVisual name="cooking_pan" size={28} />
+            </View>
+          </View>
+
+          {/* 3 METRIK STRIP */}
+          <View style={styles.simMetricsStrip}>
+            <View style={styles.simMetricCol}>
+              <Text style={styles.simMLbl}>Modal Pokok (HPP)</Text>
+              <Text style={styles.simMVal}>{formatRupiah(costPerPiece)} / pcs</Text>
+            </View>
+            <View style={styles.simMetricCol}>
+              <Text style={styles.simMLbl}>Jatah Kantin</Text>
+              <Text style={[styles.simMVal, styles.valRed]}>-{formatRupiah(shareCanteen)}</Text>
+            </View>
+            <View style={styles.simMetricCol}>
+              <Text style={styles.simMLbl}>Harga Jual Rekomendasi</Text>
+              <Text style={[styles.simMVal, styles.valOrange]}>{formatRupiah(sellPrice)}</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* 3. IDENTITAS RESEP & BATCH */}
+        <Text style={styles.sectionLbl}>IDENTITAS JAJANAN & TARGET BATCH</Text>
+        <View style={styles.formCard}>
+          <View style={styles.formFieldGroup}>
+            <Text style={styles.fieldLabel}>Nama Menu Jajanan</Text>
+            <TextInput
+              style={styles.fieldInput}
+              value={recipeName}
+              onChangeText={setRecipeName}
+              placeholder="Contoh: Risoles Rogout Ayam"
+              placeholderTextColor="#94A3B8"
+            />
+          </View>
+
+          <View style={styles.formRow2}>
+            <View style={styles.formCol}>
+              <Text style={styles.fieldLabel}>Target Batch (Porsi)</Text>
               <TextInput
-                style={styles.textInput}
+                style={styles.fieldInput}
                 value={batchPortions}
                 onChangeText={setBatchPortions}
                 keyboardType="numeric"
               />
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.labelTitle}>Harga Jual Eceran:</Text>
+            <View style={styles.formCol}>
+              <Text style={styles.fieldLabel}>Harga Jual Eceran</Text>
               <TextInput
-                style={styles.textInput}
+                style={styles.fieldInput}
                 value={suggestedSellingPrice}
                 onChangeText={setSuggestedSellingPrice}
                 keyboardType="numeric"
@@ -112,304 +163,378 @@ export const RecipeEditorScreen = ({ navigation, route }) => {
             </View>
           </View>
 
-          <View style={{ marginTop: 12 }}>
-            <Text style={styles.labelTitle}>Jatah Komisi Kantin / Pcs:</Text>
+          <View style={styles.formFieldGroup}>
+            <Text style={styles.fieldLabel}>Jatah Komisi Titip Kantin per Pcs</Text>
             <TextInput
-              style={styles.textInput}
+              style={styles.fieldInput}
               value={canteenShare}
               onChangeText={setCanteenShare}
               keyboardType="numeric"
             />
           </View>
-        </BentoCard>
+        </View>
 
-        {/* HERO SIMULASI LABA DINAMIS */}
-        <BentoCard bg="#DCFCE7" accentBorder="#BBF7D0" style={styles.profitHeroBento}>
-          <View style={styles.profitHeroTop}>
-            <View>
-              <Text style={styles.profitSubLabel}>ESTIMASI UNTUNG BERSIH / PCS</Text>
-              <Text style={styles.profitValueText}>{formatRupiah(netProfitPerPiece)}</Text>
-            </View>
-            <View style={styles.profitVisualWrap}>
-              <AssetVisual name="chart_up" size={44} />
-            </View>
-          </View>
-
-          <View style={styles.profitDivider} />
-
-          <View style={styles.profitMetricsRow}>
-            <View>
-              <Text style={styles.metricLabel}>Total Modal Resep</Text>
-              <Text style={styles.metricVal}>{formatRupiah(totalRawCost)}</Text>
-            </View>
-            <View>
-              <Text style={styles.metricLabel}>Modal / Pcs</Text>
-              <Text style={styles.metricVal}>{formatRupiah(costPerPiece)}</Text>
-            </View>
-            <View>
-              <Text style={styles.metricLabel}>Potensi Laba ({portions} pcs)</Text>
-              <Text style={[styles.metricVal, { color: '#15803D' }]}>{formatRupiah(totalBatchProfit)}</Text>
-            </View>
-          </View>
-        </BentoCard>
-
-        {/* DAFTAR BAHAN BAKU */}
-        <Text style={styles.sectionTitle}>Daftar Bahan & Komponen Biaya ({ingredients.length})</Text>
-        {ingredients.map((item) => (
-          <BentoCard key={item.id} bg="#FFFFFF" accentBorder="#E2E8F0" style={styles.ingCard}>
-            <View style={styles.ingRow}>
-              <View style={styles.ingVisualWrap}>
-                <AssetVisual name={item.icon} size={32} />
+        {/* 4. DAFTAR BAHAN BAKU & ENERGI */}
+        <Text style={styles.sectionLbl}>BAHAN BAKU & BIAYA ENERGI ({ingredients.length} BAHAN)</Text>
+        <View style={styles.ingredientsListCard}>
+          {ingredients.map((item) => (
+            <View key={item.id} style={styles.ingRowItem}>
+              <View style={styles.ingLeftWrap}>
+                <View style={styles.ingIconBox}>
+                  <AssetVisual name={item.icon || 'wheat_flour'} size={20} />
+                </View>
+                <View>
+                  <Text style={styles.ingTitleText}>{item.name}</Text>
+                  <Text style={styles.ingSubText}>Takaran: {item.qty}</Text>
+                </View>
               </View>
-              <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text style={styles.ingNameText}>{item.name}</Text>
-                <Text style={styles.ingQtyText}>Takaran: {item.qty} {item.unit}</Text>
-              </View>
-              <Text style={styles.ingCostText}>{formatRupiah(item.cost)}</Text>
+
+              <Text style={styles.ingCostNum}>{formatRupiah(item.cost)}</Text>
               <TouchableOpacity onPress={() => handleRemoveIngredient(item.id)} style={styles.delBtn}>
                 <Text style={styles.delText}>✕</Text>
               </TouchableOpacity>
             </View>
-          </BentoCard>
-        ))}
+          ))}
 
-        {/* INPUT TAMBAH BAHAN CEPAT */}
-        <BentoCard bg="#F8FAFC" accentBorder="#CBD5E1" style={styles.addIngCard}>
-          <Text style={styles.addIngTitle}>+ Tambah Bahan / Biaya Energi</Text>
-          <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-            <TextInput
-              style={[styles.textInput, { flex: 2 }]}
-              placeholder="Nama bahan / kemasan"
-              placeholderTextColor="#94A3B8"
-              value={newIngName}
-              onChangeText={setNewIngName}
-            />
-            <TextInput
-              style={[styles.textInput, { flex: 1 }]}
-              placeholder="Biaya (Rp)"
-              placeholderTextColor="#94A3B8"
-              keyboardType="numeric"
-              value={newIngCost}
-              onChangeText={setNewIngCost}
-            />
+          {/* INPUT TAMBAH BAHAN CEPAT */}
+          <View style={styles.addIngBox}>
+            <View style={styles.addIngInputs}>
+              <TextInput
+                style={[styles.fieldInput, styles.inputIngName]}
+                placeholder="Bahan baru..."
+                placeholderTextColor="#94A3B8"
+                value={newIngName}
+                onChangeText={setNewIngName}
+              />
+              <TextInput
+                style={[styles.fieldInput, styles.inputIngCost]}
+                placeholder="Rp Biaya"
+                placeholderTextColor="#94A3B8"
+                keyboardType="numeric"
+                value={newIngCost}
+                onChangeText={setNewIngCost}
+              />
+            </View>
+            <TouchableOpacity style={styles.addIngSubmitBtn} activeOpacity={0.8} onPress={handleAddIngredient}>
+              <Text style={styles.addIngSubmitBtnText}>+ Tambahkan ke Resep</Text>
+            </TouchableOpacity>
           </View>
-          <TactileButton 
-            size="sm" 
-            variant="secondary" 
-            style={{ marginTop: 10 }}
-            onPress={handleAddIngredient}
-          >
-            Tambahkan ke Resep
-          </TactileButton>
-        </BentoCard>
-
-        <View style={{ marginTop: 14 }}>
-          <TactileButton
-            size="lg"
-            variant="primary"
-            icon={<AssetVisual name="check_badge" size={22} />}
-            onPress={handleSaveRecipe}
-          >
-            Simpan Resep ke Katalog
-          </TactileButton>
         </View>
 
-        <View style={{ height: 100 }} />
+        {/* 5. CTA SIMPAN RESEP */}
+        <TouchableOpacity style={styles.saveRecipeBtn} activeOpacity={0.85} onPress={handleSaveRecipe}>
+          <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+            <Path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+            <Path d="M17 21v-8H7v8" />
+            <Path d="M7 3v5h8" />
+          </Svg>
+          <Text style={styles.saveRecipeBtnText}>Simpan Resep ke Katalog HPP</Text>
+        </TouchableOpacity>
+
       </ScrollView>
 
-      <BottomNav activeTab="Hpp" navigation={navigation} />
-    </View>
+      {/* 5. MODERN BOTTOM DOCK */}
+      <ModernBottomNav activeTab="Wallet" navigation={navigation} />
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: '#FFFFFF',
   },
-  header: {
-    paddingHorizontal: 20,
+  subpageHeader: {
+    paddingHorizontal: 18,
     paddingTop: 16,
     paddingBottom: 12,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: '#FFFFFF',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#F1EFEA',
   },
-  headerTag: {
+  backBtnRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    marginBottom: 2,
+    gap: 12,
   },
-  headerTagText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#EA580C',
-    letterSpacing: 0.5,
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  headerTitle: {
+  headerTextCol: {
+    gap: 1,
+  },
+  pageSub: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  pageTitle: {
     fontSize: 20,
     fontWeight: '900',
-    color: '#1E293B',
+    color: '#0F172A',
     letterSpacing: -0.4,
   },
-  cancelBtn: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-  },
-  cancelBtnText: {
-    fontSize: 12,
+  resetBtn: {
+    fontSize: 11.5,
     fontWeight: '800',
     color: '#64748B',
   },
   scrollContent: {
-    padding: 18,
+    paddingHorizontal: 18,
+    paddingTop: 14,
+    paddingBottom: 110, // Ruang lega di atas ModernBottomNav
   },
-  bentoSection: {
+  simResultCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
     padding: 16,
-    marginBottom: 16,
-    borderBottomWidth: 3,
-    borderBottomColor: '#CBD5E1',
-  },
-  labelTitle: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#475569',
-    marginBottom: 6,
-  },
-  textInput: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#1E293B',
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#10B981',
+    gap: 12,
+    marginBottom: 18,
+    elevation: 2,
+    shadowColor: '#10B981',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
   },
-  profitHeroBento: {
-    padding: 16,
-    marginBottom: 16,
-    borderBottomWidth: 4,
-    borderBottomColor: '#86EFAC',
-  },
-  profitHeroTop: {
+  simTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  profitSubLabel: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#15803D',
-    letterSpacing: 0.6,
+  simHeadlineLbl: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#64748B',
+    letterSpacing: 0.5,
   },
-  profitValueText: {
+  simProfitBadge: {
+    backgroundColor: '#DCFCE7',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  simProfitBadgeText: {
+    color: '#15803D',
+    fontSize: 12.5,
+    fontWeight: '900',
+  },
+  simBigProfitRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  simBigNum: {
     fontSize: 28,
     fontWeight: '900',
-    color: '#166534',
-    letterSpacing: -0.8,
-    marginTop: 2,
+    color: '#059669',
+    letterSpacing: -0.5,
   },
-  profitVisualWrap: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: '#FFFFFF',
+  simUnitLbl: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  panIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#FFF7ED',
+    borderWidth: 1.5,
+    borderColor: '#FED7AA',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  profitDivider: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#BBF7D0',
-    marginVertical: 12,
-  },
-  profitMetricsRow: {
+  simMetricsStrip: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+    borderStyle: 'dashed',
   },
-  metricLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#166534',
+  simMetricCol: {
+    gap: 2,
   },
-  metricVal: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#1E293B',
-    marginTop: 1,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#1E293B',
-    marginBottom: 10,
-    marginTop: 4,
-  },
-  ingCard: {
-    padding: 12,
-    marginBottom: 10,
-    borderBottomWidth: 3,
-    borderBottomColor: '#CBD5E1',
-  },
-  ingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  ingVisualWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: '#FAF8F5',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  ingNameText: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#1E293B',
-  },
-  ingQtyText: {
-    fontSize: 11,
+  simMLbl: {
+    fontSize: 10.5,
+    fontWeight: '600',
     color: '#64748B',
-    marginTop: 1,
   },
-  ingCostText: {
+  simMVal: {
     fontSize: 13,
-    fontWeight: '900',
-    color: '#1E293B',
-    marginRight: 10,
+    fontWeight: '800',
+    color: '#0F172A',
   },
-  delBtn: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#FEE2E2',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  delText: {
-    fontSize: 11,
-    fontWeight: '900',
+  valRed: {
     color: '#DC2626',
   },
-  addIngCard: {
-    padding: 14,
-    marginBottom: 16,
-    borderBottomWidth: 3,
-    borderBottomColor: '#CBD5E1',
+  valOrange: {
+    color: '#EA580C',
+    fontWeight: '900',
   },
-  addIngTitle: {
-    fontSize: 12,
+  sectionLbl: {
+    fontSize: 11.5,
     fontWeight: '800',
+    color: '#64748B',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+    marginTop: 4,
+  },
+  formCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    gap: 12,
+    marginBottom: 18,
+  },
+  formFieldGroup: {
+    gap: 5,
+  },
+  fieldLabel: {
+    fontSize: 11.5,
+    fontWeight: '700',
     color: '#334155',
+  },
+  fieldInput: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  formRow2: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  formCol: {
+    flex: 1,
+    gap: 5,
+  },
+  ingredientsListCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    gap: 10,
+    marginBottom: 18,
+  },
+  ingRowItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  ingLeftWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  ingIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ingTitleText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  ingSubText: {
+    fontSize: 10.5,
+    color: '#64748B',
+  },
+  ingCostNum: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#0F172A',
+    marginRight: 12,
+  },
+  delBtn: {
+    padding: 4,
+  },
+  delText: {
+    color: '#DC2626',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  addIngBox: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderStyle: 'dashed',
+    gap: 8,
+    marginTop: 4,
+  },
+  addIngInputs: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  inputIngName: {
+    flex: 2,
+  },
+  inputIngCost: {
+    flex: 1,
+  },
+  addIngSubmitBtn: {
+    backgroundColor: '#0F172A',
+    borderRadius: 10,
+    paddingVertical: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addIngSubmitBtnText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  saveRecipeBtn: {
+    backgroundColor: '#EA580C',
+    borderRadius: 16,
+    paddingVertical: 13,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    elevation: 3,
+    shadowColor: '#EA580C',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  saveRecipeBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
+    fontWeight: '900',
   },
 });

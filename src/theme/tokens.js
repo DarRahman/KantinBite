@@ -3,16 +3,26 @@ export const colors = {
   primaryDark: '#C2410C',    // Roasted Orange
   primaryLight: '#FFF7ED',   // Soft Orange Wash
   secondary: '#F59E0B',      // Warm Honey / Amber
-  secondaryLight: '#FEF3C7',
-  canvas: '#FFFFFF',         // Pure Clean Canvas
-  surfaceSubtle: '#FAFAFA',  // Soft Card Surface
-  surfaceMuted: '#F4F4F5',   // Gray-100 Form Surface
-  textPrimary: '#18181B',    // Zinc-900 (High Legibility)
-  textSecondary: '#52525B',  // Zinc-600
-  textMuted: '#71717A',      // Zinc-500
-  textPlaceholder: '#A1A1AA',// Zinc-400
-  borderHairline: '#F4F4F5', // Divider Native
-  borderSubtle: '#E4E4E7',   // Segmented Border
+  secondaryLight: '#FEF3C7', // Butter Cream Pastel
+
+  // Crisp Outlines & Hard Borders
+  borderDark: '#1E293B',     // Slate-800 Crisp Outline (2px)
+  borderSubtle: '#E2E8F0',   // Segmented Border
+
+  // Pastel Card Backgrounds (Zero Dead Space)
+  canvas: '#FAF8F5',         // Warm Off-White Canvas
+  cardWarmCream: '#FFFDF9',  // Base Card
+  cardHoneyYellow: '#FFFBEB',// Hero Wallet & Promo Tint
+  cardMintFresh: '#F0FDF4',  // Profit & Success Tint
+  cardPeachRose: '#FFF1F2',  // Expense Tint
+  cardLavender: '#F5F3FF',   // Partner & Category Tint
+  cardSkyBlue: '#EFF6FF',    // Analytics Tint
+
+  textPrimary: '#0F172A',    // Slate-900 (High Legibility)
+  textSecondary: '#475569',  // Slate-600
+  textMuted: '#64748B',      // Slate-500
+  textPlaceholder: '#94A3B8',// Slate-400
+  borderHairline: '#F1EFEA', // Divider Native
   statusSuccess: '#059669',  // Emerald-600 (Lunas / Masuk)
   statusSuccessBg: '#ECFDF5',// Emerald-50
   statusDanger: '#DC2626',   // Red-600 (Retur / Belanja)

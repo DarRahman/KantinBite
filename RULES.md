@@ -8,11 +8,13 @@ Dokumen ini memuat batasan mutlak (*hard constraints*), kebijakan anti-slop, atu
 
 1. **Dilarang Menggunakan Box-in-Box Berlapis:**
    - Dilarang membungkus data ke dalam kartu di dalam kartu yang memiliki garis tepi dobel. Gunakan pembatas baris satu lapis (`border-b border-zinc-100`) atau ruang kosong (*whitespace*).
-2. **Dilarang Menggunakan Emoji dalam Kode & Antarmuka:**
+2. **Dilarang Menggunakan Badge Kapsul Tempelan & Persentase Acak (Zero Pill Clutter):**
+   - Dilarang menempelkan badge seperti `+40% Sehat`, `Hot`, atau pill mengambang yang tidak memiliki dasar matematis riil. Teks persentase laba harus dihitung secara akurat dari rumus finansial nyata, bukan angka acak pemanis visual AI.
+3. **Dilarang Menggunakan Emoji dalam Kode & Antarmuka:**
    - Seluruh elemen visual wajib menggunakan ikon SVG murni (`react-native-svg`), bukan karakter emoji mentah.
-3. **Dilarang Menggunakan Kata-Kata Teknis Developer:**
-   - Dilarang menampilkan istilah *"Offline Mode"*, *"Local DB"*, *"Syncing"*, atau *"Tanpa Kuota"* pada antarmuka pengguna. Gunakan istilah bisnis operasional langsung: *"Kas Harian"*, *"Kasir Eceran"*, *"Rekap Sore"*.
-4. **Dilarang Menggunakan Gradien Ungu-Biru AI Klise:**
+4. **Dilarang Menggunakan Kata-Kata Teknis Developer & Atribut Internal:**
+   - Dilarang menampilkan istilah *"Offline Mode"*, *"Local DB"*, *"Syncing"*, *"Universal SaaS"*, *"Kelompok C"*, atau *"Tugas Pemvis"* pada antarmuka pengguna publik. Gunakan istilah bisnis operasional langsung: *"Kas Harian"*, *"Kasir Eceran"*, *"Rekap Sore"*.
+5. **Dilarang Menggunakan Gradien Ungu-Biru AI Klise:**
    - Seluruh warna komponen wajib merujuk secara ketat pada token warna di `DESIGN.md` (Deep Culinary Orange `#EA580C`, Warm Honey `#F59E0B`, dan Zinc Neutrals).
 
 ---

@@ -67,12 +67,16 @@ export const DonutIncomeRatio = ({ posAmount = 145000, consignmentAmount = 17500
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FAFAFA',
-    borderRadius: 16,
-    padding: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 14,
+    borderWidth: 2,
+    borderColor: '#1E293B',
+    borderBottomWidth: 4,
+    borderBottomColor: '#1E293B',
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12
+    marginBottom: 16
   },
   donutWrap: {
     width: 80,

@@ -89,10 +89,10 @@ export const ModernBottomNav = ({ activeTab = 'Home', navigation }) => {
 
 const styles = StyleSheet.create({
   navContainer: {
-    height: 70,
+    height: 72,
     backgroundColor: '#FFFFFF',
-    borderTopWidth: 1.5,
-    borderTopColor: '#F1EFEA',
+    borderTopWidth: 2,
+    borderTopColor: '#1E293B',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -102,10 +102,10 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     elevation: 10,
-    shadowColor: '#000',
+    shadowColor: '#1E293B',
     shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
+    shadowOpacity: 0.08,
+    shadowRadius: 0,
   },
   tabBtn: {
     flex: 1,

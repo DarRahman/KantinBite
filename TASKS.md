@@ -42,20 +42,26 @@ Panduan status pengerjaan seluruh modul, layar, dan fitur proyek KantinBite sesu
   - [x] Tombol CTA oranye solid `Simpan Rekap ke Buku Kas`.
   - [x] Navigasi bawah dock terpadu dengan tab Titip Kantin aktif.
 
-- [ ] **Layar 5: Pengaturan Usaha & Arsip Data (`SettingsScreen.js`)**
-  - [ ] Profil gerai usaha dan pengamanan PIN lokal 6 digit.
-  - [ ] Daftar resmi 7 anggota tim Kelompok C (format setara nomor urut 1–7).
-  - [ ] Manajemen database SQLite luring (Backup & Restore).
+- [x] **Layar 5: Pengaturan Usaha & Arsip Data (`SettingsScreen.js`)**
+  - [x] Header standar `ScreenHeader`: `Pengaturan & Akun` + tombol aksi `Bantuan`.
+  - [x] Kartu profil usaha publik (nama gerai, pemilik, WhatsApp, tombol ubah profil).
+  - [x] Seksi keamanan kasir: kunci PIN transaksi 6 digit aktif & pengaturan hak akses staf.
+  - [x] Seksi kemitraan & rekapitulasi: direktori kantin & laporan analitik pembukuan.
+  - [x] Seksi pencadangan data mandiri: tombol ekspor cadangan ke memori & pemulihan data.
+  - [x] Footer publik komersial bersih: KantinBite v1.0.0 (Zero kata kelompok, zero pemvis, zero NIM).
+  - [x] Dock navigasi bawah dengan tab `Saya` aktif.
 
 ---
 
 ## 2. Status Halaman Ekspansi Fungsional (Sub-Layar Operasional)
 
-- [ ] **Layar 6: Form Tambah/Ubah Resep Dinamis (`RecipeEditorScreen.js`)**
-  - [ ] Input nama kue, kategori, porsi batch hasil jadi.
-  - [ ] Baris dinamis bahan baku (tambah/hapus bahan, satuan gram/butir/ml, harga beli).
-  - [ ] Alokasi operasional: gas LPG, minyak goreng, kemasan mika.
-  - [ ] Slider / input penetapan harga jual dan margin untung.
+- [x] **Layar 6: Form Tambah/Ubah Resep Dinamis (`RecipeEditorScreen.js`)**
+  - [x] Top header sub-halaman dengan tombol Back `←` dan tombol Reset.
+  - [x] Live simulation result card deterministik bersih: `PROYEKSI LABA BERSIH PER BUTIR` (+Rp 200/butir), Modal HPP (Rp 600), Jatah Kantin (-Rp 400), Harga Jual (Rp 1.200) — **Bebas total dari badge kapsul slop `+40% Sehat`**.
+  - [x] Form input identitas jajanan: nama kue, target porsi batch, harga jual eceran, dan komisi kantin.
+  - [x] Daftar bahan racikan dinamis dengan ikon bahan mentah, takaran, biaya rata kanan, dan tombol hapus `✕`.
+  - [x] Form input tambah bahan cepat dan tombol simpan oranye solid `Simpan Resep ke Katalog HPP`.
+  - [x] Dock navigasi bawah `ModernBottomNav` terintegrasi di posisi bawah.
 
 - [x] **Layar 7: Gudang Stok Bahan Baku (`StockScreen.js`)**
   - [x] Top header sub-halaman dengan tombol Back `←` (jelas anak dari tombol Beranda).
@@ -65,14 +71,19 @@ Panduan status pengerjaan seluruh modul, layar, dan fitur proyek KantinBite sesu
   - [x] Status teks bersih menyatu dengan dot indikator warna (hijau `● Aman`, merah `● Kritis`) tanpa badge kapsul slop.
   - [x] Progress bar kapasitas sisa stok.
 
-- [ ] **Layar 8: Daftar Belanja Pasar Subuh Otomatis (`MarketShoppingScreen.js`)**
-  - [ ] Akumulasi otomatis gramatur bahan dari target produksi harian.
-  - [ ] Kalkulasi selisih kebutuhan vs sisa stok di gudang.
-  - [ ] Checklist belanjaan pasar dengan estimasi total modal yang harus dibawa.
+- [x] **Layar 8: Daftar Belanja Pasar Subuh Otomatis (`MarketShoppingScreen.js`)**
+  - [x] Top header sub-halaman dengan tombol Back `←` dan tombol bagikan WhatsApp `Kirim WA` (hijau).
+  - [x] Hero kartu estimasi anggaran pasar: total `Rp 271.000`, status `2 dari 6 Terbeli`, rincian terbeli vs sisa belanja terstruktur.
+  - [x] Checklist interaktif round checkbox empuk dengan efek coret teks (*strikethrough*) saat barang sudah dibeli di pasar.
+  - [x] Thumbnail bahan mentah SVG asli (telur, minyak, ayam, wortel, mika, gula).
+  - [x] Integrasi dock navigasi bawah `ModernBottomNav`.
 
-- [ ] **Layar 9: Buku Piutang Kantin (`DebtLedgerScreen.js`)**
-  - [ ] Rekapitulasi setoran tertunda per mitra kantin.
-  - [ ] Riwayat pembayaran cicilan dan status Lunas / Piutang Berjalan.
+- [x] **Layar 9: Buku Piutang Kantin (`DebtLedgerScreen.js`)**
+  - [x] Top header sub-halaman dengan tombol Back `←` dan tombol `+ Catat Piutang` oranye solid 1 baris di kanan.
+  - [x] Hero kartu total piutang putih solid: total `Rp 130.000` (merah), `3 Mitra Menunggak`, ikon uang kas resmi.
+  - [x] Kartu tagihan per kantin dengan status keterlambatan teks dot bersih (`● Telat 1 Hari`, `● Hari Ini`) bebas badge kapsul slop.
+  - [x] Dua tombol aksi ramah jempol di tiap kartu: hijau `Tagih via WA` dengan logo WA resmi dan putih border `Tandai Lunas`.
+  - [x] Integrasi dock navigasi bawah `ModernBottomNav` dengan tab Titip Kantin aktif.
 
 - [ ] **Layar 10: Pratinjau Nota Digital & WhatsApp (`ReceiptScreen.js`)**
   - [ ] Format struk belanja rapi.

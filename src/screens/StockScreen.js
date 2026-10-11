@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, StatusBar, Dimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path, Line } from 'react-native-svg';
 import AssetVisual from '../components/AssetVisual';
 
@@ -26,7 +27,7 @@ export const StockScreen = ({ navigation }) => {
       : stockItems.filter(i => i.category === activeFilter);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       {/* 1. TOP HEADER SUB-LAYAR (DENGAN TOMBOL BACK) */}
@@ -123,15 +124,9 @@ export const StockScreen = ({ navigation }) => {
                   <Text style={styles.stockUnitType}>{item.category}</Text>
                   
                   {isCrit ? (
-                    <View style={styles.statusTextCritical}>
-                      <View style={styles.dotCritical} />
-                      <Text style={styles.statusTextCriticalVal}>Kritis</Text>
-                    </View>
+                    <Text style={styles.statusDirectCritText}>Segera Beli</Text>
                   ) : (
-                    <View style={styles.statusTextSafe}>
-                      <View style={styles.dotSafe} />
-                      <Text style={styles.statusTextSafeVal}>Aman</Text>
-                    </View>
+                    <Text style={styles.statusDirectSafeText}>Cukup</Text>
                   )}
                 </View>
 
@@ -158,7 +153,7 @@ export const StockScreen = ({ navigation }) => {
           })}
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -315,36 +310,14 @@ const styles = StyleSheet.create({
     color: '#94A3B8',
     textTransform: 'uppercase',
   },
-  statusTextSafe: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  dotSafe: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#059669',
-  },
-  statusTextSafeVal: {
-    fontSize: 10.5,
-    fontWeight: '800',
+  statusDirectSafeText: {
+    fontSize: 10,
+    fontWeight: '900',
     color: '#059669',
   },
-  statusTextCritical: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  dotCritical: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#DC2626',
-  },
-  statusTextCriticalVal: {
-    fontSize: 10.5,
-    fontWeight: '800',
+  statusDirectCritText: {
+    fontSize: 10,
+    fontWeight: '900',
     color: '#DC2626',
   },
   stockThumbWrap: {

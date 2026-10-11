@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, StatusBar, Alert, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, StatusBar, Alert, Dimensions, KeyboardAvoidingView, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path, Rect, Circle } from 'react-native-svg';
 import { ModernBottomNav } from '../components/ModernBottomNav';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -102,7 +103,7 @@ export const PosScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       {/* 1. GLOBAL SCREEN HEADER (KONSISTEN 1:1 DENGAN HALAMAN LAIN) */}
@@ -261,7 +262,7 @@ export const PosScreen = ({ navigation }) => {
 
       {/* 5. MODERN BOTTOM DOCK */}
       <ModernBottomNav activeTab="Kasir" navigation={navigation} />
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -358,22 +359,22 @@ const styles = StyleSheet.create({
   posCard: {
     width: (width - 36 - 12) / 2,
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 22,
     padding: 12,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderWidth: 2,
+    borderColor: '#1E293B',
+    borderBottomWidth: 4,
+    borderBottomColor: '#1E293B',
     alignItems: 'center',
     position: 'relative',
     elevation: 2,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.02,
-    shadowRadius: 6,
   },
   posCardSelected: {
     borderColor: '#EA580C',
-    borderWidth: 2,
-    backgroundColor: '#FFFDF9',
+    borderWidth: 2.2,
+    borderBottomWidth: 4.5,
+    borderBottomColor: '#C2410C',
+    backgroundColor: '#FFFBEB',
   },
   selectedBadge: {
     position: 'absolute',
@@ -469,16 +470,16 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: '#FFFFFF',
-    borderTopWidth: 1.5,
-    borderTopColor: '#E2E8F0',
-    paddingVertical: 12,
+    borderTopWidth: 2,
+    borderTopColor: '#1E293B',
+    paddingVertical: 14,
     paddingHorizontal: 18,
     gap: 10,
     elevation: 10,
-    shadowColor: '#000000',
+    shadowColor: '#1E293B',
     shadowOffset: { width: 0, height: -6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
+    shadowOpacity: 0.1,
+    shadowRadius: 0,
   },
   quickCashRow: {
     flexDirection: 'row',
@@ -555,17 +556,17 @@ const styles = StyleSheet.create({
   },
   payBtnMain: {
     backgroundColor: '#EA580C',
-    borderRadius: 16,
-    paddingVertical: 12,
+    borderRadius: 18,
+    borderWidth: 2,
+    borderColor: '#1E293B',
+    borderBottomWidth: 4.5,
+    borderBottomColor: '#C2410C',
+    paddingVertical: 13,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
     elevation: 3,
-    shadowColor: '#EA580C',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
   },
   payBtnDisabled: {
     backgroundColor: '#E2E8F0',
@@ -577,563 +578,3 @@ const styles = StyleSheet.create({
   },
 });
 
-
-  return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
-      
-      {/* HEADER AMAN PLAYFUL */}
-      <View style={styles.header}>
-        <View>
-          <View style={styles.headerTag}>
-            <AssetVisual name="receipt_bill" size={16} />
-            <Text style={styles.headerTagText}>KASIR POS KILAT</Text>
-          </View>
-          <Text style={styles.headerTitle}>Penjualan Langsung</Text>
-        </View>
-
-        <TactileButton size="sm" variant="accent" onPress={() => setIsModalOpen(true)}>
-          + Menu Baru
-        </TactileButton>
-      </View>
-
-      <View style={styles.bodyWrap}>
-        
-        {/* PENCARIAN & FILTER KATEGORI EMPUK */}
-        <View style={styles.filterSection}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Cari risoles, pastel, lemper..."
-            placeholderTextColor="#94A3B8"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScroll}>
-            {categories.map((cat) => (
-              <TactilePill
-                key={cat}
-                label={cat}
-                active={activeCategory === cat}
-                onPress={() => setActiveCategory(cat)}
-              />
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* CATALOG GRID WITH 72PX VOLUMETRIC FOOD ICONS & PLUS/MINUS COUNTERS */}
-        <ScrollView contentContainerStyle={styles.gridScroll} showsVerticalScrollIndicator={false}>
-          <View style={styles.catalogGrid}>
-            {filteredProducts.map((item) => {
-              const qty = cart[item.id] || 0;
-              const isSelected = qty > 0;
-              return (
-                <BentoCard
-                  key={item.id}
-                  bg={isSelected ? '#FFFBEB' : '#FFFFFF'}
-                  accentBorder={isSelected ? '#F59E0B' : '#E2E8F0'}
-                  style={[styles.catalogCard, isSelected && styles.catalogCardActive]}
-                >
-                  <View style={styles.foodVisualBox}>
-                    <AssetVisual name={item.type || 'risoles'} size={60} />
-                    {isSelected && (
-                      <View style={styles.qtyBadge}>
-                        <Text style={styles.qtyBadgeText}>{qty}</Text>
-                      </View>
-                    )}
-                  </View>
-
-                  <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
-                  <Text style={styles.itemPrice}>{formatRupiah(item.price)}</Text>
-
-                  {/* COUNTER EMPUK +/- */}
-                  <View style={styles.counterRow}>
-                    <TouchableOpacity
-                      activeOpacity={0.7}
-                      style={[styles.counterBtn, qty === 0 && styles.counterBtnDisabled]}
-                      onPress={() => updateQuantity(item.id, -1)}
-                      disabled={qty === 0}
-                    >
-                      <Text style={styles.counterBtnText}>-</Text>
-                    </TouchableOpacity>
-
-                    <Text style={styles.counterQtyText}>{qty}</Text>
-
-                    <TouchableOpacity
-                      activeOpacity={0.7}
-                      style={[styles.counterBtn, styles.counterBtnAdd]}
-                      onPress={() => updateQuantity(item.id, 1)}
-                    >
-                      <Text style={[styles.counterBtnText, styles.counterBtnAddText]}>+</Text>
-                    </TouchableOpacity>
-                  </View>
-                </BentoCard>
-              );
-            })}
-          </View>
-          <View style={{ height: 260 }} />
-        </ScrollView>
-
-        {/* CART DOCK BOTTOM PLAYFUL ALA MOBBIN & UIVERSE.IO */}
-        <View style={styles.cartBottomDock}>
-          
-          {/* CHIPS CEPAT PECAHAN UANG DENGAN KOIN EMAS */}
-          <View style={styles.quickCashBar}>
-            <View style={styles.quickCashIcon}>
-              <AssetVisual name="coin_gold" size={20} />
-            </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickCashScroll}>
-              <TouchableOpacity style={styles.cashChip} onPress={() => handleQuickCash(total)}>
-                <Text style={styles.cashChipText}>Uang Pas</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.cashChip} onPress={() => handleQuickCash(10000)}>
-                <Text style={styles.cashChipText}>10rb</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.cashChip} onPress={() => handleQuickCash(20000)}>
-                <Text style={styles.cashChipText}>20rb</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.cashChip} onPress={() => handleQuickCash(50000)}>
-                <Text style={styles.cashChipText}>50rb</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.cashChip} onPress={() => handleQuickCash(100000)}>
-                <Text style={styles.cashChipText}>100rb</Text>
-              </TouchableOpacity>
-            </ScrollView>
-          </View>
-
-          {/* TOTAL & KEMBALIAN ROW */}
-          <View style={styles.totalSummaryRow}>
-            <View>
-              <Text style={styles.totalCountLabel}>Total Belanja ({count} pcs):</Text>
-              <Text style={styles.totalValueText}>{formatRupiah(total)}</Text>
-            </View>
-
-            <View style={styles.changeBox}>
-              <View style={styles.cashInputWrap}>
-                <Text style={styles.cashInputLabel}>Bayar:</Text>
-                <TextInput
-                  style={styles.cashInput}
-                  value={cashReceived}
-                  onChangeText={setCashReceived}
-                  keyboardType="number-pad"
-                  placeholder="0"
-                  placeholderTextColor="#94A3B8"
-                />
-              </View>
-              <Text style={styles.changeText}>
-                Kembali: <Text style={styles.changeValHighlight}>{formatRupiah(changeNum)}</Text>
-              </Text>
-            </View>
-          </View>
-
-          {/* TOMBOL BAYAR BESAR JEMPOL BAWAH */}
-          <TactileButton
-            size="lg"
-            variant="primary"
-            onPress={handleCheckout}
-            icon={<AssetVisual name="receipt_bill" size={24} />}
-          >
-            Bayar & Cetak Struk
-          </TactileButton>
-
-        </View>
-
-        <BottomNav activeTab="Pos" navigation={navigation} />
-      </View>
-
-      {/* MODAL TAMBAH MENU JAJANAN BARU */}
-      <Modal visible={isModalOpen} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            
-            <View style={styles.modalHeaderRow}>
-              <Text style={styles.modalTitle}>Tambah Menu Jajanan Baru</Text>
-              <TouchableOpacity onPress={() => setIsModalOpen(false)} style={styles.closeBtn}>
-                <Text style={styles.closeText}>✕</Text>
-              </TouchableOpacity>
-            </View>
-
-            <Text style={styles.formLabel}>Pilih Ikon Kue</Text>
-            <View style={styles.modalTypeRow}>
-              {['risoles', 'pastel', 'dadar', 'lemper'].map((t) => (
-                <TouchableOpacity
-                  key={t}
-                  activeOpacity={0.8}
-                  onPress={() => setNewType(t)}
-                  style={[styles.modalTypeTile, newType === t && styles.modalTypeTileActive]}
-                >
-                  <AssetVisual name={t} size={36} />
-                  <Text style={[styles.modalTypeText, newType === t && styles.modalTypeTextActive]}>
-                    {t.charAt(0).toUpperCase() + t.slice(1)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={styles.formLabel}>Nama Jajanan</Text>
-            <TextInput
-              style={styles.formInput}
-              placeholder="Contoh: Kue Lapis Rainbow"
-              placeholderTextColor="#94A3B8"
-              value={newName}
-              onChangeText={setNewName}
-            />
-
-            <Text style={styles.formLabel}>Harga Jual Satuan (Rp)</Text>
-            <TextInput
-              style={styles.formInput}
-              placeholder="Contoh: 1500"
-              placeholderTextColor="#94A3B8"
-              keyboardType="number-pad"
-              value={newPrice}
-              onChangeText={setNewPrice}
-            />
-
-            <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
-              <TactileButton variant="secondary" style={{ flex: 1 }} onPress={() => setIsModalOpen(false)}>
-                Batal
-              </TactileButton>
-              <TactileButton variant="primary" style={{ flex: 2 }} onPress={handleAddNewProduct}>
-                Simpan Menu
-              </TactileButton>
-            </View>
-
-          </View>
-        </View>
-      </Modal>
-
-    </View>
-  );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 12,
-    backgroundColor: '#FAF8F5',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1EFEA',
-  },
-  headerTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginBottom: 2,
-  },
-  headerTagText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#EA580C',
-    letterSpacing: 0.5,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#1E293B',
-    letterSpacing: -0.4,
-  },
-  bodyWrap: {
-    flex: 1,
-  },
-  filterSection: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: '#FAF8F5',
-  },
-  searchInput: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    fontSize: 13,
-    color: '#1E293B',
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  categoryScroll: {
-    gap: 8,
-  },
-  gridScroll: {
-    paddingHorizontal: 18,
-    paddingTop: 4,
-  },
-  catalogGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    justifyContent: 'space-between',
-  },
-  catalogCard: {
-    width: (width - 36 - 12) / 2,
-    padding: 14,
-    alignItems: 'center',
-    borderBottomWidth: 4,
-    borderBottomColor: '#CBD5E1',
-  },
-  catalogCardActive: {
-    borderBottomColor: '#F59E0B',
-  },
-  foodVisualBox: {
-    width: 72,
-    height: 72,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    marginBottom: 6,
-  },
-  qtyBadge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: '#EA580C',
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 10,
-    borderWidth: 1.5,
-    borderColor: '#FFFFFF',
-  },
-  qtyBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '900',
-  },
-  itemName: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#1E293B',
-    textAlign: 'center',
-    marginBottom: 2,
-  },
-  itemPrice: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#EA580C',
-    marginBottom: 10,
-  },
-  counterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F1F5F9',
-    borderRadius: 14,
-    padding: 3,
-    gap: 10,
-  },
-  counterBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 10,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  counterBtnDisabled: {
-    opacity: 0.4,
-  },
-  counterBtnAdd: {
-    backgroundColor: '#EA580C',
-    borderColor: '#C2410C',
-  },
-  counterBtnText: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: '#475569',
-  },
-  counterBtnAddText: {
-    color: '#FFFFFF',
-  },
-  counterQtyText: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#1E293B',
-    minWidth: 16,
-    textAlign: 'center',
-  },
-  cartBottomDock: {
-    position: 'absolute',
-    bottom: 60,
-    left: 0,
-    right: 0,
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 26,
-    borderTopRightRadius: 26,
-    borderTopWidth: 2,
-    borderTopColor: '#F1EFEA',
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 14,
-    elevation: 8,
-  },
-  quickCashBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  quickCashIcon: {
-    marginRight: 8,
-  },
-  quickCashScroll: {
-    gap: 6,
-  },
-  cashChip: {
-    backgroundColor: '#FFFBEB',
-    borderWidth: 1.5,
-    borderColor: '#FDE68A',
-    borderBottomWidth: 3,
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-    borderRadius: 14,
-  },
-  cashChipText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#B45309',
-  },
-  totalSummaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  totalCountLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#64748B',
-  },
-  totalValueText: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: '#1E293B',
-    letterSpacing: -0.5,
-  },
-  changeBox: {
-    alignItems: 'flex-end',
-  },
-  cashInputWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  cashInputLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#64748B',
-  },
-  cashInput: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 8,
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#1E293B',
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
-    minWidth: 70,
-    textAlign: 'right',
-  },
-  changeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#64748B',
-    marginTop: 2,
-  },
-  changeValHighlight: {
-    color: '#15803D',
-    fontWeight: '900',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.6)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    padding: 20,
-    paddingBottom: 28,
-  },
-  modalHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#1E293B',
-  },
-  closeBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#F1F5F9',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  closeText: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#64748B',
-  },
-  modalTypeRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 14,
-  },
-  modalTypeTile: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 8,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    backgroundColor: '#FAF8F5',
-  },
-  modalTypeTileActive: {
-    borderColor: '#EA580C',
-    backgroundColor: '#FFF7ED',
-  },
-  modalTypeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#64748B',
-    marginTop: 4,
-  },
-  modalTypeTextActive: {
-    color: '#EA580C',
-    fontWeight: '800',
-  },
-  formLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#475569',
-    marginBottom: 5,
-  },
-  formInput: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    fontSize: 13,
-    color: '#1E293B',
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-});

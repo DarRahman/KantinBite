@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, StatusBar, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
-import { BottomNav } from '../components/BottomNav';
+import Svg, { Path, Rect, Circle } from 'react-native-svg';
+import { ScreenHeader } from '../components/ScreenHeader';
+import { ModernBottomNav } from '../components/ModernBottomNav';
 import AssetVisual from '../components/AssetVisual';
-import { BentoCard, TactileButton } from '../components/PlayfulComponents';
 import { getProfile, exportBackupJSON, restoreBackupJSON } from '../db/storage';
 
 export const SettingsScreen = ({ navigation }) => {
@@ -68,117 +70,169 @@ export const SettingsScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       
       {/* HEADER AMAN PLAYFUL */}
-      <View style={styles.header}>
-        <View>
-          <View style={styles.headerTag}>
-            <AssetVisual name="chef_mascot" size={16} />
-            <Text style={styles.headerTagText}>PENGATURAN & IDENTITAS SISTEM</Text>
-          </View>
-          <Text style={styles.headerTitle}>Profil Usaha & Cadangan</Text>
-        </View>
-      </View>
+      <ScreenHeader
+        title="Pengaturan & Akun"
+        subtitle="Informasi Usaha & Pengamanan Data"
+        actionLabel="Bantuan"
+        onActionPress={() => Alert.alert('Pusat Bantuan', 'Hubungi tim layanan bantuan KantinBite di support@kantinbite.id')}
+      />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
-        {/* HERO KARTU PROFIL USAHA UNIVERSAL */}
-        <BentoCard bg="#FFFBEB" accentBorder="#FDE68A" style={styles.heroBento}>
-          <View style={styles.heroTopRow}>
-            <View style={styles.chefVisualBox}>
-              <AssetVisual name="chef_mascot" size={54} />
-            </View>
-            <View style={{ flex: 1, marginLeft: 14 }}>
-              <View style={styles.tagUniversal}>
-                <Text style={styles.tagUniversalText}>UNIVERSAL SAAS UMKM</Text>
-              </View>
-              <Text style={styles.businessNameText}>{profile.businessName}</Text>
-              <Text style={styles.ownerNameText}>Pemilik: {profile.ownerName}</Text>
-              <Text style={styles.phoneText}>WA: {profile.phone}</Text>
-            </View>
+        {/* HERO KARTU PROFIL USAHA PUBLIK */}
+        <View style={styles.profileCard}>
+          <View style={styles.profileAvatarBox}>
+            <AssetVisual name="chef_mascot" size={38} />
           </View>
-        </BentoCard>
-
-        {/* SHORTCUT MENU BARU */}
-        <Text style={styles.sectionTitle}>Fitur Tambahan Operasional</Text>
-        <View style={styles.shortcutRow}>
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileBizName}>{profile.businessName || 'Dapur Berkah Bunda'}</Text>
+            <Text style={styles.profileOwner}>Pemilik: {profile.ownerName || 'Bunda Sumiati'}</Text>
+            <Text style={styles.profileWa}>WhatsApp: {profile.phone || '0812-3456-7890'}</Text>
+          </View>
           <TouchableOpacity 
-            style={styles.shortcutBtn} 
+            style={styles.editProfileBtn} 
             activeOpacity={0.8}
-            onPress={() => navigation.navigate('Stock')}
+            onPress={() => Alert.alert('Ubah Profil', 'Fitur pembaruan profil usaha mandiri.')}
           >
-            <AssetVisual name="wheat_flour" size={28} />
-            <Text style={styles.shortcutLabel}>Gudang Stok</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.shortcutBtn} 
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('MarketShopping')}
-          >
-            <AssetVisual name="market_cart" size={28} />
-            <Text style={styles.shortcutLabel}>Belanja Subuh</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.shortcutBtn} 
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('DebtLedger')}
-          >
-            <AssetVisual name="money_cash" size={28} />
-            <Text style={styles.shortcutLabel}>Buku Piutang</Text>
+            <Text style={styles.editProfileBtnText}>Ubah</Text>
           </TouchableOpacity>
         </View>
 
-        {/* CADANGAN DATA OFFLINE DENGAN CLIPBOARD */}
-        <Text style={styles.sectionTitle}>Pencadangan & Pemulihan (SQLite Lokal)</Text>
-        <BentoCard bg="#FFFFFF" accentBorder="#E2E8F0" style={{ padding: 16, marginBottom: 16 }}>
-          <Text style={styles.descText}>
-            Simpan data resep kue, piutang kantin, dan riwayat kas harian agar tidak hilang saat berganti ponsel.
+        {/* SEKSI KEAMANAN & AKSES KASIR */}
+        <Text style={styles.sectionLbl}>KEAMANAN & AKSES KASIR</Text>
+        <View style={styles.menuGroupCard}>
+          <TouchableOpacity 
+            style={styles.menuItemRow} 
+            activeOpacity={0.7}
+            onPress={() => Alert.alert('Kunci PIN', 'PIN keamanan kasir 6 digit aktif.')}
+          >
+            <View style={styles.menuItemLeft}>
+              <View style={styles.menuIconWrap}>
+                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+                  <Rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <Path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </Svg>
+              </View>
+              <View>
+                <Text style={styles.menuItemTitle}>Kunci PIN Transaksi (6 Digit)</Text>
+                <Text style={styles.menuItemDesc}>Mencegah akses buka laporan tanpa izin</Text>
+              </View>
+            </View>
+            <View style={styles.menuStatusActive}>
+              <Svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth={3}>
+                <Path d="M20 6L9 17L4 12" />
+              </Svg>
+              <Text style={styles.menuStatusActiveText}>Aktif</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.menuItemRow} 
+            activeOpacity={0.7}
+            onPress={() => Alert.alert('Hak Akses', 'Pengaturan akses staf/kasir.')}
+          >
+            <View style={styles.menuItemLeft}>
+              <View style={styles.menuIconWrap}>
+                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+                  <Path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <Circle cx="12" cy="7" r="4" />
+                </Svg>
+              </View>
+              <View>
+                <Text style={styles.menuItemTitle}>Hak Akses Karyawan / Asisten</Text>
+                <Text style={styles.menuItemDesc}>Batasi menu dapur hanya untuk kasir langsung</Text>
+              </View>
+            </View>
+            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <Path d="M9 18L15 12L9 6" />
+            </Svg>
+          </TouchableOpacity>
+        </View>
+
+        {/* SEKSI KEMITRAAN & REKAPITULASI */}
+        <Text style={styles.sectionLbl}>KEMITRAAN & REKAPITULASI</Text>
+        <View style={styles.menuGroupCard}>
+          <TouchableOpacity 
+            style={styles.menuItemRow} 
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('PartnerDirectory')}
+          >
+            <View style={styles.menuItemLeft}>
+              <View style={styles.menuIconWrap}>
+                <AssetVisual name="canteen_shop" size={18} />
+              </View>
+              <View>
+                <Text style={styles.menuItemTitle}>Buku Direktori Mitra Kantin</Text>
+                <Text style={styles.menuItemDesc}>Daftar PIC, kontak nomor WA, dan persentase komisi</Text>
+              </View>
+            </View>
+            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <Path d="M9 18L15 12L9 6" />
+            </Svg>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.menuItemRow} 
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('FinanceReport')}
+          >
+            <View style={styles.menuItemLeft}>
+              <View style={styles.menuIconWrap}>
+                <AssetVisual name="chart_up" size={18} />
+              </View>
+              <View>
+                <Text style={styles.menuItemTitle}>Laporan Analitik & Pembukuan</Text>
+                <Text style={styles.menuItemDesc}>Rekap omzet mingguan, modal bahan, dan laba bersih</Text>
+              </View>
+            </View>
+            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <Path d="M9 18L15 12L9 6" />
+            </Svg>
+          </TouchableOpacity>
+        </View>
+
+        {/* PENCADANGAN BASIS DATA MANDIRI */}
+        <Text style={styles.sectionLbl}>PENCADANGAN BASIS DATA MANDIRI</Text>
+        <View style={styles.backupCard}>
+          <Text style={styles.backupDescText}>
+            Simpan salinan data resep kue, piutang kantin, dan riwayat kas harian Anda agar aman saat berganti perangkat baru.
           </Text>
 
-          <View style={{ gap: 10, marginTop: 10 }}>
-            <TactileButton
-              variant="secondary"
-              icon={<AssetVisual name="package_box" size={20} />}
+          <View style={styles.backupButtonsRow}>
+            <TouchableOpacity 
+              style={styles.btnExport} 
+              activeOpacity={0.8}
               onPress={handleExportClipboard}
             >
-              Salin Cadangan Data (Backup JSON)
-            </TactileButton>
+              <Text style={styles.btnExportText}>Cadangkan Data (Salin)</Text>
+            </TouchableOpacity>
 
-            <TactileButton
-              variant="accent"
-              icon={<AssetVisual name="check_badge" size={20} />}
+            <TouchableOpacity 
+              style={styles.btnRestore} 
+              activeOpacity={0.8}
               onPress={handleRestoreClipboard}
             >
-              Pulihkan Data dari Clipboard
-            </TactileButton>
+              <Text style={styles.btnRestoreText}>Pulihkan Data</Text>
+            </TouchableOpacity>
           </View>
-        </BentoCard>
+        </View>
 
-        {/* ANGGOTA KELOMPOK C (FORMAT SETARA TANPA JABATAN) */}
-        <Text style={styles.sectionTitle}>Tim Pengembang Kelompok C</Text>
-        <BentoCard bg="#F8FAFC" accentBorder="#CBD5E1" style={styles.teamCard}>
-          <Text style={styles.teamHeaderTitle}>STIKOM Poltek Cirebon • Teknik Informatika</Text>
-          
-          <View style={styles.memberList}>
-            <Text style={styles.memberText}>1. Badar Rahman (14524303)</Text>
-            <Text style={styles.memberText}>2. Avivah (14524013)</Text>
-            <Text style={styles.memberText}>3. Cindy Septiani (24525404)</Text>
-            <Text style={styles.memberText}>4. Nezla Veronika Putri (14524214)</Text>
-            <Text style={styles.memberText}>5. Raehan Pramudia Nugraha (14524304)</Text>
-            <Text style={styles.memberText}>6. Raihan Al Farizi (14524302)</Text>
-            <Text style={styles.memberText}>7. Wisnu Hadi Pradana (14524309)</Text>
-          </View>
-        </BentoCard>
+        {/* 6. FOOTER PUBLIK BERSIH (TANPA KATA TECH / UNIVERSAL JARGON) */}
+        <View style={styles.publicFooter}>
+          <Text style={styles.footerAppName}>KantinBite v1.0.0</Text>
+          <Text style={styles.footerCopyright}>Aplikasi Pembukuan & Operasional Kuliner Harian</Text>
+          <Text style={styles.footerCopyright}>© 2026 KantinBite. Seluruh hak cipta dilindungi.</Text>
+        </View>
 
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      <BottomNav activeTab="Settings" navigation={navigation} />
-    </View>
+      <ModernBottomNav activeTab="Me" navigation={navigation} />
+    </SafeAreaView>
   );
 };
 
@@ -216,7 +270,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 18,
   },
-  heroBento: {
+  heroCard: {
     padding: 18,
     marginBottom: 18,
     borderBottomWidth: 4,

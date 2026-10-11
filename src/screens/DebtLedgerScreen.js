@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, StatusBar, Alert, Dimensions, Linking } from 'react-native';
-import { BottomNav } from '../components/BottomNav';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Path, Line, Rect, Circle, Polyline } from 'react-native-svg';
+import { ModernBottomNav } from '../components/ModernBottomNav';
 import AssetVisual from '../components/AssetVisual';
-import { BentoCard, TactileButton } from '../components/PlayfulComponents';
 import { formatRupiah } from '../utils/formatters';
 
 const { width } = Dimensions.get('window');
@@ -15,9 +16,8 @@ export const DebtLedgerScreen = ({ navigation }) => {
       pic: 'Pak Joko',
       phone: '081298765432',
       amount: 45000,
-      dueDate: 'Kemarin (Rabu, 7 Okt)',
+      dueDate: 'Rabu, 7 Okt',
       items: '25 Risoles Rogout & 10 Pastel',
-      status: 'Tertahan',
       daysLate: 1
     },
     {
@@ -28,18 +28,16 @@ export const DebtLedgerScreen = ({ navigation }) => {
       amount: 60000,
       dueDate: 'Senin, 5 Okt',
       items: '30 Dadar Gulung & 30 Lemper',
-      status: 'Tertahan',
       daysLate: 3
     },
     {
       id: 'd3',
-      canteenName: 'Koperasi STIKOM Poltek',
+      canteenName: 'Koperasi Kampus',
       pic: 'Mas Arif',
       phone: '085711223344',
       amount: 25000,
       dueDate: 'Kamis, 8 Okt (Hari ini)',
       items: '20 Risoles Rogout Mayo',
-      status: 'Jatuh Tempo',
       daysLate: 0
     }
   ]);
@@ -65,134 +63,404 @@ export const DebtLedgerScreen = ({ navigation }) => {
 
   const handleRemindWhatsApp = (d) => {
     const text = `Halo ${d.pic} (${d.canteenName}), mohon info rekonsiliasi setoran konsinyasi kue titipan sebesar *${formatRupiah(d.amount)}* (${d.items}) yang jatuh tempo ${d.dueDate}. Terima kasih banyak.`;
-    Linking.openURL(`whatsapp://send?phone=62${d.phone.slice(1)}&text=${encodeURIComponent(text)}`);
+    Linking.openURL(`whatsapp://send?phone=${d.phone}&text=${encodeURIComponent(text)}`);
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       
-      {/* HEADER AMAN PLAYFUL */}
-      <View style={styles.header}>
-        <View>
-          <View style={styles.headerTag}>
-            <AssetVisual name="warning_badge" size={16} />
-            <Text style={styles.headerTagText}>MANAJEMEN KONSINYASI TERTAHAN</Text>
+      {/* 1. TOP HEADER SUB-LAYAR DENGAN TOMBOL BACK */}
+      <View style={styles.subpageHeader}>
+        <View style={styles.backBtnRow}>
+          <TouchableOpacity 
+            style={styles.backBtn}
+            activeOpacity={0.7}
+            onPress={() => navigation.goBack()}
+          >
+            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <Line x1="19" y1="12" x2="5" y2="12" />
+              <Path d="M12 19L5 12L12 5" />
+            </Svg>
+          </TouchableOpacity>
+
+          <View style={styles.headerTextCol}>
+            <Text style={styles.pageTitle}>Buku Piutang Kantin</Text>
+            <Text style={styles.pageSub}>Rekapitulasi Tagihan Tertunda</Text>
           </View>
-          <Text style={styles.headerTitle}>Buku Piutang Kantin</Text>
         </View>
 
         <TouchableOpacity 
-          style={styles.headerRightBtn}
-          activeOpacity={0.8}
+          style={styles.addDebtBtn}
+          activeOpacity={0.85}
           onPress={() => navigation.navigate('Consignment')}
         >
-          <AssetVisual name="canteen_shop" size={20} />
-          <Text style={styles.headerRightText}>Titip Kantin</Text>
+          <Text style={styles.addDebtBtnText}>+ Catat Piutang</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
-        {/* HERO TOTAL PIUTANG BERVOLUME */}
-        <BentoCard bg="#FEF2F2" accentBorder="#FECACA" style={styles.heroBento}>
+        {/* 2. HERO TOTAL PIUTANG BERSIH (TANPA IKON MERAH MENEMPEL) */}
+        <View style={styles.debtHeroCard}>
           <View style={styles.heroTopRow}>
-            <View>
-              <Text style={styles.heroSubLabel}>TOTAL SETORAN TERTAHAN DI KANTIN</Text>
-              <Text style={styles.heroBalanceText}>{formatRupiah(totalPiutang)}</Text>
+            <Text style={styles.heroLabelText}>TOTAL SETORAN TERTAHAN DI KANTIN</Text>
+            <Text style={styles.heroCountText}>{debts.length} Mitra Menunggak</Text>
+          </View>
+
+          <View style={styles.heroMainRow}>
+            <Text style={styles.heroBigNum}>{formatRupiah(totalPiutang)}</Text>
+          </View>
+
+          <View style={styles.debtSummaryStrip}>
+            <Text style={styles.summaryTextMuted}>Jatuh Tempo: 1 Hari Ini • 2 Telat</Text>
+            <Text style={styles.summaryTextBold}>Arus Kas: Tertahan</Text>
+          </View>
+        </View>
+
+        {/* 3. DAFTAR TAGIHAN PIUTANG KANTIN */}
+        <Text style={styles.sectionLbl}>DAFTAR TAGIHAN PIUTANG ({debts.length} MITRA)</Text>
+
+        {debts.map((d) => {
+          const isLate = d.daysLate > 0;
+          return (
+            <View key={d.id} style={styles.debtCard}>
+              <View style={styles.debtCardHeader}>
+                <View style={styles.canteenIconBox}>
+                  <AssetVisual name="canteen_shop" size={24} />
+                </View>
+
+                <View style={styles.debtInfoCol}>
+                  <Text style={styles.debtCanteenTitle}>{d.canteenName}</Text>
+                  <Text style={styles.debtPicContact}>PIC: {d.pic} • {d.phone}</Text>
+                </View>
+
+                <View style={styles.debtAmountCol}>
+                  <Text style={styles.debtAmountNum}>{formatRupiah(d.amount)}</Text>
+                  {isLate ? (
+                    <Text style={styles.statusDirectLateText}>Jatuh tempo kemarin</Text>
+                  ) : (
+                    <Text style={styles.statusDirectDueText}>Setor hari ini</Text>
+                  )}
+                </View>
+              </View>
+
+              <View style={styles.debtItemsLine}>
+                <Text style={styles.debtItemsText}>
+                  Item Tertahan: <Text style={styles.debtItemsBold}>{d.items}</Text> ({d.dueDate})
+                </Text>
+              </View>
+
+              <View style={styles.debtBtnRow}>
+                <TouchableOpacity 
+                  style={styles.btnTagihWa}
+                  activeOpacity={0.8}
+                  onPress={() => handleRemindWhatsApp(d)}
+                >
+                  <Svg width={13} height={13} viewBox="0 0 24 24" fill="#FFFFFF">
+                    <Path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2" />
+                  </Svg>
+                  <Text style={styles.btnTagihWaText}>Tagih via WA</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={styles.btnMarkPaid}
+                  activeOpacity={0.8}
+                  onPress={() => handleMarkAsPaid(d.id, d.canteenName, d.amount)}
+                >
+                  <Svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth={3}>
+                    <Polyline points="20 6 9 17 4 12" />
+                  </Svg>
+                  <Text style={styles.btnMarkPaidText}>Tandai Lunas</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={styles.debtVisualBox}>
-              <AssetVisual name="money_cash" size={54} />
-            </View>
-          </View>
-
-          <View style={styles.heroAlertPill}>
-            <AssetVisual name="clock_time" size={16} />
-            <Text style={styles.heroAlertPillText}>
-              {debts.length} Mitra Kantin Belum Menyetorkan Uang Hasil Penjualan
-            </Text>
-          </View>
-        </BentoCard>
-
-        {/* LIST PIUTANG KANTIN */}
-        <Text style={styles.sectionTitle}>Daftar Tagihan Jatuh Tempo</Text>
-
-        {debts.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <AssetVisual name="check_badge" size={64} />
-            <Text style={styles.emptyTitle}>Semua Setoran Kantin Lunas!</Text>
-            <Text style={styles.emptySubtitle}>Tidak ada piutang tertahan. Arus kas gerai sehat 100%.</Text>
-          </View>
-        ) : (
-          debts.map((d) => {
-            const isLate = d.daysLate > 0;
-            return (
-              <BentoCard key={d.id} bg="#FFFFFF" accentBorder={isLate ? '#FECACA' : '#E2E8F0'} style={styles.debtCard}>
-                
-                <View style={styles.cardHeaderRow}>
-                  <View style={styles.canteenIconBox}>
-                    <AssetVisual name="canteen_shop" size={36} />
-                  </View>
-
-                  <View style={{ flex: 1, marginLeft: 12 }}>
-                    <View style={styles.badgeRow}>
-                      <View style={[styles.lateBadge, isLate ? styles.lateBadgeRed : styles.lateBadgeYellow]}>
-                        <AssetVisual name={isLate ? 'warning_badge' : 'clock_time'} size={12} />
-                        <Text style={[styles.lateBadgeText, { color: isLate ? '#B91C1C' : '#B45309' }]}>
-                          {isLate ? `Telat ${d.daysLate} Hari` : 'Jatuh Tempo Hari Ini'}
-                        </Text>
-                      </View>
-                    </View>
-                    <Text style={styles.canteenNameText}>{d.canteenName}</Text>
-                    <Text style={styles.picText}>PIC: {d.pic} ({d.phone})</Text>
-                  </View>
-
-                  <View style={styles.amountBox}>
-                    <Text style={styles.amountText}>{formatRupiah(d.amount)}</Text>
-                    <Text style={styles.dueText}>{d.dueDate}</Text>
-                  </View>
-                </View>
-
-                {/* DETAIL ITEM YANG DITITIPKAN */}
-                <View style={styles.itemsSummaryBox}>
-                  <Text style={styles.itemsSummaryLabel}>Item Dititipkan: <Text style={{ color: '#1E293B', fontWeight: '800' }}>{d.items}</Text></Text>
-                </View>
-
-                {/* DUA TOMBOL AKSI: TAGIH WA & LUNASKAN */}
-                <View style={styles.cardBtnRow}>
-                  <TactileButton
-                    size="sm"
-                    variant="secondary"
-                    style={{ flex: 1 }}
-                    icon={<AssetVisual name="receipt_bill" size={16} />}
-                    onPress={() => handleRemindWhatsApp(d)}
-                  >
-                    Kirim Tagihan WA
-                  </TactileButton>
-
-                  <TactileButton
-                    size="sm"
-                    variant="success"
-                    style={{ flex: 1 }}
-                    icon={<AssetVisual name="check_badge" size={16} />}
-                    onPress={() => handleMarkAsPaid(d.id, d.canteenName, d.amount)}
-                  >
-                    Tandai Lunas
-                  </TactileButton>
-                </View>
-
-              </BentoCard>
-            );
-          })
-        )}
-
-        <View style={{ height: 100 }} />
+          );
+        })}
       </ScrollView>
 
-      <BottomNav activeTab="Consignment" navigation={navigation} />
-    </View>
+      {/* 5. MODERN BOTTOM DOCK */}
+      <ModernBottomNav activeTab="Activity" navigation={navigation} />
+    </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  subpageHeader: {
+    paddingHorizontal: 18,
+    paddingTop: 16,
+    paddingBottom: 14,
+    backgroundColor: '#FFFFFF',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1EFEA',
+  },
+  backBtnRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+    minWidth: 0,
+  },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  headerTextCol: {
+    gap: 1,
+    flex: 1,
+  },
+  pageSub: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  pageTitle: {
+    fontSize: 19,
+    fontWeight: '900',
+    color: '#0F172A',
+    letterSpacing: -0.3,
+  },
+  addDebtBtn: {
+    backgroundColor: '#EA580C',
+    borderRadius: 12,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    elevation: 2,
+    shadowColor: '#EA580C',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    flexShrink: 0,
+  },
+  addDebtBtnText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '800',
+    whiteSpace: 'nowrap',
+  },
+  scrollContent: {
+    paddingHorizontal: 18,
+    paddingTop: 14,
+    paddingBottom: 110,
+  },
+  debtHeroCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#CBD5E1',
+    gap: 10,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+  },
+  heroTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  heroLabelText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#64748B',
+    letterSpacing: 0.5,
+  },
+  moneyBadge: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1.5,
+    borderColor: '#FECACA',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroMainRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+  },
+  heroBigNum: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: '#DC2626',
+    letterSpacing: -0.5,
+  },
+  heroCountText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#B91C1C',
+  },
+  debtSummaryStrip: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+    borderStyle: 'dashed',
+  },
+  summaryTextMuted: {
+    fontSize: 11.5,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  summaryTextBold: {
+    fontSize: 11.5,
+    color: '#0F172A',
+    fontWeight: '800',
+  },
+  sectionLbl: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#64748B',
+    letterSpacing: 0.5,
+    marginBottom: 10,
+    marginTop: 4,
+  },
+  debtCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    gap: 10,
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 6,
+  },
+  debtCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  canteenIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#FFF7ED',
+    borderWidth: 1,
+    borderColor: '#FED7AA',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  debtInfoCol: {
+    flex: 1,
+    gap: 2,
+    minWidth: 0,
+  },
+  debtCanteenTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  debtPicContact: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  debtAmountCol: {
+    alignItems: 'flex-end',
+    gap: 2,
+  },
+  debtAmountNum: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#DC2626',
+  },
+  statusDirectLateText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#DC2626',
+  },
+  statusDirectDueText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#D97706',
+  },
+  debtItemsLine: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 10,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    borderLeftWidth: 3,
+    borderLeftColor: '#CBD5E1',
+  },
+  debtItemsText: {
+    fontSize: 11,
+    color: '#475569',
+  },
+  debtItemsBold: {
+    color: '#1E293B',
+    fontWeight: '800',
+  },
+  debtBtnRow: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingTop: 2,
+  },
+  btnTagihWa: {
+    flex: 1,
+    backgroundColor: '#22C55E',
+    borderRadius: 10,
+    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    elevation: 2,
+    shadowColor: '#22C55E',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.22,
+    shadowRadius: 4,
+  },
+  btnTagihWaText: {
+    color: '#FFFFFF',
+    fontSize: 11.5,
+    fontWeight: '800',
+  },
+  btnMarkPaid: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    borderRadius: 10,
+    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+  },
+  btnMarkPaidText: {
+    color: '#0F172A',
+    fontSize: 11.5,
+    fontWeight: '800',
+  },
+});
+
 
 const styles = StyleSheet.create({
   container: {
@@ -249,11 +517,15 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 18,
   },
-  heroBento: {
+  heroCard: {
+    backgroundColor: '#FFF1F2',
+    borderRadius: 22,
+    borderWidth: 2,
+    borderColor: '#1E293B',
     padding: 18,
     marginBottom: 18,
-    borderBottomWidth: 4,
-    borderBottomColor: '#F87171',
+    borderBottomWidth: 4.5,
+    borderBottomColor: '#1E293B',
   },
   heroTopRow: {
     flexDirection: 'row',
@@ -307,10 +579,14 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   debtCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    borderWidth: 2,
+    borderColor: '#1E293B',
     padding: 16,
     marginBottom: 14,
-    borderBottomWidth: 4,
-    borderBottomColor: '#CBD5E1',
+    borderBottomWidth: 4.5,
+    borderBottomColor: '#1E293B',
   },
   cardHeaderRow: {
     flexDirection: 'row',

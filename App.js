@@ -16,6 +16,7 @@ import { RecipeEditorScreen } from './src/screens/RecipeEditorScreen';
 import { PartnerDirectoryScreen } from './src/screens/PartnerDirectoryScreen';
 import { ReceiptScreen } from './src/screens/ReceiptScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
+import { FinanceReportScreen } from './src/screens/FinanceReportScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -46,6 +47,7 @@ export default function App() {
           <Stack.Screen name="PartnerDirectory" component={PartnerDirectoryScreen} />
           <Stack.Screen name="Receipt" component={ReceiptScreen} />
           <Stack.Screen name="Settings" component={SettingsScreen} />
+          <Stack.Screen name="FinanceReport" component={FinanceReportScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, StatusBar, TextInput, Dimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path, Rect, Circle } from 'react-native-svg';
 import { ModernBottomNav } from '../components/ModernBottomNav';
 import AssetVisual from '../components/AssetVisual';
+import { Mascot } from '../components/Mascot';
 import { PastelReferenceIcon } from '../components/PastelReferenceIcon';
 import { WeeklyBarChart } from '../components/WeeklyBarChart';
 import { DonutIncomeRatio } from '../components/DonutIncomeRatio';
@@ -27,8 +29,8 @@ export const DashboardScreen = ({ navigation }) => {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       {/* 1. TOP HEADER: BERSIH & BERNAFAS (ZERO PARASITE BADGES, ZERO DEV JARGON) */}
       <View style={styles.topHeader}>
@@ -41,8 +43,10 @@ export const DashboardScreen = ({ navigation }) => {
           style={styles.avatarBtn} 
           activeOpacity={0.8}
           onPress={() => navigation.navigate('Settings')}
+          accessibilityLabel="Buka Pengaturan Profil Usaha"
+          accessibilityRole="button"
         >
-          <AssetVisual name="chef_mascot" size={38} />
+          <Mascot size={42} />
         </TouchableOpacity>
       </View>
 
@@ -69,7 +73,7 @@ export const DashboardScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* 3. HERO CASH WALLET CARD RAMPING, PADAT & KONSISTEN */}
+        {/* 3. HERO CASH WALLET CARD ZERO DEAD SPACE (KREM MADU & DUAL STATS) */}
         <View style={styles.heroWalletCard}>
           <View style={styles.walletHeaderRow}>
             <View style={styles.walletLabelBox}>
@@ -77,7 +81,7 @@ export const DashboardScreen = ({ navigation }) => {
               <Text style={styles.walletLabelText}>Uang Kas di Dompet</Text>
             </View>
             <TouchableOpacity onPress={() => setHideBalance(!hideBalance)} style={styles.eyeBtn}>
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#71717A" strokeWidth={2}>
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#1E293B" strokeWidth={2.2}>
                 <Path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                 <Circle cx="12" cy="12" r="3" />
               </Svg>
@@ -85,10 +89,34 @@ export const DashboardScreen = ({ navigation }) => {
           </View>
 
           <View style={styles.walletBalanceRow}>
-            <Text style={styles.walletAmountText}>
-              {hideBalance ? 'Rp ••••••••' : 'Rp 850.000'}
-            </Text>
-            <AssetVisual name="wallet_purse" size={26} />
+            <View>
+              <Text style={styles.walletAmountText}>
+                {hideBalance ? 'Rp ••••••••' : 'Rp 850.000'}
+              </Text>
+              <Text style={styles.walletSubHelper}>Modal kas siap pakai di laci toko</Text>
+            </View>
+            <AssetVisual name="wallet_purse" size={38} />
+          </View>
+
+          {/* DUAL STAT PANEL PEMASUKAN & PENGELUARAN RAPAT */}
+          <View style={styles.walletDualStatStrip}>
+            <View style={styles.walletStatItem}>
+              <View style={styles.statDotGreen} />
+              <View>
+                <Text style={styles.statItemLbl}>Pemasukan Hari Ini</Text>
+                <Text style={styles.statItemValGreen}>+Rp 320.000</Text>
+              </View>
+            </View>
+
+            <View style={styles.walletStatDivider} />
+
+            <View style={styles.walletStatItem}>
+              <View style={styles.statDotOrange} />
+              <View>
+                <Text style={styles.statItemLbl}>Belanja Subuh</Text>
+                <Text style={styles.statItemValOrange}>-Rp 150.000</Text>
+              </View>
+            </View>
           </View>
         </View>
 
@@ -279,7 +307,7 @@ export const DashboardScreen = ({ navigation }) => {
 
       {/* 9. BOTTOM NAVIGATION MODERN ELEVATED FAB (ICON-ONLY STANDARD) */}
       <ModernBottomNav activeTab="Home" navigation={navigation} />
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -331,11 +359,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 16,
     paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    paddingVertical: 9,
+    borderWidth: 1.8,
+    borderColor: '#1E293B',
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#1E293B',
     marginBottom: 16,
   },
   searchInput: {
@@ -348,22 +378,82 @@ const styles = StyleSheet.create({
   filterIconBtn: {
     padding: 4,
   },
-  // 3. HERO KARTU KAS ASLI (PUTIH SOLID, RAMPING & PADAT)
+  // 3. HERO KARTU KAS ASLI (ZERO DEAD SPACE - PASTEL MADU & NEO-BRUTAL BORDER)
   heroWalletCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    paddingVertical: 14,
+    backgroundColor: '#FFFBEB',
+    borderRadius: 22,
+    paddingVertical: 16,
     paddingHorizontal: 18,
-    borderWidth: 1.5,
-    borderColor: '#E4E4E7',
-    borderBottomWidth: 3.5,
-    borderBottomColor: '#D4D4D8',
-    elevation: 2,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
+    borderWidth: 2,
+    borderColor: '#1E293B',
+    borderBottomWidth: 4.5,
+    borderBottomColor: '#1E293B',
+    elevation: 3,
+    shadowColor: '#1E293B',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 0,
     marginBottom: 16,
+  },
+  walletSubHelper: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#64748B',
+    marginTop: 2,
+  },
+  walletDualStatStrip: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#1E293B',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  walletStatItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  statDotGreen: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#10B981',
+    borderWidth: 1,
+    borderColor: '#1E293B',
+  },
+  statDotOrange: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#EA580C',
+    borderWidth: 1,
+    borderColor: '#1E293B',
+  },
+  statItemLbl: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  statItemValGreen: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: '#059669',
+  },
+  statItemValOrange: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: '#DC2626',
+  },
+  walletStatDivider: {
+    width: 1.5,
+    height: 24,
+    backgroundColor: '#E2E8F0',
+    marginHorizontal: 8,
   },
   walletHeaderRow: {
     flexDirection: 'row',
@@ -444,22 +534,22 @@ const styles = StyleSheet.create({
     color: '#DC2626',
   },
 
-  // KARTU JAJANAN KREM MENTEGA (#FFF9D6) + 25 LAKU
+  // KARTU JAJANAN KREM MENTEGA (#FFFBEB) CHUNKY OUTLINE
   foodCardButter: {
     width: 154,
-    backgroundColor: '#FFF9D6',
+    backgroundColor: '#FFFBEB',
     borderRadius: 22,
     paddingVertical: 14,
     paddingHorizontal: 12,
-    borderWidth: 1.5,
-    borderColor: '#FEF08A',
-    borderBottomWidth: 3.5,
-    borderBottomColor: '#FDE047',
-    elevation: 2,
-    shadowColor: '#000000',
+    borderWidth: 2,
+    borderColor: '#1E293B',
+    borderBottomWidth: 4,
+    borderBottomColor: '#1E293B',
+    elevation: 3,
+    shadowColor: '#1E293B',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
+    shadowOpacity: 0.1,
+    shadowRadius: 0,
     marginBottom: 6,
   },
   foodCardNameButter: {
@@ -615,14 +705,14 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
   targetBanner: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F0FDF4',
     borderRadius: 22,
     padding: 16,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    borderBottomWidth: 3.5,
-    borderBottomColor: '#CBD5E1',
-    marginBottom: 22,
+    borderWidth: 2,
+    borderColor: '#1E293B',
+    borderBottomWidth: 4.5,
+    borderBottomColor: '#1E293B',
+    marginBottom: 20,
   },
   targetBannerTop: {
     flexDirection: 'row',
@@ -687,10 +777,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
     padding: 12,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    borderBottomWidth: 3,
-    borderBottomColor: '#CBD5E1',
+    borderWidth: 1.8,
+    borderColor: '#1E293B',
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#1E293B',
   },
   actIconWrap: {
     width: 42,

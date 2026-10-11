@@ -384,6 +384,102 @@ export default function AssetVisual({ name, size = 48, style }) {
         </View>
       );
 
+    case 'meat_chicken':
+    case 'ayam':
+      return (
+        <View style={[{ width: s, height: s, alignItems: 'center', justifyContent: 'center' }, style]}>
+          <Svg width={s} height={s} viewBox="0 0 64 64" fill="none">
+            <Ellipse cx="32" cy="54" rx="20" ry="4" fill="#E2E8F0" />
+            {/* Tulang Paha Putih */}
+            <Path d="M28 46 L28 54 M26 54 C24 54 24 57 26 57 C28 57 28 55 30 55 C32 55 32 57 34 57 C36 57 36 54 34 54 L34 46" stroke="#18181B" strokeWidth="2.5" fill="#FFFFFF" strokeLinejoin="round" />
+            {/* Daging Paha Ayam Keemasan Bervolume */}
+            <Path d="M20 32 C16 22 24 14 34 14 C44 14 48 22 46 32 C44 42 38 46 32 46 C24 46 22 40 20 32 Z" fill="#F59E0B" stroke="#18181B" strokeWidth="2.5" />
+            <Path d="M24 24 Q32 18 40 24" stroke="#FEF3C7" strokeWidth="2" strokeLinecap="round" opacity="0.8" />
+            <Circle cx="30" cy="30" r="2.5" fill="#D97706" />
+            <Circle cx="38" cy="34" r="2" fill="#D97706" />
+          </Svg>
+        </View>
+      );
+
+    case 'carrot_veg':
+    case 'wortel':
+      return (
+        <View style={[{ width: s, height: s, alignItems: 'center', justifyContent: 'center' }, style]}>
+          <Svg width={s} height={s} viewBox="0 0 64 64" fill="none">
+            <Ellipse cx="32" cy="54" rx="18" ry="4" fill="#E2E8F0" />
+            {/* Daun Hijau Segar di Atas */}
+            <Path d="M32 18 C30 10 24 10 26 18 M32 18 C32 8 36 8 34 18 M32 18 C36 10 42 12 38 18" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+            {/* Badan Wortel Runcing Oranye */}
+            <Path d="M24 20 C22 24 30 52 32 52 C34 52 42 24 40 20 C36 18 28 18 24 20 Z" fill="#F97316" stroke="#18181B" strokeWidth="2.5" strokeLinejoin="round" />
+            {/* Serat Garis Alami */}
+            <Path d="M27 26 h6 M29 34 h7 M28 42 h5" stroke="#C2410C" strokeWidth="2" strokeLinecap="round" />
+          </Svg>
+        </View>
+      );
+
+    case 'egg_raw':
+    case 'telur':
+      return (
+        <View style={[{ width: s, height: s, alignItems: 'center', justifyContent: 'center' }, style]}>
+          <Svg width={s} height={s} viewBox="0 0 64 64" fill="none">
+            <Ellipse cx="32" cy="54" rx="18" ry="4" fill="#E2E8F0" />
+            <Path d="M20 38 C20 22 25 14 32 14 C39 14 44 22 44 38 C44 48 39 52 32 52 C25 52 20 48 20 38 Z" fill="#FEF3C7" stroke="#18181B" strokeWidth="2.5" />
+            <Path d="M25 30 Q30 20 36 26" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+          </Svg>
+        </View>
+      );
+
+    case 'oil_butter':
+    case 'minyak':
+      return (
+        <View style={[{ width: s, height: s, alignItems: 'center', justifyContent: 'center' }, style]}>
+          <Svg width={s} height={s} viewBox="0 0 64 64" fill="none">
+            <Ellipse cx="32" cy="54" rx="20" ry="4" fill="#E2E8F0" />
+            <Rect x="28" y="12" width="8" height="6" rx="2" fill="#EF4444" stroke="#18181B" strokeWidth="2" />
+            <Path d="M29 18 L29 24 L22 30 L22 50 C22 52 24 54 26 54 L38 54 C40 54 42 52 42 50 L42 30 L35 18 Z" fill="#FBBF24" stroke="#18181B" strokeWidth="2.5" strokeLinejoin="round" />
+            <Circle cx="32" cy="40" r="4.5" fill="#F59E0B" />
+            <Path d="M26 34 L26 48" stroke="#FEF3C7" strokeWidth="2" strokeLinecap="round" opacity="0.8" />
+          </Svg>
+        </View>
+      );
+
+    case 'package_box':
+    case 'mika':
+    case 'plastik':
+      return (
+        <View style={[{ width: s, height: s, alignItems: 'center', justifyContent: 'center' }, style]}>
+          <Svg width={s} height={s} viewBox="0 0 64 64" fill="none">
+            <Ellipse cx="32" cy="54" rx="22" ry="4" fill="#E2E8F0" />
+            {/* Tutup Mika Transparan Buka Ke Atas */}
+            <Path d="M14 26 L18 16 L46 16 L50 26 Z" fill="#E0F2FE" stroke="#0284C7" strokeWidth="2" opacity="0.85" />
+            <Path d="M22 18 L42 18" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+            {/* Wadah Bawah Mika Plastik Bergaris Bersekat */}
+            <Rect x="12" y="26" width="40" height="24" rx="4" fill="#F0F9FF" stroke="#0284C7" strokeWidth="2.5" />
+            <Path d="M22 26 L22 48 M32 26 L32 48 M42 26 L42 48" stroke="#BAE6FD" strokeWidth="1.8" />
+            {/* Kilau Plastik Halus */}
+            <Path d="M16 30 L48 30" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+          </Svg>
+        </View>
+      );
+
+    case 'sugar_cane':
+    case 'gula':
+    case 'daun':
+      return (
+        <View style={[{ width: s, height: s, alignItems: 'center', justifyContent: 'center' }, style]}>
+          <Svg width={s} height={s} viewBox="0 0 64 64" fill="none">
+            <Ellipse cx="32" cy="54" rx="20" ry="4" fill="#E2E8F0" />
+            {/* Daun Pisang Hijau Tua di Belakang */}
+            <Path d="M38 16 C48 18 52 30 46 44 C42 50 36 52 32 50 C28 42 32 24 38 16 Z" fill="#15803D" stroke="#166534" strokeWidth="2" />
+            <Path d="M38 18 L36 48" stroke="#4ADE80" strokeWidth="1.5" strokeLinecap="round" />
+            {/* Karung Kantong Gula Pasir Putih Berikat Tali */}
+            <Path d="M18 28 C16 22 36 22 34 28 L36 50 C36 54 16 54 16 50 Z" fill="#FFFFFF" stroke="#18181B" strokeWidth="2.5" />
+            <Rect x="20" y="24" width="12" height="5" rx="2" fill="#FEF08A" stroke="#18181B" strokeWidth="1.5" />
+            <Text x="26" y="42" fontSize="9" fontWeight="900" fill="#EA580C" textAnchor="middle">GULA</Text>
+          </Svg>
+        </View>
+      );
+
     default:
       return (
         <View style={[{ width: s, height: s, backgroundColor: '#F1F5F9', borderRadius: s / 3, alignItems: 'center', justifyContent: 'center' }, style]}>

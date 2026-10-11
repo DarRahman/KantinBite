@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, StatusBar, Alert, Dimensions, Share } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomNav } from '../components/BottomNav';
 import AssetVisual from '../components/AssetVisual';
-import { BentoCard, TactileButton } from '../components/PlayfulComponents';
 import { formatRupiah } from '../utils/formatters';
 
 const { width } = Dimensions.get('window');
@@ -55,8 +55,8 @@ export const ReceiptScreen = ({ route, navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF8F5" />
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       
       {/* HEADER AMAN PLAYFUL */}
       <View style={styles.header}>
@@ -139,7 +139,7 @@ export const ReceiptScreen = ({ route, navigation }) => {
           <View style={styles.stampCenterBox}>
             <AssetVisual name="check_badge" size={44} />
             <Text style={styles.stampCenterText}>PEMBAYARAN LUNAS</Text>
-            <Text style={styles.stampCenterSub}>Tercatat otomatis di Buku Kas SQLite</Text>
+            <Text style={styles.stampCenterSub}>Tercatat otomatis di Buku Kas Toko</Text>
           </View>
 
         </View>
@@ -160,7 +160,7 @@ export const ReceiptScreen = ({ route, navigation }) => {
         <View style={{ height: 60 }} />
       </ScrollView>
 
-    </View>
+    </SafeAreaView>
   );
 };
 
