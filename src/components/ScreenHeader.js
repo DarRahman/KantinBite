@@ -89,6 +89,5 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 11,
     fontWeight: '800',
-    whiteSpace: 'nowrap',
   },
 });
