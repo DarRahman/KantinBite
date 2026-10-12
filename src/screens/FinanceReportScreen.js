@@ -162,11 +162,12 @@ export const FinanceReportScreen = ({ navigation }) => {
         <View style={styles.heroProfitCard}>
           <View style={styles.heroTopRow}>
             <View>
-              <Text style={styles.heroCardSubtitle}>LABA BERSIH RIIL (SETELAH HPP & KOMISI)</Text>
-              <Text style={styles.heroProfitAmount}>{formatRupiah(reportMetrics.netProfit)}</Text>
+              <Text style={styles.heroCardSubtitle}>SALDO KAS FISIK DI DOMPET</Text>
+              <Text style={styles.heroProfitAmount}>{formatRupiah(cashflow.walletBalance)}</Text>
+              <Text style={styles.heroCardSubDetail}>Laba Bersih ({period === 'hariIni' ? 'Hari Ini' : period === '7hari' ? '7 Hari' : 'Bulan Ini'}): +{formatRupiah(reportMetrics.netProfit)}</Text>
             </View>
             <View style={styles.heroIconBox}>
-              <AssetVisual name="mascot_celebrate" size={36} />
+              <AssetVisual name="wallet_purse" size={32} />
             </View>
           </View>
 
@@ -358,10 +359,16 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: 3,
   },
+  heroCardSubDetail: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#059669',
+    marginTop: 2,
+  },
   heroProfitAmount: {
     fontSize: 26,
     fontWeight: '900',
-    color: '#059669',
+    color: '#0F172A',
     letterSpacing: -0.6,
   },
   heroIconBox: {

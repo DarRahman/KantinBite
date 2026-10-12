@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, StatusBar, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path, Line, Circle } from 'react-native-svg';
@@ -7,6 +7,9 @@ import AssetVisual from '../components/AssetVisual';
 import { formatRupiah } from '../utils/formatters';
 
 export const RecipeEditorScreen = ({ navigation, route }) => {
+  const recipeId = route?.params?.recipeId;
+  const isEditMode = Boolean(recipeId);
+
   const [selectedIcon, setSelectedIcon] = useState('risoles_rogout');
   const availableIcons = ['risoles_rogout', 'pastel_telur', 'dadar_gulung', 'lemper_ayam'];
   const [recipeName, setRecipeName] = useState('Risoles Rogout Ayam');
@@ -20,6 +23,69 @@ export const RecipeEditorScreen = ({ navigation, route }) => {
     { id: '3', name: 'Ayam Suwir & Sayuran Isian', qty: 'Isian Rogout Gurih', cost: 10000, icon: 'meat_chicken' },
     { id: '4', name: 'Gas LPG & Kemasan Mika', qty: 'Alokasi Operasional', cost: 6000, icon: 'gas_cylinder' },
   ]);
+
+  useEffect(() => {
+    if (recipeId === 'r2' || recipeId === 'p2') {
+      setSelectedIcon('pastel_telur');
+      setRecipeName('Pastel Sayur Telur');
+      setBatchPortions('50');
+      setSuggestedSellingPrice('1500');
+      setCanteenShare('500');
+      setIngredients([
+        { id: '1', name: 'Tepung Terigu Cakra 500g', qty: 'Kulit Renyah', cost: 7000, icon: 'wheat_flour' },
+        { id: '2', name: 'Telur Rebus & Sayur Wortel', qty: 'Isian Sayur Telur', cost: 12000, icon: 'egg_raw' },
+        { id: '3', name: 'Daging Ayam Cincang', qty: 'Daging Isian', cost: 10000, icon: 'meat_chicken' },
+        { id: '4', name: 'Minyak Goreng & Gas LPG', qty: 'Alokasi Goreng', cost: 8500, icon: 'gas_cylinder' },
+      ]);
+    } else if (recipeId === 'r3' || recipeId === 'p3') {
+      setSelectedIcon('dadar_gulung');
+      setRecipeName('Dadar Gulung Pandan');
+      setBatchPortions('50');
+      setSuggestedSellingPrice('1000');
+      setCanteenShare('300');
+      setIngredients([
+        { id: '1', name: 'Tepung Terigu & Daun Suji', qty: 'Adonan Kulit Hijau', cost: 5000, icon: 'wheat_flour' },
+        { id: '2', name: 'Kelapa Parut & Gula Jawa', qty: 'Unti Kelapa Manis', cost: 9000, icon: 'sugar_cane' },
+        { id: '3', name: 'Santan Kelapa Gurih', qty: 'Santan Kental', cost: 6000, icon: 'oil_butter' },
+        { id: '4', name: 'Gas LPG & Plastik Kemasan', qty: 'Biaya Pengolahan', cost: 5000, icon: 'gas_cylinder' },
+      ]);
+    } else if (recipeId === 'r4' || recipeId === 'p4') {
+      setSelectedIcon('lemper_ayam');
+      setRecipeName('Lemper Ayam Ketan');
+      setBatchPortions('40');
+      setSuggestedSellingPrice('1500');
+      setCanteenShare('500');
+      setIngredients([
+        { id: '1', name: 'Beras Ketan Putih Pulen', qty: 'Ketan Gurih', cost: 8000, icon: 'wheat_flour' },
+        { id: '2', name: 'Daging Dada Ayam Suwir', qty: 'Isian Ayam Bumbu', cost: 12000, icon: 'meat_chicken' },
+        { id: '3', name: 'Santan Kental Gurih', qty: 'Santan Masak', cost: 5000, icon: 'oil_butter' },
+        { id: '4', name: 'Daun Pisang & Lidi Semat', qty: 'Pembungkus Tradisional', cost: 3000, icon: 'package_box' },
+      ]);
+    } else if (recipeId === 'r1' || recipeId === 'p1') {
+      setSelectedIcon('risoles_rogout');
+      setRecipeName('Risoles Rogout Ayam');
+      setBatchPortions('50');
+      setSuggestedSellingPrice('1200');
+      setCanteenShare('400');
+      setIngredients([
+        { id: '1', name: 'Tepung Terigu Segitiga', qty: '500 gram', cost: 6000, icon: 'wheat_flour' },
+        { id: '2', name: 'Telur Ayam & Minyak Goreng', qty: '2 Butir & Minyak', cost: 8000, icon: 'egg_raw' },
+        { id: '3', name: 'Ayam Suwir & Sayuran Isian', qty: 'Isian Rogout Gurih', cost: 10000, icon: 'meat_chicken' },
+        { id: '4', name: 'Gas LPG & Kemasan Mika', qty: 'Alokasi Operasional', cost: 6000, icon: 'gas_cylinder' },
+      ]);
+    } else if (!recipeId) {
+      setSelectedIcon('risoles_rogout');
+      setRecipeName('');
+      setBatchPortions('50');
+      setSuggestedSellingPrice('');
+      setCanteenShare('');
+      setIngredients([
+        { id: '1', name: 'Tepung / Bahan Pokok', qty: 'Takaran Adonan', cost: 8000, icon: 'wheat_flour' },
+        { id: '2', name: 'Bahan Isian Jajanan', qty: 'Bahan Utama', cost: 12000, icon: 'meat_chicken' },
+        { id: '3', name: 'Minyak / Gas Operasional', qty: 'Biaya Masak', cost: 6000, icon: 'gas_cylinder' },
+      ]);
+    }
+  }, [recipeId]);
 
   const [newIngName, setNewIngName] = useState('');
   const [newIngCost, setNewIngCost] = useState('');
@@ -79,8 +145,8 @@ export const RecipeEditorScreen = ({ navigation, route }) => {
           </TouchableOpacity>
 
           <View style={styles.headerTextCol}>
-            <Text style={styles.pageTitle}>Racik Resep & HPP</Text>
-            <Text style={styles.pageSub}>Formulasi Modal & Batas Harga Jual</Text>
+            <Text style={styles.pageTitle}>{isEditMode ? 'Ubah Resep Jajanan' : 'Tambah Resep Baru'}</Text>
+            <Text style={styles.pageSub}>{isEditMode ? `Formulasi: ${recipeName}` : 'Formulasi Menu Jajanan Baru'}</Text>
           </View>
         </View>
 
@@ -266,7 +332,9 @@ export const RecipeEditorScreen = ({ navigation, route }) => {
             <Path d="M17 21v-8H7v8" />
             <Path d="M7 3v5h8" />
           </Svg>
-          <Text style={styles.saveRecipeBtnText}>Simpan Resep ke Katalog HPP</Text>
+          <Text style={styles.saveRecipeBtnText}>
+            {isEditMode ? 'Simpan Perubahan Resep' : 'Tambahkan Resep ke Katalog HPP'}
+          </Text>
         </TouchableOpacity>
 
       </ScrollView>

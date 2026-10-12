@@ -145,15 +145,16 @@ export const ReceiptScreen = ({ route, navigation }) => {
 
         {/* DUA TOMBOL AKSI: KIRIM WA & CETAK */}
         <View style={styles.actionBtnRow}>
-          <TactileButton
-            size="lg"
-            variant="success"
-            style={{ width: '100%' }}
-            icon={<AssetVisual name="receipt_bill" size={22} />}
+          <TouchableOpacity
+            style={styles.btnShareWa}
+            activeOpacity={0.85}
             onPress={handleShareWhatsApp}
+            accessibilityLabel="Kirim Nota ke WhatsApp"
+            accessibilityRole="button"
           >
-            Kirim Nota ke WhatsApp
-          </TactileButton>
+            <AssetVisual name="receipt_bill" size={20} />
+            <Text style={styles.btnShareWaText}>Kirim Nota ke WhatsApp</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={{ height: 60 }} />
@@ -366,5 +367,24 @@ const styles = StyleSheet.create({
   },
   actionBtnRow: {
     width: '100%',
+  },
+  btnShareWa: {
+    backgroundColor: '#22C55E',
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#1E293B',
+    borderBottomWidth: 4.5,
+    borderBottomColor: '#15803D',
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    width: '100%',
+  },
+  btnShareWaText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '900',
   },
 });
