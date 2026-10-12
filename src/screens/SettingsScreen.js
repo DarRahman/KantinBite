@@ -221,7 +221,18 @@ export const SettingsScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* 6. FOOTER PUBLIK BERSIH (TANPA KATA TECH / UNIVERSAL JARGON) */}
+        {/* 6. TOMBOL KUNCI KASIR (MASUK LAYAR PIN) */}
+        <TouchableOpacity 
+          style={styles.lockAppBtn} 
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('Auth')}
+          accessibilityLabel="Kunci Kasir dan Keluar ke Layar PIN"
+          accessibilityRole="button"
+        >
+          <Text style={styles.lockAppBtnText}>Kunci Kasir (Buka Layar PIN)</Text>
+        </TouchableOpacity>
+
+        {/* 7. FOOTER PUBLIK BERSIH (TANPA KATA TECH / UNIVERSAL JARGON) */}
         <View style={styles.publicFooter}>
           <Text style={styles.footerAppName}>KantinBite v1.0.0</Text>
           <Text style={styles.footerCopyright}>Aplikasi Pembukuan & Operasional Kuliner Harian</Text>
@@ -374,5 +385,20 @@ const styles = StyleSheet.create({
     color: '#334155',
     fontWeight: '700',
     paddingVertical: 2,
+  },
+  lockAppBtn: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#DC2626',
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  lockAppBtnText: {
+    color: '#DC2626',
+    fontSize: 13,
+    fontWeight: '800',
   },
 });

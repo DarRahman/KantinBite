@@ -177,28 +177,7 @@ export const DashboardScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* 5. HORIZONTAL CATEGORY CHIPS */}
-        <View style={styles.categoryChipsWrap}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScroll}>
-            {categories.map((cat, idx) => {
-              const isActive = selectedCategory === cat;
-              return (
-                <TouchableOpacity 
-                  key={idx}
-                  activeOpacity={0.8}
-                  onPress={() => setSelectedCategory(cat)}
-                  style={[styles.categoryChip, isActive && styles.categoryChipActive]}
-                >
-                  <Text style={[styles.categoryChipText, isActive && styles.categoryChipTextActive]}>
-                    {cat}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-        </View>
-
-        {/* 6. POPULAR / FAVORITE FOOD CAROUSEL ASLI (GAYA KARTU KREM MENTEGA #FFF9D6 + '25 LAKU') */}
+        {/* 5. POPULAR / FAVORITE FOOD CAROUSEL ASLI (GAYA KARTU KREM MENTEGA #FFF9D6 + '25 LAKU') */}
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle}>Katalog Jajanan Unggulan</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Hpp')}>

@@ -67,7 +67,7 @@ export const ModernBottomNav = ({ activeTab = 'Home', navigation }) => {
           <Path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2z" />
           <Circle cx="16" cy="14" r="1.5" />
         </Svg>
-        <Text style={[styles.tabLabel, activeTab === 'Wallet' && styles.tabLabelActive]}>Katalog</Text>
+        <Text style={[styles.tabLabel, activeTab === 'Wallet' && styles.tabLabelActive]}>Katalog HPP</Text>
       </TouchableOpacity>
 
       {/* 5. ME / AKUN & PROFIL */}

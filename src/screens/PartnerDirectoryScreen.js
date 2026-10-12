@@ -162,7 +162,7 @@ export const PartnerDirectoryScreen = ({ navigation }) => {
                 icon={<AssetVisual name="chef_mascot" size={16} />}
                 onPress={() => handleCallOrWhatsApp(p)}
               >
-                Chat WhatsApp
+                Chat WA
               </TactileButton>
             </View>
 

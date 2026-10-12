@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Svg, { Path, Rect, Circle, Ellipse, G, Defs, LinearGradient, RadialGradient, Stop } from 'react-native-svg';
+import { Mascot } from './Mascot';
 
 /**
  * AssetVisual Engine
@@ -317,13 +318,7 @@ export default function AssetVisual({ name, size = 48, style }) {
     case 'bitey':
       return (
         <View style={[{ width: s, height: s, alignItems: 'center', justifyContent: 'center' }, style]}>
-          <Svg width={s} height={s} viewBox="0 0 72 72">
-            <Circle cx="36" cy="40" r="14" fill="#FED7AA" stroke="#000" strokeWidth="2.5" />
-            <Path d="M26 30 C22 18 50 18 46 30 Z" fill="#FFF" stroke="#000" strokeWidth="2.5" />
-            <Circle cx="32" cy="38" r="2" fill="#000" />
-            <Circle cx="40" cy="38" r="2" fill="#000" />
-            <Path d="M33 44 Q36 48 39 44" stroke="#EA580C" strokeWidth="2" strokeLinecap="round" />
-          </Svg>
+          <Mascot size={s} />
         </View>
       );
 
