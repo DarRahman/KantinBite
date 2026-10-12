@@ -231,6 +231,26 @@ export const DashboardScreen = ({ navigation }) => {
           <DonutIncomeRatio posAmount={145000} consignmentAmount={175000} />
         </View>
 
+        {/* KARTU PINTASAN BUKU PIUTANG MITRA */}
+        <TouchableOpacity
+          style={styles.debtBannerCard}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate('DebtLedger')}
+          accessibilityLabel="Buka Buku Piutang Mitra"
+          accessibilityRole="button"
+        >
+          <View style={styles.debtBannerLeft}>
+            <View style={styles.debtAlertDot} />
+            <View>
+              <Text style={styles.debtBannerTitle}>Buku Piutang Mitra (Rp 50.000)</Text>
+              <Text style={styles.debtBannerSub}>2 Kantin menunda setoran retur sore</Text>
+            </View>
+          </View>
+          <View style={styles.debtActionPill}>
+            <Text style={styles.debtActionPillText}>Tagih ›</Text>
+          </View>
+        </TouchableOpacity>
+
         {/* 7. TARGET OPERASIONAL & METRIK HARIAN */}
         <View style={styles.targetBanner}>
           <View style={styles.targetBannerTop}>
@@ -718,6 +738,57 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: '700',
     color: '#64748B',
+  },
+  debtBannerCard: {
+    backgroundColor: '#FFF1F2',
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#1E293B',
+    borderBottomWidth: 4,
+    borderBottomColor: '#1E293B',
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  debtBannerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+  },
+  debtAlertDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#DC2626',
+    borderWidth: 1.5,
+    borderColor: '#1E293B',
+  },
+  debtBannerTitle: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#991B1B',
+  },
+  debtBannerSub: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#64748B',
+    marginTop: 1,
+  },
+  debtActionPill: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.8,
+    borderColor: '#1E293B',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+  },
+  debtActionPillText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#DC2626',
   },
   targetBanner: {
     backgroundColor: '#F0FDF4',

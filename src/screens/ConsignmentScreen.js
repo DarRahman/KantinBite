@@ -158,6 +158,21 @@ export const ConsignmentScreen = ({ route, navigation }) => {
           </View>
         </View>
 
+        {/* SHORTCUT BUKU PIUTANG KANTIN */}
+        <TouchableOpacity
+          style={styles.debtAlertBanner}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate('DebtLedger')}
+          accessibilityLabel="Buka Buku Piutang Mitra"
+          accessibilityRole="button"
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#DC2626' }} />
+            <Text style={{ fontSize: 11.5, fontWeight: '800', color: '#991B1B' }}>Buku Piutang: Rp 50.000 Tertunda</Text>
+          </View>
+          <Text style={{ fontSize: 11, fontWeight: '800', color: '#DC2626' }}>Buka Buku ›</Text>
+        </TouchableOpacity>
+
         {/* 3. PILIH KANTIN REKANAN HORIZONTAL CAROUSEL */}
         <Text style={styles.sectionLbl}>PILIH KANTIN REKANAN</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.canteenCarousel}>
@@ -309,6 +324,18 @@ const styles = StyleSheet.create({
   },
   dateStrip: {
     marginVertical: 10,
+  },
+  debtAlertBanner: {
+    backgroundColor: '#FFF1F2',
+    borderWidth: 1.5,
+    borderColor: '#FECACA',
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
   },
   datePill: {
     flexDirection: 'row',
