@@ -6,6 +6,7 @@ import Svg, { Path, Rect, Circle } from 'react-native-svg';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { ModernBottomNav } from '../components/ModernBottomNav';
 import AssetVisual from '../components/AssetVisual';
+import { Mascot } from '../components/Mascot';
 import { getProfile, exportBackupJSON, restoreBackupJSON } from '../db/storage';
 
 export const SettingsScreen = ({ navigation }) => {
@@ -83,140 +84,172 @@ export const SettingsScreen = ({ navigation }) => {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
-        {/* HERO KARTU PROFIL USAHA PUBLIK */}
-        <View style={styles.profileCard}>
-          <View style={styles.profileAvatarBox}>
-            <AssetVisual name="chef_mascot" size={38} />
-          </View>
-          <View style={styles.profileInfo}>
-            <Text style={styles.profileBizName}>{profile.businessName || 'Dapur Berkah Bunda'}</Text>
-            <Text style={styles.profileOwner}>Pemilik: {profile.ownerName || 'Bunda Sumiati'}</Text>
-            <Text style={styles.profileWa}>WhatsApp: {profile.phone || '0812-3456-7890'}</Text>
-          </View>
-          <TouchableOpacity 
-            style={styles.editProfileBtn} 
-            activeOpacity={0.8}
-            onPress={() => Alert.alert('Ubah Profil', 'Fitur pembaruan profil usaha mandiri.')}
-          >
-            <Text style={styles.editProfileBtnText}>Ubah</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* SEKSI KEAMANAN & AKSES KASIR */}
-        <Text style={styles.sectionLbl}>KEAMANAN & AKSES KASIR</Text>
-        <View style={styles.menuGroupCard}>
-          <TouchableOpacity 
-            style={styles.menuItemRow} 
-            activeOpacity={0.7}
-            onPress={() => Alert.alert('Kunci PIN', 'PIN keamanan kasir 6 digit aktif.')}
-          >
-            <View style={styles.menuItemLeft}>
-              <View style={styles.menuIconWrap}>
-                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-                  <Rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                  <Path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </Svg>
-              </View>
-              <View>
-                <Text style={styles.menuItemTitle}>Kunci PIN Transaksi (6 Digit)</Text>
-                <Text style={styles.menuItemDesc}>Mencegah akses buka laporan tanpa izin</Text>
-              </View>
+        {/* 2. HERO PROFIL TOKO CHUNKY (KREM MADU & MASCOT BITEY) */}
+        <View style={styles.heroProfileCard}>
+          <View style={styles.profileTopRow}>
+            <View style={styles.avatarCircleWrap}>
+              <Mascot size={52} />
             </View>
-            <View style={styles.menuStatusActive}>
-              <Svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth={3}>
-                <Path d="M20 6L9 17L4 12" />
-              </Svg>
-              <Text style={styles.menuStatusActiveText}>Aktif</Text>
+
+            <View style={styles.profileTextCol}>
+              <View style={styles.statusPillLive}>
+                <View style={styles.statusDotLive} />
+                <Text style={styles.statusPillText}>TOKO AKTIF BEROPERASI</Text>
+              </View>
+              <Text style={styles.profileBizTitle}>{profile.businessName || 'Dapur Berkah Bunda'}</Text>
+              <Text style={styles.profileOwnerSub}>{profile.ownerName || 'Bunda Sumiati'} • {profile.phone || '0812-3456-7890'}</Text>
             </View>
-          </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={styles.menuItemRow} 
-            activeOpacity={0.7}
-            onPress={() => Alert.alert('Hak Akses', 'Pengaturan akses staf/kasir.')}
-          >
-            <View style={styles.menuItemLeft}>
-              <View style={styles.menuIconWrap}>
-                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-                  <Path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <Circle cx="12" cy="7" r="4" />
-                </Svg>
-              </View>
-              <View>
-                <Text style={styles.menuItemTitle}>Hak Akses Karyawan / Asisten</Text>
-                <Text style={styles.menuItemDesc}>Batasi menu dapur hanya untuk kasir langsung</Text>
-              </View>
-            </View>
-            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-              <Path d="M9 18L15 12L9 6" />
-            </Svg>
-          </TouchableOpacity>
-        </View>
-
-        {/* SEKSI KEMITRAAN & REKAPITULASI */}
-        <Text style={styles.sectionLbl}>KEMITRAAN & REKAPITULASI</Text>
-        <View style={styles.menuGroupCard}>
-          <TouchableOpacity 
-            style={styles.menuItemRow} 
-            activeOpacity={0.7}
-            onPress={() => navigation.navigate('PartnerDirectory')}
-          >
-            <View style={styles.menuItemLeft}>
-              <View style={styles.menuIconWrap}>
-                <AssetVisual name="canteen_shop" size={18} />
-              </View>
-              <View>
-                <Text style={styles.menuItemTitle}>Buku Direktori Mitra Kantin</Text>
-                <Text style={styles.menuItemDesc}>Daftar PIC, kontak nomor WA, dan persentase komisi</Text>
-              </View>
-            </View>
-            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-              <Path d="M9 18L15 12L9 6" />
-            </Svg>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.menuItemRow} 
-            activeOpacity={0.7}
-            onPress={() => navigation.navigate('FinanceReport')}
-          >
-            <View style={styles.menuItemLeft}>
-              <View style={styles.menuIconWrap}>
-                <AssetVisual name="chart_up" size={18} />
-              </View>
-              <View>
-                <Text style={styles.menuItemTitle}>Laporan Analitik & Pembukuan</Text>
-                <Text style={styles.menuItemDesc}>Rekap omzet mingguan, modal bahan, dan laba bersih</Text>
-              </View>
-            </View>
-            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-              <Path d="M9 18L15 12L9 6" />
-            </Svg>
-          </TouchableOpacity>
-        </View>
-
-        {/* PENCADANGAN BASIS DATA MANDIRI */}
-        <Text style={styles.sectionLbl}>PENCADANGAN BASIS DATA MANDIRI</Text>
-        <View style={styles.backupCard}>
-          <Text style={styles.backupDescText}>
-            Simpan salinan data resep kue, piutang kantin, dan riwayat kas harian Anda agar aman saat berganti perangkat baru.
-          </Text>
-
-          <View style={styles.backupButtonsRow}>
             <TouchableOpacity 
-              style={styles.btnExport} 
+              style={styles.editBtnChunky}
               activeOpacity={0.8}
-              onPress={handleExportClipboard}
+              onPress={() => Alert.alert('Ubah Profil Usaha', 'Form pengubahan nama usaha dan kontak operasional.')}
+              accessibilityLabel="Ubah Profil Usaha"
+              accessibilityRole="button"
             >
-              <Text style={styles.btnExportText}>Cadangkan Data (Salin)</Text>
+              <Text style={styles.editBtnText}>Ubah</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* 3. DUA KARTU BENTO OPERASIONAL UTAMA (KEMITRAAN & LAPORAN KEUANGAN) */}
+        <View style={styles.sectionTitleRow}>
+          <Text style={styles.sectionHeadingText}>Pusat Rekapitulasi</Text>
+          <Text style={styles.sectionSubtitleBadge}>Akses Cepat</Text>
+        </View>
+
+        <View style={styles.dualBentoRow}>
+          {/* KARTU 1: DIREKTORI REKANAN KANTIN */}
+          <TouchableOpacity
+            style={styles.bentoCardPartner}
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate('PartnerDirectory')}
+            accessibilityLabel="Buka Direktori Rekanan Kantin"
+            accessibilityRole="button"
+          >
+            <View style={styles.bentoIconBoxPartner}>
+              <AssetVisual name="canteen_shop" size={26} />
+            </View>
+            <Text style={styles.bentoCardTitle}>Direktori Rekanan</Text>
+            <Text style={styles.bentoCardSub}>4 Mitra Kantin Aktif</Text>
+            <View style={styles.bentoCardActionPill}>
+              <Text style={styles.bentoActionText}>Buka Mitra ›</Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* KARTU 2: LAPORAN ANALITIK KEUANGAN */}
+          <TouchableOpacity
+            style={styles.bentoCardFinance}
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate('FinanceReport')}
+            accessibilityLabel="Buka Laporan Analitik Keuangan"
+            accessibilityRole="button"
+          >
+            <View style={styles.bentoIconBoxFinance}>
+              <AssetVisual name="chart_up" size={26} />
+            </View>
+            <Text style={styles.bentoCardTitle}>Laporan Keuangan</Text>
+            <Text style={styles.bentoCardSub}>Analisis Laba & PDF</Text>
+            <View style={styles.bentoCardActionPillGreen}>
+              <Text style={styles.bentoActionTextGreen}>Lihat Laporan ›</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* 4. SEKSI KEAMANAN KASIR & AKSES PIN */}
+        <View style={styles.sectionTitleRow}>
+          <Text style={styles.sectionHeadingText}>Keamanan & Akses Kasir</Text>
+        </View>
+
+        <View style={styles.chunkyCardGroup}>
+          <TouchableOpacity 
+            style={styles.chunkyRowItem} 
+            activeOpacity={0.7}
+            onPress={() => Alert.alert('Kunci PIN Kasir', 'Kunci PIN transaksi 6 digit aktif untuk melindungi kas toko.')}
+            accessibilityLabel="Kunci PIN Transaksi"
+            accessibilityRole="button"
+          >
+            <View style={styles.rowIconWrap}>
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#EA580C" strokeWidth={2.4}>
+                <Rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <Path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </Svg>
+            </View>
+            <View style={styles.rowTextCol}>
+              <Text style={styles.rowTitleText}>Kunci PIN Kasir (6 Digit)</Text>
+              <Text style={styles.rowDescText}>Proteksi buka buku kas & laporan keuangan</Text>
+            </View>
+            <View style={styles.statusPillActive}>
+              <Text style={styles.statusTextActive}>Aktif</Text>
+            </View>
+          </TouchableOpacity>
+
+          <View style={styles.rowDivider} />
+
+          <TouchableOpacity 
+            style={styles.chunkyRowItem} 
+            activeOpacity={0.7}
+            onPress={() => Alert.alert('Hak Akses Karyawan', 'Pengaturan pembatasan akses untuk kasir dan asisten dapur.')}
+            accessibilityLabel="Hak Akses Karyawan"
+            accessibilityRole="button"
+          >
+            <View style={styles.rowIconWrap}>
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth={2.2}>
+                <Path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <Circle cx="12" cy="7" r="4" />
+              </Svg>
+            </View>
+            <View style={styles.rowTextCol}>
+              <Text style={styles.rowTitleText}>Hak Akses Staf Kasir</Text>
+              <Text style={styles.rowDescText}>Akses penjualan kilat tanpa melihat data modal</Text>
+            </View>
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth={2.5}>
+              <Path d="M9 18L15 12L9 6" strokeLinecap="round" strokeLinejoin="round" />
+            </Svg>
+          </TouchableOpacity>
+        </View>
+
+        {/* 5. SEKSI PENCADANGAN PEMBUKUAN (CHUNKY BACKUP CARD) */}
+        <View style={styles.sectionTitleRow}>
+          <Text style={styles.sectionHeadingText}>Salinan Data Pembukuan</Text>
+        </View>
+
+        <View style={styles.backupCardChunky}>
+          <View style={styles.backupHeadRow}>
+            <View style={styles.backupIconBox}>
+              <AssetVisual name="package_box" size={24} />
+            </View>
+            <View style={styles.backupHeadTextCol}>
+              <Text style={styles.backupTitleText}>Cadangan Mandiri di Perangkat</Text>
+              <Text style={styles.backupDescText}>
+                Simpan salinan resep kue, catatan piutang kantin, dan kas harian agar aman di HP Anda.
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.backupBtnRow}>
+            <TouchableOpacity 
+              style={styles.btnBackupExport} 
+              activeOpacity={0.85}
+              onPress={handleExportClipboard}
+              accessibilityLabel="Salin Cadangan Pembukuan"
+              accessibilityRole="button"
+            >
+              <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={2.5}>
+                <Path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                <Rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+              </Svg>
+              <Text style={styles.btnBackupExportText}>Salin Cadangan</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={styles.btnRestore} 
-              activeOpacity={0.8}
+              style={styles.btnBackupRestore} 
+              activeOpacity={0.85}
               onPress={handleRestoreClipboard}
+              accessibilityLabel="Pulihkan Data Pembukuan"
+              accessibilityRole="button"
             >
-              <Text style={styles.btnRestoreText}>Pulihkan Data</Text>
+              <Text style={styles.btnBackupRestoreText}>Pulihkan Data</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -224,18 +257,22 @@ export const SettingsScreen = ({ navigation }) => {
         {/* 6. TOMBOL KUNCI KASIR (MASUK LAYAR PIN) */}
         <TouchableOpacity 
           style={styles.lockAppBtn} 
-          activeOpacity={0.8}
+          activeOpacity={0.85}
           onPress={() => navigation.navigate('Auth')}
           accessibilityLabel="Kunci Kasir dan Keluar ke Layar PIN"
           accessibilityRole="button"
         >
-          <Text style={styles.lockAppBtnText}>Kunci Kasir (Buka Layar PIN)</Text>
+          <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth={2.4}>
+            <Rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <Path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </Svg>
+          <Text style={styles.lockAppBtnText}>Kunci Kasir (Buka Layar Masuk PIN)</Text>
         </TouchableOpacity>
 
-        {/* 7. FOOTER PUBLIK BERSIH (TANPA KATA TECH / UNIVERSAL JARGON) */}
+        {/* 7. FOOTER RESMI PUBLIK BERSIH */}
         <View style={styles.publicFooter}>
           <Text style={styles.footerAppName}>KantinBite v1.0.0</Text>
-          <Text style={styles.footerCopyright}>Aplikasi Pembukuan & Operasional Kuliner Harian</Text>
+          <Text style={styles.footerCopyright}>Sistem Operasional Kuliner & Pembukuan Mandiri</Text>
           <Text style={styles.footerCopyright}>© 2026 KantinBite. Seluruh hak cipta dilindungi.</Text>
         </View>
 
@@ -252,153 +289,372 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAF8F5',
   },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 12,
-    backgroundColor: '#FAF8F5',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1EFEA',
-  },
-  headerTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginBottom: 2,
-  },
-  headerTagText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#EA580C',
-    letterSpacing: 0.5,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#1E293B',
-    letterSpacing: -0.4,
-  },
   scrollContent: {
-    padding: 18,
+    paddingHorizontal: 18,
+    paddingTop: 10,
   },
-  heroCard: {
-    padding: 18,
-    marginBottom: 18,
-    borderBottomWidth: 4,
-    borderBottomColor: '#F59E0B',
-  },
-  heroTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  chefVisualBox: {
-    width: 64,
-    height: 64,
+  // HERO PROFILE CARD CHUNKY
+  heroProfileCard: {
+    backgroundColor: '#FFFBEB',
     borderRadius: 22,
-    backgroundColor: '#FEF3C7',
-    alignItems: 'center',
-    justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#FDE68A',
-  },
-  tagUniversal: {
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
-    marginBottom: 4,
-  },
-  tagUniversalText: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#B45309',
-  },
-  businessNameText: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: '#1E293B',
-  },
-  ownerNameText: {
-    fontSize: 12,
-    color: '#64748B',
-    fontWeight: '700',
-    marginTop: 1,
-  },
-  phoneText: {
-    fontSize: 11,
-    color: '#94A3B8',
-    marginTop: 1,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#1E293B',
-    marginBottom: 10,
-    marginTop: 4,
-  },
-  shortcutRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 18,
-  },
-  shortcutBtn: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    borderBottomWidth: 3.5,
-    borderBottomColor: '#CBD5E1',
-    gap: 6,
-  },
-  shortcutLabel: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#334155',
-  },
-  descText: {
-    fontSize: 12,
-    color: '#64748B',
-    lineHeight: 18,
-  },
-  teamCard: {
+    borderColor: '#1E293B',
+    borderBottomWidth: 5,
+    borderBottomColor: '#1E293B',
     padding: 16,
     marginBottom: 16,
-    borderBottomWidth: 3,
-    borderBottomColor: '#CBD5E1',
   },
-  teamHeaderTitle: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#475569',
-    marginBottom: 10,
+  profileTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
-  memberList: {
-    gap: 6,
-  },
-  memberText: {
-    fontSize: 12,
-    color: '#334155',
-    fontWeight: '700',
-    paddingVertical: 2,
-  },
-  lockAppBtn: {
+  avatarCircleWrap: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: '#DC2626',
-    borderRadius: 14,
-    paddingVertical: 12,
+    borderWidth: 2,
+    borderColor: '#1E293B',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  profileTextCol: {
+    flex: 1,
+  },
+  statusPillLive: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1.2,
+    borderColor: '#A7F3D0',
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    marginBottom: 3,
+  },
+  statusDotLive: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#10B981',
+  },
+  statusPillText: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#065F46',
+    letterSpacing: 0.4,
+  },
+  profileBizTitle: {
+    fontSize: 16.5,
+    fontWeight: '900',
+    color: '#0F172A',
+    letterSpacing: -0.3,
+  },
+  profileOwnerSub: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748B',
+    marginTop: 1,
+  },
+  editBtnChunky: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.8,
+    borderColor: '#1E293B',
+    borderBottomWidth: 3,
+    borderBottomColor: '#1E293B',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+  },
+  editBtnText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#1E293B',
+  },
+  // SECTION HEADINGS
+  sectionTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+    marginTop: 4,
+  },
+  sectionHeadingText: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#0F172A',
+  },
+  sectionSubtitleBadge: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#EA580C',
+  },
+  // DUAL BENTO CARDS
+  dualBentoRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 16,
+  },
+  bentoCardPartner: {
+    flex: 1,
+    backgroundColor: '#ECFDF5',
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#1E293B',
+    borderBottomWidth: 4,
+    borderBottomColor: '#1E293B',
+    padding: 14,
+  },
+  bentoCardFinance: {
+    flex: 1,
+    backgroundColor: '#EFF6FF',
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#1E293B',
+    borderBottomWidth: 4,
+    borderBottomColor: '#1E293B',
+    padding: 14,
+  },
+  bentoIconBoxPartner: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#1E293B',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  bentoIconBoxFinance: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#1E293B',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  bentoCardTitle: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#0F172A',
+    marginBottom: 2,
+  },
+  bentoCardSub: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#64748B',
+    marginBottom: 8,
+  },
+  bentoCardActionPill: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.2,
+    borderColor: '#1E293B',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  bentoActionText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#065F46',
+  },
+  bentoCardActionPillGreen: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.2,
+    borderColor: '#1E293B',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  bentoActionTextGreen: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#1D4ED8',
+  },
+  // CHUNKY CARD GROUP (KEAMANAN)
+  chunkyCardGroup: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#1E293B',
+    borderBottomWidth: 4,
+    borderBottomColor: '#1E293B',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    marginBottom: 16,
+  },
+  chunkyRowItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  rowIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1.5,
+    borderColor: '#1E293B',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  rowTextCol: {
+    flex: 1,
+  },
+  rowTitleText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  rowDescText: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#64748B',
+    marginTop: 1,
+  },
+  statusPillActive: {
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+  },
+  statusTextActive: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#065F46',
+  },
+  rowDivider: {
+    height: 1,
+    backgroundColor: '#F1EFEA',
+  },
+  // BACKUP CARD CHUNKY
+  backupCardChunky: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#1E293B',
+    borderBottomWidth: 4,
+    borderBottomColor: '#1E293B',
+    padding: 16,
+    marginBottom: 16,
+    gap: 12,
+  },
+  backupHeadRow: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'flex-start',
+  },
+  backupIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#FFF7ED',
+    borderWidth: 1.5,
+    borderColor: '#1E293B',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backupHeadTextCol: {
+    flex: 1,
+  },
+  backupTitleText: {
+    fontSize: 13.5,
+    fontWeight: '900',
+    color: '#0F172A',
+    marginBottom: 2,
+  },
+  backupDescText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#64748B',
+    lineHeight: 15,
+  },
+  backupBtnRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  btnBackupExport: {
+    flex: 1,
+    backgroundColor: '#EA580C',
+    borderRadius: 14,
+    borderWidth: 1.8,
+    borderColor: '#1E293B',
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#C2410C',
+    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  btnBackupExportText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  btnBackupRestore: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    borderWidth: 1.8,
+    borderColor: '#1E293B',
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#1E293B',
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  btnBackupRestoreText: {
+    color: '#0F172A',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  // LOCK APP BTN
+  lockAppBtn: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#DC2626',
+    borderBottomWidth: 4,
+    borderBottomColor: '#DC2626',
+    borderRadius: 16,
+    paddingVertical: 13,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
     marginBottom: 20,
   },
   lockAppBtnText: {
     color: '#DC2626',
     fontSize: 13,
-    fontWeight: '800',
+    fontWeight: '900',
+  },
+  // FOOTER
+  publicFooter: {
+    alignItems: 'center',
+    gap: 2,
+    paddingVertical: 8,
+  },
+  footerAppName: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#475569',
+  },
+  footerCopyright: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#94A3B8',
   },
 });
