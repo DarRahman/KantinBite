@@ -470,7 +470,8 @@ export default function AssetVisual({ name, size = 48, style }) {
             {/* Karung Kantong Gula Pasir Putih Berikat Tali */}
             <Path d="M18 28 C16 22 36 22 34 28 L36 50 C36 54 16 54 16 50 Z" fill="#FFFFFF" stroke="#18181B" strokeWidth="2.5" />
             <Rect x="20" y="24" width="12" height="5" rx="2" fill="#FEF08A" stroke="#18181B" strokeWidth="1.5" />
-            <Text x="26" y="42" fontSize="9" fontWeight="900" fill="#EA580C" textAnchor="middle">GULA</Text>
+            <Path d="M22 38 L30 38" stroke="#EA580C" strokeWidth="2" strokeLinecap="round" />
+            <Path d="M24 43 L28 43" stroke="#EA580C" strokeWidth="2" strokeLinecap="round" />
           </Svg>
         </View>
       );
