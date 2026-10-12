@@ -155,6 +155,24 @@ export const SettingsScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
+        {/* KARTU PINTASAN BUKU PIUTANG MITRA (LAYAR 10) */}
+        <TouchableOpacity
+          style={styles.debtShortcutCardSettings}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate('DebtLedger')}
+          accessibilityLabel="Buka Buku Piutang Mitra"
+          accessibilityRole="button"
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#DC2626' }} />
+            <View>
+              <Text style={{ fontSize: 13, fontWeight: '900', color: '#991B1B' }}>Buku Piutang Mitra (Layar 10)</Text>
+              <Text style={{ fontSize: 10.5, fontWeight: '600', color: '#64748B' }}>Total Rp 50.000 tagihan kantin belum lunas</Text>
+            </View>
+          </View>
+          <Text style={{ fontSize: 12, fontWeight: '900', color: '#DC2626' }}>Buka Piutang ›</Text>
+        </TouchableOpacity>
+
         {/* 4. SEKSI KEAMANAN KASIR & AKSES PIN */}
         <View style={styles.sectionTitleRow}>
           <Text style={styles.sectionHeadingText}>Keamanan & Akses Kasir</Text>
@@ -467,6 +485,19 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '800',
     color: '#1D4ED8',
+  },
+  debtShortcutCardSettings: {
+    backgroundColor: '#FFF1F2',
+    borderRadius: 18,
+    borderWidth: 2,
+    borderColor: '#1E293B',
+    borderBottomWidth: 4,
+    borderBottomColor: '#1E293B',
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
   },
   // CHUNKY CARD GROUP (KEAMANAN)
   chunkyCardGroup: {
