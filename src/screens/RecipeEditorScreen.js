@@ -7,6 +7,8 @@ import AssetVisual from '../components/AssetVisual';
 import { formatRupiah } from '../utils/formatters';
 
 export const RecipeEditorScreen = ({ navigation, route }) => {
+  const [selectedIcon, setSelectedIcon] = useState('risoles_rogout');
+  const availableIcons = ['risoles_rogout', 'pastel_telur', 'dadar_gulung', 'lemper_ayam'];
   const [recipeName, setRecipeName] = useState('Risoles Rogout Ayam');
   const [batchPortions, setBatchPortions] = useState('50');
   const [suggestedSellingPrice, setSuggestedSellingPrice] = useState('1200');
@@ -131,6 +133,42 @@ export const RecipeEditorScreen = ({ navigation, route }) => {
         {/* 3. IDENTITAS RESEP & BATCH */}
         <Text style={styles.sectionLbl}>IDENTITAS JAJANAN & TARGET BATCH</Text>
         <View style={styles.formCard}>
+          {/* PILIH IKON ATAU FOTO JAJANAN */}
+          <View style={styles.formFieldGroup}>
+            <Text style={styles.fieldLabel}>Pilihan Ikon atau Foto Jajanan</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.iconSelectorScroll}>
+              {availableIcons.map((ic) => {
+                const isSelected = selectedIcon === ic;
+                return (
+                  <TouchableOpacity
+                    key={ic}
+                    activeOpacity={0.8}
+                    onPress={() => setSelectedIcon(ic)}
+                    style={[styles.iconTileCard, isSelected && styles.iconTileCardSelected]}
+                    accessibilityLabel={`Pilih ikon ${ic}`}
+                    accessibilityRole="button"
+                  >
+                    <AssetVisual name={ic} size={42} />
+                  </TouchableOpacity>
+                );
+              })}
+
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => Alert.alert('Ambil Foto / Galeri', 'Opsi unggah foto dari kamera atau galeri HP akan aktif pada pembaruan mendatang.')}
+                style={styles.photoUploadTile}
+                accessibilityLabel="Ambil foto atau pilih dari galeri"
+                accessibilityRole="button"
+              >
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth={2}>
+                  <Path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                  <Circle cx="12" cy="13" r="4" />
+                </Svg>
+                <Text style={styles.photoUploadText}>+ Foto</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+
           <View style={styles.formFieldGroup}>
             <Text style={styles.fieldLabel}>Nama Menu Jajanan</Text>
             <TextInput
@@ -405,6 +443,45 @@ const styles = StyleSheet.create({
   },
   formFieldGroup: {
     gap: 5,
+  },
+  iconSelectorScroll: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingVertical: 4,
+  },
+  iconTileCard: {
+    width: 58,
+    height: 58,
+    borderRadius: 16,
+    backgroundColor: '#FAF8F5',
+    borderWidth: 1.8,
+    borderColor: '#E2E8F0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconTileCardSelected: {
+    borderColor: '#EA580C',
+    backgroundColor: '#FFFBEB',
+    borderWidth: 2,
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#C2410C',
+  },
+  photoUploadTile: {
+    width: 58,
+    height: 58,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.8,
+    borderColor: '#CBD5E1',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+  },
+  photoUploadText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#64748B',
   },
   fieldLabel: {
     fontSize: 11.5,

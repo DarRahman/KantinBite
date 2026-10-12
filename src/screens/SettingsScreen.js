@@ -93,8 +93,7 @@ export const SettingsScreen = ({ navigation }) => {
 
             <View style={styles.profileTextCol}>
               <View style={styles.statusPillLive}>
-                <View style={styles.statusDotLive} />
-                <Text style={styles.statusPillText}>TOKO AKTIF BEROPERASI</Text>
+                <Text style={styles.statusPillText}>TOKO BUKA</Text>
               </View>
               <Text style={styles.profileBizTitle}>{profile.businessName || 'Dapur Berkah Bunda'}</Text>
               <Text style={styles.profileOwnerSub}>{profile.ownerName || 'Bunda Sumiati'} • {profile.phone || '0812-3456-7890'}</Text>
@@ -179,8 +178,8 @@ export const SettingsScreen = ({ navigation }) => {
               <Text style={styles.rowTitleText}>Kunci PIN Kasir (6 Digit)</Text>
               <Text style={styles.rowDescText}>Proteksi buka buku kas & laporan keuangan</Text>
             </View>
-            <View style={styles.statusPillActive}>
-              <Text style={styles.statusTextActive}>Aktif</Text>
+            <View style={styles.pinActiveBadge}>
+              <Text style={styles.pinActiveBadgeText}>PIN AKTIF</Text>
             </View>
           </TouchableOpacity>
 
@@ -323,29 +322,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statusPillLive: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    backgroundColor: '#ECFDF5',
-    borderWidth: 1.2,
-    borderColor: '#A7F3D0',
-    paddingVertical: 2,
-    paddingHorizontal: 7,
-    borderRadius: 6,
+    backgroundColor: '#1E293B',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 8,
     alignSelf: 'flex-start',
-    marginBottom: 3,
-  },
-  statusDotLive: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#10B981',
+    marginBottom: 4,
   },
   statusPillText: {
-    fontSize: 9,
+    fontSize: 9.5,
     fontWeight: '900',
-    color: '#065F46',
-    letterSpacing: 0.4,
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
   profileBizTitle: {
     fontSize: 16.5,
@@ -522,18 +510,17 @@ const styles = StyleSheet.create({
     color: '#64748B',
     marginTop: 1,
   },
-  statusPillActive: {
-    backgroundColor: '#ECFDF5',
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
-    paddingVertical: 2,
+  pinActiveBadge: {
+    backgroundColor: '#059669',
+    paddingVertical: 3,
     paddingHorizontal: 8,
-    borderRadius: 6,
+    borderRadius: 8,
   },
-  statusTextActive: {
-    fontSize: 10,
+  pinActiveBadgeText: {
+    fontSize: 9.5,
     fontWeight: '900',
-    color: '#065F46',
+    color: '#FFFFFF',
+    letterSpacing: 0.4,
   },
   rowDivider: {
     height: 1,

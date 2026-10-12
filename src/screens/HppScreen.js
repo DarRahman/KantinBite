@@ -146,7 +146,7 @@ export const HppScreen = ({ navigation }) => {
               {/* HEADER KARTU: THUMBNAIL + TITLE + TOMBOL EDIT */}
               <View style={styles.cardHeaderRow}>
                 <View style={styles.foodThumbBox}>
-                  <AssetVisual name={item.icon || 'risoles_rogout'} size={48} />
+                  <AssetVisual name={item.icon || item.type || 'risoles_rogout'} size={48} />
                 </View>
 
                 <View style={styles.headerInfoCol}>
