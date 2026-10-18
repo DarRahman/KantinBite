@@ -278,9 +278,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEF3C7',
     borderBottomWidth: 2.5,
     borderBottomColor: '#FDBA74',
+    height: 220,
   },
   svgBackdrop: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 220,
   },
   scenicDecorLayer: {
     position: 'absolute',
