@@ -1,117 +1,120 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Path, Rect, Circle } from 'react-native-svg';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AnimatedPressable } from './PlayfulComponents';
 
-/**
- * ModernBottomNav — Floating Pill & Tactile Bottom Navigation Dock
- * Terinspirasi dari floating navigation dock pada Referensi 2, 3, 4, dan 5
- * dengan efek tekan membal (Spring Scale) dan tombol tengah KASIR 3D.
- */
-export const ModernBottomNav = ({ activeTab = 'Home', navigation }) => {
-  const tabsLeft = [
-    {
-      key: 'Home',
-      label: 'Beranda',
-      route: 'Dashboard',
-      renderIcon: (active) => (
-        <Svg width={20} height={20} viewBox="0 0 24 24" fill={active ? '#FED7AA' : 'none'} stroke={active ? '#EA580C' : '#64748B'} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-          <Path d="M3 9.5L12 3l9 6.5V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5z" />
-          <Path d="M9 22V12h6v10" />
+const NavSvgIcon = ({ name, active }) => {
+  const color = active ? '#EA580C' : '#9A3412';
+  const fillTint = active ? '#FFEDD5' : 'none';
+
+  switch (name) {
+    case 'Home':
+      return (
+        <Svg width={22} height={22} viewBox="0 0 24 24" fill={fillTint} stroke={color} strokeWidth={2.3} strokeLinecap="round" strokeLinejoin="round">
+          <Path d="M3 10.5L12 3l9 7.5V20a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 20v-9.5z" />
+          <Path d="M9 21V13h6v8" />
         </Svg>
-      ),
-    },
-    {
-      key: 'Activity',
-      label: 'Titip Kantin',
-      route: 'Consignment',
-      renderIcon: (active) => (
-        <Svg width={20} height={20} viewBox="0 0 24 24" fill={active ? '#FED7AA' : 'none'} stroke={active ? '#EA580C' : '#64748B'} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-          <Path d="M3 9l2-5h14l2 5" />
-          <Path d="M21 9v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9" />
-          <Path d="M9 22V13h6v9" />
+      );
+    case 'Consignment':
+      return (
+        <Svg width={22} height={22} viewBox="0 0 24 24" fill={fillTint} stroke={color} strokeWidth={2.3} strokeLinecap="round" strokeLinejoin="round">
+          <Path d="M3 9l1.8-5h14.4L21 9" />
+          <Path d="M3 9c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3" />
+          <Path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8" />
         </Svg>
-      ),
-    },
+      );
+    case 'Pos':
+      return (
+        <Svg width={25} height={25} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+          <Rect x="3" y="6" width="18" height="14" rx="3" fill="#EA580C" stroke="#FFFFFF" />
+          <Path d="M7 10h10M7 14h4M15 14h2" stroke="#FFFFFF" />
+          <Path d="M8 3h8v3H8z" />
+        </Svg>
+      );
+    case 'Hpp':
+      return (
+        <Svg width={22} height={22} viewBox="0 0 24 24" fill={fillTint} stroke={color} strokeWidth={2.3} strokeLinecap="round" strokeLinejoin="round">
+          <Rect x="4" y="4" width="16" height="17" rx="3" />
+          <Path d="M8 9h8M8 13h5M8 17h3" />
+          <Circle cx="15.5" cy="16.5" r="1.5" fill={color} />
+        </Svg>
+      );
+    case 'Settings':
+      return (
+        <Svg width={22} height={22} viewBox="0 0 24 24" fill={fillTint} stroke={color} strokeWidth={2.3} strokeLinecap="round" strokeLinejoin="round">
+          <Circle cx="12" cy="8" r="4" />
+          <Path d="M5 20c1.5-3.8 4.2-6 7-6s5.5 2.2 7 6" />
+        </Svg>
+      );
+    default:
+      return null;
+  }
+};
+
+export const ModernBottomNav = ({ activeTab, navigation }) => {
+  const insets = useSafeAreaInsets();
+  const bottomInset = Math.max(insets.bottom, 8);
+
+  const leftItems = [
+    { key: 'Home', label: 'Beranda', route: 'Dashboard' },
+    { key: 'Consignment', label: 'Titip Kantin', route: 'Consignment' },
   ];
 
-  const tabsRight = [
-    {
-      key: 'Wallet',
-      label: 'Resep HPP',
-      route: 'Hpp',
-      renderIcon: (active) => (
-        <Svg width={20} height={20} viewBox="0 0 24 24" fill={active ? '#FED7AA' : 'none'} stroke={active ? '#EA580C' : '#64748B'} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-          <Rect x="3" y="6" width="18" height="14" rx="3" />
-          <Path d="M7 6V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
-          <Circle cx="16" cy="13" r="1.5" fill={active ? '#EA580C' : '#64748B'} />
-        </Svg>
-      ),
-    },
-    {
-      key: 'Me',
-      label: 'Akun Toko',
-      route: 'Settings',
-      renderIcon: (active) => (
-        <Svg width={20} height={20} viewBox="0 0 24 24" fill={active ? '#FED7AA' : 'none'} stroke={active ? '#EA580C' : '#64748B'} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-          <Path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          <Circle cx="12" cy="7" r="4" />
-        </Svg>
-      ),
-    },
+  const rightItems = [
+    { key: 'Hpp', label: 'Resep HPP', route: 'Hpp' },
+    { key: 'Settings', label: 'Akun Toko', route: 'Settings' },
   ];
 
   return (
-    <View style={styles.outerAnchor} pointerEvents="box-none">
-      <View style={styles.navCapsule}>
-        {tabsLeft.map((tab) => {
-          const isActive = activeTab === tab.key;
+    <View style={[styles.outerWrap, { paddingBottom: bottomInset }]} pointerEvents="box-none">
+      <View style={styles.navBar}>
+        {/* 2 Tab Kiri */}
+        {leftItems.map((item) => {
+          const isActive = activeTab === item.key;
           return (
             <AnimatedPressable
-              key={tab.key}
+              key={item.key}
               scaleTo={0.9}
-              onPress={() => navigation.navigate(tab.route)}
-              style={[styles.tabBtn, isActive && styles.tabBtnActive]}
+              onPress={() => navigation.navigate(item.route)}
+              style={[styles.tabButton, isActive && styles.tabButtonActive]}
             >
-              {tab.renderIcon(isActive)}
-              <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]}>
-                {tab.label}
+              <NavSvgIcon name={item.key} active={isActive} />
+              <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]} numberOfLines={1}>
+                {item.label}
               </Text>
             </AnimatedPressable>
           );
         })}
 
-        {/* TOMBOL TENGAH ELEVATED KASIR 3D */}
-        <View style={styles.centerFabAnchor}>
+        {/* TOMBOL TENGAH KASIR POS MENONJOL */}
+        <View style={styles.centerCashierWrap}>
           <AnimatedPressable
             scaleTo={0.92}
             onPress={() => navigation.navigate('Pos')}
             style={[
-              styles.centerFabBtn,
-              activeTab === 'Kasir' && styles.centerFabBtnActive,
+              styles.centerCashierBtn,
+              activeTab === 'Pos' && styles.centerCashierBtnActive,
             ]}
           >
-            <Svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={2.3} strokeLinecap="round" strokeLinejoin="round">
-              <Rect x="2" y="7" width="20" height="14" rx="3" fill="#C2410C" />
-              <Path d="M6 3h12v4H6z" fill="#FDE047" stroke="#FFFFFF" />
-              <Path d="M6 12h4 M14 12h4 M6 16h4 M14 16h4" />
-            </Svg>
-            <Text style={styles.fabLabel}>KASIR</Text>
+            <NavSvgIcon name="Pos" active />
+            <Text style={styles.centerCashierLabel}>KASIR</Text>
           </AnimatedPressable>
         </View>
 
-        {tabsRight.map((tab) => {
-          const isActive = activeTab === tab.key;
+        {/* 2 Tab Kanan */}
+        {rightItems.map((item) => {
+          const isActive = activeTab === item.key;
           return (
             <AnimatedPressable
-              key={tab.key}
+              key={item.key}
               scaleTo={0.9}
-              onPress={() => navigation.navigate(tab.route)}
-              style={[styles.tabBtn, isActive && styles.tabBtnActive]}
+              onPress={() => navigation.navigate(item.route)}
+              style={[styles.tabButton, isActive && styles.tabButtonActive]}
             >
-              {tab.renderIcon(isActive)}
-              <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]}>
-                {tab.label}
+              <NavSvgIcon name={item.key} active={isActive} />
+              <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]} numberOfLines={1}>
+                {item.label}
               </Text>
             </AnimatedPressable>
           );
@@ -122,87 +125,73 @@ export const ModernBottomNav = ({ activeTab = 'Home', navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  outerAnchor: {
+  outerWrap: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
     paddingHorizontal: 12,
-    paddingBottom: 10,
-    backgroundColor: 'transparent',
+    paddingTop: 6,
   },
-  navCapsule: {
-    height: 68,
+  navBar: {
+    flexDirection: 'row',
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
-    borderWidth: 1.5,
-    borderColor: '#FDE68A',
-    borderBottomWidth: 4,
-    borderBottomColor: '#FDBA74',
-    flexDirection: 'row',
-    alignItems: 'center',
+    paddingVertical: 7,
+    paddingHorizontal: 6,
     justifyContent: 'space-between',
-    paddingHorizontal: 8,
+    alignItems: 'center',
+    borderWidth: 1.8,
+    borderColor: '#FDE68A',
+    borderBottomWidth: 4.5,
+    borderBottomColor: '#F59E0B',
     elevation: 10,
-    shadowColor: '#78350F',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
   },
-  tabBtn: {
+  tabButton: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 7,
-    marginHorizontal: 2,
-    borderRadius: 16,
-    minHeight: 48,
+    paddingVertical: 5,
+    borderRadius: 15,
   },
-  tabBtnActive: {
+  tabButtonActive: {
     backgroundColor: '#FFF7ED',
   },
   tabLabel: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#64748B',
-    marginTop: 3,
+    color: '#78350F',
+    marginTop: 2,
   },
   tabLabelActive: {
     color: '#EA580C',
     fontWeight: '900',
   },
-  centerFabAnchor: {
-    width: 70,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: -24,
+  centerCashierWrap: {
+    marginTop: -22,
+    paddingHorizontal: 4,
   },
-  centerFabBtn: {
+  centerCashierBtn: {
     width: 60,
     height: 60,
-    borderRadius: 22,
+    borderRadius: 20,
     backgroundColor: '#EA580C',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
+    borderWidth: 2.5,
+    borderColor: '#FFFBEB',
     borderBottomWidth: 5,
     borderBottomColor: '#9A3412',
     elevation: 8,
-    shadowColor: '#EA580C',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
   },
-  centerFabBtnActive: {
+  centerCashierBtnActive: {
     backgroundColor: '#C2410C',
-    borderColor: '#FEF08A',
   },
-  fabLabel: {
+  centerCashierLabel: {
     fontSize: 9,
     fontWeight: '900',
     color: '#FFFFFF',
-    letterSpacing: 0.6,
     marginTop: 1,
+    letterSpacing: 0.4,
   },
 });

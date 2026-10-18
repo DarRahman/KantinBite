@@ -1,6 +1,6 @@
 {
-  "summary": "Rencana penyempurnaan desain dan aturan visual KantinBite: penghapusan seluruh titik status tech/online dan warna pudar di RULES.md & DESIGN.md, perombakan 4/8 ikon operasional menjadi ilustrasi alat dapur & kantin bernuansa krem-oranye terakota seragam, harmonisasi warna kartu Masuk Hari Ini & Belanja Subuh, serta pembuatan Pop-Up Galeri Katalog 26+ Jajanan Kantin lengkap dengan gambar universal netral dan fitur unggah foto sendiri.",
-  "updatedAt": "2026-10-18T19:55:14.481140581Z",
+  "summary": "Rencana perbaikan menyeluruh arsitektur Native Mobile Android (Expo Go / APK) untuk KantinBite: memperbaiki bug initStorage di App.js, memperbaiki bug flex layout Yoga pada AnimatedPressable yang membuat kartu Masuk Hari Ini & Belanja Subuh gepeng vertikal, menghapus teks 'Dapur & Konsinyasi Kantin' di atas header, menyempurnakan ilustrasi pemandangan dapur & kantin hangat di ScenicBanner agar tampil utuh di Android SVG, serta menata responsivitas seluruh 12 layar dan ModernBottomNav.",
+  "updatedAt": "2026-10-18T23:14:34.041283429Z",
   "requestFeedback": true,
   "userFacing": true
 }

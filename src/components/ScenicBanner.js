@@ -9,14 +9,17 @@ import Svg, {
   LinearGradient,
   Stop,
   Line,
+  Ellipse,
 } from 'react-native-svg';
 import { Mascot } from './Mascot';
 
 /**
- * ScenicBanner — Header Ilustrasi Kuliner Tajam (Zero Faded Opacity, Zero Tech Dots)
- * - Warna solid, tegas, dan menyatu dalam palet Warm Cream, Honey Gold & Terracotta
- * - Bebas kapsul bertitik (Zero Parasite Dots)
- * - Ilustrasi latar tertata di sisi kanan bawah maskot sehingga tidak pernah menabrak teks
+ * ScenicBanner — Header Pemandangan Dapur & Kantin Hangat (100% Kompatibel Android SVG)
+ * - Menghapus kapsul teks "Dapur & Konsinyasi Kantin" di sudut kiri atas
+ * - Menggunakan viewBox="0 0 400 220" dengan preserveAspectRatio="none" untuk latar & kanopi
+ *   sehingga kanopi bergelombang (scalloped awning) di puncak TIDAK PERNAH terpotong di HP Android
+ * - Menampilkan suasana Dapur & Kantin Hangat: jendela dapur bercahaya, siluet stoples/etalase kue,
+ *   meja saji hangat, dan kepulan uap kue di sekitar Chef Bitey.
  */
 export const ScenicBanner = ({
   scene = 'kitchen_morning',
@@ -35,8 +38,8 @@ export const ScenicBanner = ({
         return {
           skyTop: '#FFF7ED',
           skyBottom: '#FEF3C7',
-          hillBack: '#FDE68A',
-          hillFront: '#FCD34D',
+          wallShade: '#FDE68A',
+          counterTop: '#FCD34D',
           awningA: '#EA580C',
           awningB: '#FFFBEB',
           mascotPose: scene === 'canteen_morning' ? 'canteen_drop' : 'celebrate',
@@ -45,8 +48,8 @@ export const ScenicBanner = ({
         return {
           skyTop: '#FFFBEB',
           skyBottom: '#FFEDD5',
-          hillBack: '#FDE68A',
-          hillFront: '#FDBA74',
+          wallShade: '#FDE68A',
+          counterTop: '#FDBA74',
           awningA: '#EA580C',
           awningB: '#FFFFFF',
           mascotPose: 'cashier',
@@ -55,8 +58,8 @@ export const ScenicBanner = ({
         return {
           skyTop: '#FFFBEB',
           skyBottom: '#FEF3C7',
-          hillBack: '#FDE68A',
-          hillFront: '#FCD34D',
+          wallShade: '#FDE68A',
+          counterTop: '#FCD34D',
           awningA: '#D97706',
           awningB: '#FFF7ED',
           mascotPose: 'notebook',
@@ -65,8 +68,8 @@ export const ScenicBanner = ({
         return {
           skyTop: '#FFF7ED',
           skyBottom: '#FEF3C7',
-          hillBack: '#FED7AA',
-          hillFront: '#FDBA74',
+          wallShade: '#FED7AA',
+          counterTop: '#FDBA74',
           awningA: '#C2410C',
           awningB: '#FFFBEB',
           mascotPose: 'stock_chef',
@@ -75,8 +78,8 @@ export const ScenicBanner = ({
         return {
           skyTop: '#FFFBEB',
           skyBottom: '#FEF3C7',
-          hillBack: '#FDE68A',
-          hillFront: '#FCD34D',
+          wallShade: '#FDE68A',
+          counterTop: '#FCD34D',
           awningA: '#EA580C',
           awningB: '#FFFFFF',
           mascotPose: 'baker_box',
@@ -85,8 +88,8 @@ export const ScenicBanner = ({
         return {
           skyTop: '#FFF7ED',
           skyBottom: '#FEF3C7',
-          hillBack: '#FDE68A',
-          hillFront: '#FCD34D',
+          wallShade: '#FDE68A',
+          counterTop: '#FCD34D',
           awningA: '#EA580C',
           awningB: '#FFFFFF',
           mascotPose: 'baker_box',
@@ -95,68 +98,113 @@ export const ScenicBanner = ({
   };
 
   const theme = getScenePalette();
+  const hasTopNav = Boolean(onBackPress || actionLabel || rightAvatarOnPress);
 
   return (
     <View style={styles.wrapper}>
-      {/* LAPISAN ILUSTRASI PEMANDANGAN SOLID & TAJAM (TANPA EFEK PUDAR) */}
+      {/* LAPISAN 1: LATAR DINDING DAPUR & MEJA KANTIN HANGAT (ANDROID-SAFE SVG) */}
       <View style={styles.svgBackdrop}>
-        <Svg width="100%" height="100%" viewBox="0 0 400 185" preserveAspectRatio="xMidYMid slice">
+        <Svg width="100%" height="100%" viewBox="0 0 400 220" preserveAspectRatio="none">
           <Defs>
-            <LinearGradient id={`sky_${scene}`} x1="0" y1="0" x2="0" y2="1">
+            <LinearGradient id="bgWallGrad" x1="0" y1="0" x2="0" y2="1">
               <Stop offset="0%" stopColor={theme.skyTop} />
               <Stop offset="100%" stopColor={theme.skyBottom} />
             </LinearGradient>
           </Defs>
 
-          {/* Langit Krem Hangat */}
-          <Rect x="0" y="0" width="400" height="185" fill={`url(#sky_${scene})`} />
+          {/* Dinding Krem Dapur Hangat */}
+          <Rect x="0" y="0" width="400" height="220" fill="url(#bgWallGrad)" />
 
-          {/* Kanopi Toko Roti / Kantin Solid di Puncak */}
-          <G>
-            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
-              <Path
-                key={i}
-                d={`M${i * 40} 0 H${i * 40 + 20} V10 Q${i * 40 + 10} 17 ${i * 40} 10 Z`}
-                fill={i % 2 === 0 ? theme.awningA : theme.awningB}
-              />
-            ))}
-            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
-              <Path
-                key={`b_${i}`}
-                d={`M${i * 40 + 20} 0 H${i * 40 + 40} V10 Q${i * 40 + 30} 17 ${i * 40 + 20} 10 Z`}
-                fill={theme.awningB}
-              />
-            ))}
-          </G>
-
-          {/* Matahari Pagi Cerah di Sudut Kanan Atas Belakang Maskot */}
-          <Circle cx="348" cy="54" r="28" fill="#FDE047" />
-          <Circle cx="348" cy="54" r="19" fill="#FACC15" />
-
-          {/* Awan Putih Bersih */}
-          <G>
-            <Circle cx="48" cy="36" r="11" fill="#FFFFFF" />
-            <Circle cx="62" cy="33" r="14" fill="#FFFFFF" />
-            <Circle cx="76" cy="37" r="10" fill="#FFFFFF" />
-            <Rect x="46" y="36" width="32" height="11" rx="5.5" fill="#FFFFFF" />
-          </G>
-
-          {/* Gelombang Bukit Krem Emas di Dasar Header */}
+          {/* Gelombang Meja & Lantai Dapur Hangat di Dasar (Menggunakan Kurva Bezier C Eksplisit untuk Android) */}
           <Path
-            d="M0 148 Q110 128 230 146 T400 136 L400 185 L0 185 Z"
-            fill={theme.hillBack}
+            d="M0 168 C110 148, 260 182, 400 156 L400 220 L0 220 Z"
+            fill={theme.wallShade}
           />
           <Path
-            d="M0 162 Q140 146 270 162 T400 154 L400 185 L0 185 Z"
-            fill={theme.hillFront}
+            d="M0 184 C140 168, 270 196, 400 174 L400 220 L0 220 Z"
+            fill={theme.counterTop}
           />
         </Svg>
       </View>
 
-      {/* KONTEN UTAMA HEADER */}
+      {/* LAPISAN 2: ILUSTRASI JENDELA DAPUR, RAK STOPLES & UAP KUE (PROPORSIONAL TANPA DISTORSI) */}
+      <View style={styles.scenicDecorLayer} pointerEvents="none">
+        <Svg width={220} height={150} viewBox="0 0 220 150">
+          {/* Jendela Dapur Bercahaya Hangat di Sisi Kanan */}
+          <Rect
+            x="92"
+            y="18"
+            width="64"
+            height="58"
+            rx="10"
+            fill="#FFFBEB"
+            stroke="#F59E0B"
+            strokeWidth="2.5"
+          />
+          {/* Kisi Jendela Dapur */}
+          <Line x1="124" y1="18" x2="124" y2="76" stroke="#F59E0B" strokeWidth="2" />
+          <Line x1="92" y1="47" x2="156" y2="47" stroke="#F59E0B" strokeWidth="2" />
+          {/* Kusen Bawah Jendela */}
+          <Rect x="87" y="74" width="74" height="6" rx="3" fill="#D97706" />
+
+          {/* Cahaya Pagi Hangat di Sudut Kanan Atas */}
+          <Circle cx="188" cy="40" r="26" fill="#FDE047" />
+          <Circle cx="188" cy="40" r="17" fill="#FACC15" />
+
+          {/* Rak Dapur & Stoples Kue di Kiri Jendela */}
+          <Rect x="20" y="54" width="56" height="5" rx="2.5" fill="#D97706" />
+          {/* Stoples Tepung & Toples Kue */}
+          <Rect x="26" y="34" width="16" height="20" rx="4" fill="#FFFBEB" stroke="#D97706" strokeWidth="1.8" />
+          <Rect x="28" y="30" width="12" height="4" rx="2" fill="#EA580C" />
+          <Rect x="48" y="38" width="18" height="16" rx="5" fill="#FED7AA" stroke="#C2410C" strokeWidth="1.8" />
+          <Rect x="50" y="34" width="14" height="4" rx="2" fill="#9A3412" />
+
+          {/* Kepulan Uap Kue Hangat (Steam Swirls) */}
+          <Path
+            d="M150 112 C146 102, 156 96, 151 86"
+            stroke="#FFFFFF"
+            strokeWidth="3"
+            strokeLinecap="round"
+            fill="none"
+          />
+          <Path
+            d="M164 118 C160 108, 170 102, 165 92"
+            stroke="#FFFFFF"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            fill="none"
+          />
+          <Ellipse cx="64" cy="96" rx="18" ry="6" fill="#FDE68A" />
+        </Svg>
+      </View>
+
+      {/* LAPISAN 3: KANOPI TOKO KUE / KANTIN DI PUNCAK ATAS (100% UTUH DARI KIRI KE KANAN DI ANDROID) */}
+      <View style={styles.awningTopBar} pointerEvents="none">
+        <Svg width="100%" height={18} viewBox="0 0 400 18" preserveAspectRatio="none">
+          {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => {
+            const x1 = i * 40;
+            const x2 = x1 + 20;
+            const x3 = x1 + 40;
+            return (
+              <G key={i}>
+                <Path
+                  d={`M${x1} 0 L${x2} 0 L${x2} 10 C${x2} 16, ${x1} 16, ${x1} 10 Z`}
+                  fill={theme.awningA}
+                />
+                <Path
+                  d={`M${x2} 0 L${x3} 0 L${x3} 10 C${x3} 16, ${x2} 16, ${x2} 10 Z`}
+                  fill={theme.awningB}
+                />
+              </G>
+            );
+          })}
+        </Svg>
+      </View>
+
+      {/* LAPISAN 4: KONTEN UTAMA HEADER */}
       <View style={styles.contentWrap}>
-        {/* Baris Navigasi Atas (Hanya Muncul Jika Ada Tombol Back atau Aksi Kanan) */}
-        {(onBackPress || actionLabel || rightAvatarOnPress) && (
+        {/* Baris Navigasi Atas: HANYA tombol Back (jika sub-screen) dan tombol Aksi/Profil di kanan */}
+        {hasTopNav && (
           <View style={styles.topNavRow}>
             <View style={styles.leftRow}>
               {onBackPress ? (
@@ -179,11 +227,7 @@ export const ScenicBanner = ({
                     <Path d="M12 19L5 12L12 5" />
                   </Svg>
                 </TouchableOpacity>
-              ) : (
-                <View style={styles.warmTagPill}>
-                  <Text style={styles.warmTagText}>Dapur & Konsinyasi Kantin</Text>
-                </View>
-              )}
+              ) : null}
             </View>
 
             {actionLabel ? (
@@ -206,8 +250,8 @@ export const ScenicBanner = ({
           </View>
         )}
 
-        {/* Baris Hero Judul + Maskot Chef Bitey (Bebas Tabrakan Teks) */}
-        <View style={styles.heroRow}>
+        {/* Baris Hero Judul + Maskot Chef Bitey */}
+        <View style={[styles.heroRow, !onBackPress && styles.heroRowHome]}>
           <View style={styles.titleColumn}>
             <Text style={styles.heroTitle}>{title}</Text>
             {subtitle ? <Text style={styles.heroSubtitle}>{subtitle}</Text> : null}
@@ -232,14 +276,28 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
     backgroundColor: '#FEF3C7',
-    borderBottomWidth: 2,
+    borderBottomWidth: 2.5,
     borderBottomColor: '#FDBA74',
   },
   svgBackdrop: {
     ...StyleSheet.absoluteFillObject,
   },
+  scenicDecorLayer: {
+    position: 'absolute',
+    top: 10,
+    right: 6,
+    width: 220,
+    height: 150,
+  },
+  awningTopBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 18,
+  },
   contentWrap: {
-    paddingTop: 18,
+    paddingTop: 22,
     paddingHorizontal: 18,
     paddingBottom: 16,
   },
@@ -247,11 +305,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   leftRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    minHeight: 34,
   },
   backButton: {
     width: 38,
@@ -264,19 +323,6 @@ const styles = StyleSheet.create({
     borderColor: '#FDBA74',
     borderBottomWidth: 3,
     borderBottomColor: '#EA580C',
-  },
-  warmTagPill: {
-    backgroundColor: '#FFFBEB',
-    paddingHorizontal: 11,
-    paddingVertical: 5,
-    borderRadius: 11,
-    borderWidth: 1.5,
-    borderColor: '#FDBA74',
-  },
-  warmTagText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#9A3412',
   },
   actionCtaBtn: {
     backgroundColor: '#EA580C',
@@ -295,7 +341,7 @@ const styles = StyleSheet.create({
   },
   profilePillBtn: {
     backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
+    paddingHorizontal: 13,
     paddingVertical: 7,
     borderRadius: 13,
     borderWidth: 1.5,
@@ -314,9 +360,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 2,
   },
+  heroRowHome: {
+    marginTop: -4,
+  },
   titleColumn: {
     flex: 1,
-    paddingRight: 12,
+    paddingRight: 10,
   },
   heroTitle: {
     fontSize: 22,

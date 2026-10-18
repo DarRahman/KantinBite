@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 
-import { seedInitialData } from './src/db/storage';
+import { initStorage } from './src/db/storage';
 import { AuthScreen } from './src/screens/AuthScreen';
 import { DashboardScreen } from './src/screens/DashboardScreen';
 import { HppScreen } from './src/screens/HppScreen';
@@ -23,12 +23,12 @@ const Stack = createNativeStackNavigator();
 
 export default function App() {
   useEffect(() => {
-    seedInitialData();
+    initStorage();
   }, []);
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="dark" backgroundColor="#FFFBEB" />
+      <StatusBar style="dark" backgroundColor="#FFF7ED" />
       <NavigationContainer>
         <Stack.Navigator
           initialRouteName="Dashboard"

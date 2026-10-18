@@ -335,6 +335,9 @@ export const initStorage = async () => {
   }
 };
 
+export const seedInitialData = initStorage;
+
+
 export const getProfile = async () => {
   try {
     const data = await AsyncStorage.getItem(KEYS.USER_PROFILE);

@@ -1,66 +1,89 @@
-# KantinBite — Harmonisasi Palet Kuliner, Ikon Seragam & Galeri Pop-Up 26+ Jajanan + Upload Foto
+# KantinBite — Perbaikan Arsitektur Native Mobile Android (Expo Go & APK) & Tata Letak Responsif
 
-Perbaikan menyeluruh atas ketidakselarasan visual, penghapusan ornamen *tech/online indicator* (titik bulat status & *Dynamic Island*), pembaruan aturan keras di `RULES.md` dan `DESIGN.md`, penggantian ikon operasional lama agar seragam dengan tema **Warm Cream & Terracotta**, serta penambahan **Pop-Up Katalog Galeri 26+ Jajanan Kantin + Gambar Universal Netral + Fitur Upload Foto Sendiri**.
+Perbaikan menyeluruh atas bug *runtime* dan tata letak Flexbox/SVG pada perangkat Android fisik (**Expo Go** & **APK**), mencakup perbaikan pemanggilan `initStorage` di `App.js`, perbaikan bug `AnimatedPressable` yang membuat kartu **"Masuk Hari Ini & Belanja Subuh"** tergencet vertikal (gepeng), penghapusan kapsul teks `"Dapur & Konsinyasi Kantin"` di bagian atas header, serta penyempurnaan ilustrasi latar **Pemandangan Dapur & Kantin Hangat** agar tampil utuh dan responsif di semua ukuran layar HP Android.
 
 ### User Review & Critical Decisions
 
 > [!IMPORTANT]
-> Seluruh perubahan ini dirancang untuk langsung mengatasi ke-4 tangkapan layar yang Anda tandai serta mengunci aturan desain baru di dalam dokumen `RULES.md` dan `DESIGN.md`:
+> Seluruh perbaikan di bawah ini difokuskan 100% untuk **Native Mobile Android (Expo Go & APK)** berdasarkan tangkapan layar HP Android Anda:
 
-- **Confirmed Decision 1 — Zero Tech/Online Dots & Zero Faded Design (`RULES.md` & `DESIGN.md`)**:
-  - Menghapus total *Dynamic Island* hitam bertitik di bagian atas frame, menghapus seluruh kapsul bertitik (`• DAPUR PRODUKSI PAGI`, `• SIMULATOR MODAL & MARGIN`), serta menghapus titik bulat hijau/oranye (`statDotGreen`, `statDotOrange`, `profileMiniDot`) di seluruh layar.
-  - Menghapus penggunaan *opacity* transparan/pudar pada kanopi, matahari, dan latar header sehingga seluruh warna tampil **100% tegas, hangat, dan tajam** tanpa kesan pudar.
-  - Memperbaiki teks kapitalisasi yang salah ketik seperti `"TAKaran"` menjadi `"TAKARAN BAHAN 1 ADONAN"` dan menghapus istilah teknis `"SIMULATOR"`.
-- **Confirmed Decision 2 — Penggantian Total Ikon Operasional Lama (`PastelReferenceIcon.js`)**:
-  - Mengganti 4 ikon lama (*Kasir Lapak, Titip Kantin, Gudang Stok, Belanja Subuh*) yang sebelumnya berwarna cokelat gelap kaku dengan kotak ungu/hijau/kuning belang-belang menjadi **Ilustrasi Alat Dapur & Kantin Bernuansa Krem, Madu, dan Oranye Terakota Seragam** (`#FFF7ED`, `#FEF3C7`, `#FDBA74`, `#EA580C`, `#9A3412`) sehingga menyatu hangat dengan keseluruhan aplikasi.
-- **Confirmed Decision 3 — Harmonisasi Kartu Kas "Masuk Hari Ini & Belanja Subuh" (`DashboardScreen.js`)**:
-  - Mengganti strip putih kontras bertitik hijau/oranye yang tidak nyaman dilihat menjadi **2 Kartu Mini Berdampingan Bernuansa Krem Madu & Terakota Lembut** dengan ikon visual koin/keranjang mini, kontras teks cokelat tua (`#431407`) dan oranye terakota (`#C2410C`), serta pemisah yang menyatu lembut dengan kartu dompet utama.
-- **Confirmed Decision 4 — Pop-Up Katalog Galeri 26+ Jajanan + Ikon Netral + Upload Foto Sendiri (`RecipeEditorScreen.js` & `AssetVisual.js`)**:
-  - Mengganti deretan 4 gambar di halaman Tambah/Edit Resep menjadi **Kartu Pratinjau Gambar Jajanan Aktif** dengan tombol **"Pilih Gambar Jajanan / Upload Foto"** yang membuka **Pop-Up Galeri Katalog Penuh**.
-  - Menyediakan **26+ Ilustrasi Jajanan Kantin & Pasar** yang dikelompokkan per kategori (*Gorengan, Kue Basah, Roti & Bolu, Minuman & Puding*), ditambah **3 Gambar Universal Netral** (*Piring Saji Jajanan, Boks Mika Kue, Bungkus Daun Pisang*), serta tombol **Unggah Foto Sendiri dari HP/Perangkat** untuk jajanan unik buatan sendiri.
+- **Confirmed Decision 1 — Perbaikan Dua Kartu "Masuk Hari Ini & Belanja Subuh" Sejajar 50-50 Proporsional**:
+  - **Akar Masalah di Tangkapan Layar**: Komponen `AnimatedPressable` membungkus `<Pressable>` (tanpa `style`) lalu menaruh `style={{ flex: 1 }}` di dalam `<Animated.View>`. Di mesin **Yoga Flexbox Android Native**, `<Pressable>` tanpa `flex: 1` di dalam `flexDirection: 'row'` menyusut menjadi selebar ikon (`~54px`), sementara `flex: 1` di dalamnya malah merentangkan kartu secara vertikal menjadi panjang dan memotong teks nominal!
+  - **Solusi**: Memisahkan *outer layout styles* (`flex`, `width`, `margin`, `alignSelf`) ke `<Pressable>` (atau menggunakan `Animated.createAnimatedComponent(Pressable)`) serta menata kartu **Masuk Hari Ini** dan **Belanja Subuh** secara **50-50 proporsional** dengan ikon + label di baris atas dan nominal Rupiah (`+Rp 320.000` & `-Rp 150.000`) tampil utuh dan jelas di bawahnya.
+- **Confirmed Decision 2 — Penghapusan Teks `"Dapur & Konsinyasi Kantin"` & Ilustrasi Dapur/Kantin Hangat di Header Atas**:
+  - Menghapus total kapsul `"Dapur & Konsinyasi Kantin"` dari bagian kiri atas `ScenicBanner`.
+  - Memperbaiki *rendering* `react-native-svg` pada Android (mengganti path kurva `T` yang tidak stabil di SVG Android menjadi kurva Bezier `C` eksplisit dan memperbaiki `LinearGradient` & kanopi) serta menghadirkan **Ilustrasi Suasana Dapur & Kantin Hangat** (kanopi toko kue utuh, jendela dapur bercahaya hangat, rak siluet stoples/panci, kepulan uap kue hangat, dan maskot Chef Bitey).
+- **Confirmed Decision 3 — Perbaikan Bug Fatal `initStorage` vs `seedInitialData`**:
+  - Di `App.js` sebelumnya tertulis `import { seedInitialData } from './src/db/storage'`, padahal fungsi yang diekspor di `src/db/storage.js` adalah `initStorage`. Kita akan menyelaraskan `initStorage` di `App.js` dan mengekspor alias `seedInitialData = initStorage` di `src/db/storage.js` agar tidak pernah terjadi *TypeError: seedInitialData is not a function* di Expo Go.
 
 ---
 
-### 1. Daftar Pembaruan Spesifik Berdasarkan 4 Tangkapan Layar Anda
+### 1. Overview & Core Concept
 
-1. **Perbaikan Tangkapan Layar 1 (4 Ikon Operasional: Kasir Lapak, Titip Kantin, Gudang Stok, Belanja Subuh)**:
-   - Menghapus warna latar ungu (`#DDD6FE`), hijau mint (`#A7F3D0`), hijau stabilo (`#D9F99D`), dan siluet hitam-cokelat tua (`#3D312A`) pada `PastelReferenceIcon.js`.
-   - Menggantinya dengan **8 Ilustrasi Kuliner Terakota & Krem Madu Seragam** (Mesin Kasir Toko Roti, Tenda Etalase Kantin Hangat, Stoples & Karung Tepung Dapur, Keranjang Anyaman Pasar Pagi, Buku Resep & Kalkulator, Buku Catatan Setoran, Gerai Mitra Kantin, dan Grafik Laba Emas) dengan bingkai squircle krem-oranye yang selaras satu tema.
-
-2. **Perbaikan Tangkapan Layar 2 (Strip "Masuk Hari Ini +Rp 320.000 | Belanja Subuh -Rp 150.000")**:
-   - Menghapus titik bulat hijau (`statDotGreen`) dan titik bulat oranye (`statDotOrange`) yang terlihat seperti indikator status online.
-   - Mengubah tata letaknya menjadi dua panel permukaan hangat (`#FFF7ED` dan `#FEF3C7`) dengan ikon mini `coin_gold` dan `market_cart`, warna teks yang harmonis (`#7C2D12`, `#065F46`, `#9A3412`), dan garis batas hangat yang nyaman dipandang mata.
-
-3. **Perbaikan Tangkapan Layar 3 (Badge `• DAPUR PRODUKSI PAGI` & Warna Pudar)**:
-   - Menghapus komponen `sceneBadge` dan `sceneDot` dari seluruh `ScenicBanner`.
-   - Menghilangkan efek *opacity* pudar pada kanopi toko roti, bukit latar, dan elemen dekoratif; serta mengatur ulang posisi ilustrasi latar agar tidak pernah bertabrakan dengan teks judul/subjudul.
-
-4. **Perbaikan Tangkapan Layar 4 (Layar `Racik Resep & HPP` & Pemilih Gambar Menu)**:
-   - Menghapus *Dynamic Island* hitam bertitik biru di bagian atas bingkai layar HP pada `App.js`.
-   - Memperbaiki typo `"TAKaran"` menjadi `"TAKARAN BAHAN 1 ADONAN"`.
-   - Mengganti pemilih 4 ikon menjadi **Kartu Pemilih Gambar Menu Interaktif** yang saat diklik membuka **Modal Pop-Up Galeri Jajanan Lengkap (26+ Ilustrasi + Ikon Universal Netral + Upload Foto Sendiri)**.
+- **What It Does**: Memastikan aplikasi **KantinBite** berjalan 100% mulus di **Expo Go Android** dan saat di-build menjadi **APK**, tanpa kartu yang tergencet, tanpa teks terpotong, tanpa grafik SVG yang hilang/terpotong di bagian atas, dan tanpa *crash* saat inisialisasi penyimpanan lokal.
+- **Target Audience / Persona**: Pedagang jajanan pasar & pengelola dapur konsinyasi kantin yang menggunakan berbagai ukuran layar HP Android (mulai dari layar ringkas `360dp` hingga layar lebar `430dp+`).
+- **Key Value**: Tata letak yang proporsional, responsif terhadap sistem *status bar* & *navigation bar* Android, serta visual ilustrasi dapur-kantin yang tajam di perangkat nyata.
 
 ---
 
-### 2. Arsitektur Katalog 26+ Jajanan, Ikon Universal & Foto Kustom (`AssetVisual.js`)
+### 2. User Experience & Visual Design
 
-Komponen `AssetVisual` akan diperluas agar mampu merender:
-1. **Foto Kustom Pengguna (`customPhotoUri` / `data:image/...` / `file://...`)**: Jika produk memiliki foto unggahan pengguna, `AssetVisual` otomatis menampilkan `<Image source={{ uri }} />` di dalam bingkai piring/kartu yang rapi di seluruh layar (Beranda, Kasir POS, Katalog HPP, dan Nota).
-2. **3 Ilustrasi Universal Netral (Untuk Jajanan Unik Apa Saja)**:
-   - `universal_plate`: Piring saji keramik hangat dengan tudung/hiasan daun pandan netral.
-   - `universal_box`: Boks mika kemasan jajanan kantin berpita hangat.
-   - `universal_leaf`: Bungkusan daun pisang segar tradisional dengan semat lidi.
-3. **23+ Ilustrasi Spesifik Jajanan Kantin & Pasar Nusantara**:
-   - **Gorengan Gurih**: `risoles_rogout` (Risoles Rogout), `pastel_telur` (Pastel Telur), `tahu_isi` (Tahu Isi Sayur), `bakwan_jagung` (Bakwan Sayur/Jagung), `tempe_mendoan` (Tempe Mendoan), `pisang_goreng` (Pisang Goreng Crispy), `martabak_telur` (Martabak Mini Telur).
-   - **Kue Basah Tradisional**: `dadar_gulung` (Dadar Gulung Pandan), `lemper_ayam` (Lemper Ayam), `kue_lumpur` (Kue Lumpur Kentang), `klepon_pandan` (Klepon Gula Aren), `onde_onde` (Onde-Onde Wijen), `kue_lapis` (Kue Lapis Pelangi/Beras), `putu_ayu` (Putu Ayu Kelapa), `nagasari` (Nagasari Pisang).
-   - **Roti, Bolu & Pastry**: `bolu_kukus` (Bolu Kukus Mekar), `donat_gula` (Donat Gula Salju/Meses), `brownies_coklat` (Brownies Cokelat Keju), `sosis_solo` (Sosis Solo Ayam), `pie_susu` (Pie Susu Lumer).
-   - **Minuman & Dessert Kantin**: `puding_cup` (Puding Cup Vla), `es_teh_cup` (Es Teh / Minuman Cup), `salad_buah` (Salad Buah / Jelly Cup).
+- **Header Atas (`ScenicBanner`) Tanpa Kapsul Teks Kiri**:
+  - Teks `"Dapur & Konsinyasi Kantin"` dihapus sepenuhnya sehingga area atas Beranda bersih, hanya menyisakan judul **"Dapur Berkah Bunda"**, sapaan hangat, tombol **"Profil Toko ›"** di kanan atas, dan **Maskot Chef Bitey**.
+  - Latar belakang SVG pada `ScenicBanner` menggunakan koordinat eksplisit yang kompatibel penuh dengan **Android Native `react-native-svg`**:
+    - Kanopi bergelombang (*scalloped bakery awning*) oranye terakota & krem yang rapi dari ujung kiri ke kanan tanpa terpotong ganjil.
+    - Ilustrasi jendela dapur hangat (*warm bakery window*), siluet etalase kue, kepulan uap aroma jajanan, dan meja kayu hangat di bagian bawah.
+- **Kartu Dompet & Dua Kartu Sejajar 50-50 (`DashboardScreen`)**:
+  - Kartu utama menampilkan **Uang Kas Tunai di Laci (`Rp 850.000`)**.
+  - Di bawahnya terdapat **2 Kartu Sejajar 50-50 Proporsional** (`flex: 1` pada container `Pressable`):
+    - **Kartu Kiri (Masuk Hari Ini)**: Latar krem madu (`#FEF3C7`), ikon koin emas + label `"Masuk Hari Ini"`, dan nominal tegas **`+Rp 320.000`** (`numberOfLines={1}`, `adjustsFontSizeToFit`).
+    - **Kartu Kanan (Belanja Subuh)**: Latar krem persik (`#FFF7ED`), ikon keranjang pasar + label `"Belanja Subuh"`, dan nominal tegas **`-Rp 150.000`** (`numberOfLines={1}`, `adjustsFontSizeToFit`).
+- **Grid 8 Ikon Operasional & Navigasi Bawah (`ModernBottomNav`)**:
+  - Memastikan ke-8 tombol di `quickActionGrid` (`Kasir Lapak, Titip Kantin, Gudang Stok, Belanja Subuh, Hitung HPP, Buku Piutang, Mitra Kantin, Laba Bersih`) memiliki lebar `23%` yang presisi di Android dengan `AnimatedPressable` yang meneruskan properti layout secara benar.
+  - Memastikan `ModernBottomNav` menghormati *safe area bottom inset* Android (`useSafeAreaInsets().bottom`) sehingga tidak tertutup *gesture bar* atau tombol navigasi HP.
 
 ---
 
-### 3. Pembaruan Dokumen Standar (`RULES.md` & `DESIGN.md`)
+### 3. Key Product Decisions & Trade-Offs
 
-- Menambahkan pasal eksplisit pada `RULES.md` dan `DESIGN.md`:
-  - **Aturan Anti-Pudar (Zero Washed-Out / Faded Colors)**: Dilarang menggunakan *opacity* rendah pada elemen ilustrasi utama, kanopi, atau kartu yang membuat tampilan tampak kusam/pudar.
-  - **Aturan Anti-Indikator Online/Tech (Zero Tech Dots & Notch Clutter)**: Dilarang menampilkan titik bulat indikator status (`•`), lampu hijau/oranye ala aplikasi server, atau *Dynamic Island* kamera palsu.
-  - **Aturan Kohesi Warna Kuliner (Unified Warm Culinary Palette)**: Seluruh ikon pintasan, kartu ringkasan kas, dan permukaan kartu wajib berada dalam harmoni warna **Warm Cream (`#FFFBEB`), Soft Peach (`#FFF7ED`), Honey Gold (`#F59E0B`), Roasted Terracotta (`#EA580C`), dan Deep Espresso (`#431407`)** tanpa warna pelangi yang saling bertabrakan.
+- **Decision 1 — Pemisahan Layout Style vs Inner Card Style pada `AnimatedPressable`**:
+  - *Chosen Approach*: Mengekstrak properti tata letak Flexbox (`flex`, `flexGrow`, `flexBasis`, `width`, `minWidth`, `maxWidth`, `margin*`, `alignSelf`) agar dipasang langsung pada elemen `<Pressable>`, sementara properti visual kartu (`backgroundColor`, `padding`, `borderRadius`, `border*`, `flexDirection`, `alignItems`, `justifyContent`) tetap berada di `<Animated.View>` bersama `transform: [{ scale }]`.
+  - *Why*: Pada React Native Android (mesin Yoga), jika `flex: 1` ditaruh pada anak di dalam `<Pressable>` yang tidak memiliki lebar/flex, maka `<Pressable>` gagal membagi ruang horizontal `flexDirection: 'row'` dan justru merentangkan anak secara vertikal (seperti terlihat pada kartu Masuk Hari Ini di screenshot Anda). Perbaikan di satu titik `PlayfulComponents.js` ini otomatis memperbaiki puluhan tombol dan kartu di seluruh 12 layar sekaligus!
+- **Decision 2 — Kompatibilitas SVG Android pada `ScenicBanner`**:
+  - *Chosen Approach*: Mengganti perintah path `T` (*smooth quadratic bezier shorthand*) dan perhitungan loop kanopi yang terpotong dengan path SVG eksplisit (`M`, `L`, `Q`, `C`, `Z`) serta ilustrasi jendela dapur & uap kue hangat.
+  - *Why*: Renderer `react-native-svg` di Android Native menangani `preserveAspectRatio` dan kurva `T` secara berbeda dibanding browser web, yang menyebabkan pita kanopi atas tampak putus-putus di screenshot HP Anda.
+
+---
+
+### 4. Technical Architecture & Data Strategy *(Technical Reference)*
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                   App.js (100% Native Mobile Root)                      │
+│  SafeAreaProvider ──► StatusBar ──► NavigationContainer                 │
+│  useEffect(() => initStorage())  [+ alias seedInitialData in storage]   │
+└───────────────────────────────────┬─────────────────────────────────────┘
+                                    │
+        ┌───────────────────────────┼───────────────────────────┐
+        ▼                           ▼                           ▼
+┌──────────────────────┐  ┌──────────────────────────┐  ┌──────────────────────┐
+│  ScenicBanner.js     │  │  PlayfulComponents.js    │  │  ModernBottomNav.js  │
+│ • Hapus pill "Dapur  │  │ • AnimatedPressable:     │  │ • SafeArea bottom    │
+│   & Konsinyasi"      │  │   Pisahkan outer flex/   │  │   inset otomatis     │
+│ • Ilustrasi Jendela  │  │   width style ke         │  │   untuk HP Android   │
+│   Dapur & Uap Kue    │  │   Pressable agar 50-50   │  │ • 5 Tab + Tombol     │
+│ • SVG Android-safe   │  │   row bekerja di Android │  │   Tengah KASIR       │
+└──────────────────────┘  └──────────────────────────┘  └──────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│         12 Layar Responsif Android (Dashboard, POS, Consignment,        │
+│         Hpp, RecipeEditor + 26 Snack Gallery, Stock, Market, dll.)      │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+- **Data Model & Storage Initialization (`src/db/storage.js` & `App.js`)**:
+  - `initStorage()` tetap menjadi fungsi utama pengisian data awal (`DEFAULT_PROFILE`, `DEFAULT_PRODUCTS`, `DEFAULT_CANTEENS`, `DEFAULT_CASHFLOW`, `DEFAULT_CONSIGNMENT`, `DEFAULT_STOCK_ITEMS`, `DEFAULT_MARKET_ITEMS`, `DEFAULT_DEBTS`).
+  - Menambahkan `export const seedInitialData = initStorage;` di `src/db/storage.js` dan memanggil `initStorage()` di `App.js` agar 100% bebas error.
+- **Interactive Component & State Mapping**:
+  - Seluruh kartu `walletSubCardWarm` & `walletSubCardPeach` di `DashboardScreen`, tombol pintasan 2x4, pill filter, stepper di `PosScreen` & `ConsignmentScreen`, serta galeri pop-up 26+ jajanan di `RecipeEditorScreen` diuji agar proporsional di layar sempit maupun lebar pada Expo Go Android.

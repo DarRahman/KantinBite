@@ -7,9 +7,38 @@ import {
   Animated,
 } from 'react-native';
 
+const OUTER_LAYOUT_KEYS = new Set([
+  'flex',
+  'flexGrow',
+  'flexShrink',
+  'flexBasis',
+  'width',
+  'minWidth',
+  'maxWidth',
+  'height',
+  'minHeight',
+  'maxHeight',
+  'margin',
+  'marginTop',
+  'marginBottom',
+  'marginLeft',
+  'marginRight',
+  'marginHorizontal',
+  'marginVertical',
+  'alignSelf',
+  'position',
+  'top',
+  'bottom',
+  'left',
+  'right',
+  'zIndex',
+]);
+
 /**
  * AnimatedPressable — Pembungkus Sentuhan Membal (Spring Scale Micro-interaction)
- * Membuat setiap kartu, tombol, dan ikon squircle terasa responsif seperti aplikasi mobile native.
+ * Kompatibel 100% dengan Yoga Flexbox Android Native (Expo Go & APK):
+ * Memisahkan outer layout styles (flex, width, margin, alignSelf) ke <Pressable>
+ * sehingga kartu 50-50 dan grid 4 kolom tidak pernah menyusut/gepeng di HP Android.
  */
 export function AnimatedPressable({
   children,
@@ -42,6 +71,18 @@ export function AnimatedPressable({
     }).start();
   };
 
+  const flatStyle = StyleSheet.flatten(style) || {};
+  const outerStyle = {};
+  const innerStyle = {};
+
+  Object.keys(flatStyle).forEach((key) => {
+    if (OUTER_LAYOUT_KEYS.has(key)) {
+      outerStyle[key] = flatStyle[key];
+    } else {
+      innerStyle[key] = flatStyle[key];
+    }
+  });
+
   return (
     <Pressable
       onPress={onPress}
@@ -50,8 +91,16 @@ export function AnimatedPressable({
       disabled={disabled}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole={accessibilityRole}
+      style={outerStyle}
     >
-      <Animated.View style={[style, { transform: [{ scale: scaleAnim }] }]}>
+      <Animated.View
+        style={[
+          innerStyle,
+          outerStyle.width ? { width: '100%' } : null,
+          outerStyle.flex ? { width: '100%' } : null,
+          { transform: [{ scale: scaleAnim }] },
+        ]}
+      >
         {children}
       </Animated.View>
     </Pressable>

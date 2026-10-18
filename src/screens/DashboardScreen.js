@@ -120,7 +120,7 @@ export const DashboardScreen = ({ navigation }) => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* 1. SCENIC MORNING KITCHEN BANNER (SOLID, TANPA TITIK INDIKATOR TECH) */}
+        {/* 1. SCENIC MORNING KITCHEN BANNER (SOLID, TANPA KAPSUL KIRI ATAS) */}
         <ScenicBanner
           scene="kitchen_morning"
           title={profile.businessName || 'Dapur Berkah Bunda'}
@@ -150,7 +150,7 @@ export const DashboardScreen = ({ navigation }) => {
         </ScenicBanner>
 
         <View style={styles.bodyPadding}>
-          {/* 2. HERO DOMPET KAS HARIAN BERVOLUME DENGAN KARTU MASUK & BELANJA YANG MENYATU */}
+          {/* 2. HERO DOMPET KAS HARIAN BERVOLUME DENGAN 2 KARTU SEJAJAR 50-50 PROPORSIONAL */}
           <View style={styles.heroWalletCard}>
             <View style={styles.walletHeaderRow}>
               <View style={styles.walletLabelBox}>
@@ -171,8 +171,12 @@ export const DashboardScreen = ({ navigation }) => {
             </View>
 
             <View style={styles.walletBalanceRow}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.walletAmountText}>
+              <View style={{ flex: 1, paddingRight: 8 }}>
+                <Text
+                  style={styles.walletAmountText}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
                   {hideBalance ? 'Rp ••••••••' : formatRupiah(cashflow.walletBalance)}
                 </Text>
                 <Text style={styles.walletSubHelper}>
@@ -182,22 +186,28 @@ export const DashboardScreen = ({ navigation }) => {
               <AssetVisual name="wallet_purse" size={50} />
             </View>
 
-            {/* DUA KARTU MINI HARMONIS (TANPA TITIK BULAT HIJAU/ORANYE, WARNA KREM-TERAKOTA MENYATU) */}
+            {/* DUA KARTU MINI SEJAJAR 50-50 PROPORSIONAL (RESPONSIF DI SEMUA UKURAN LAYAR HP ANDROID) */}
             <View style={styles.walletDualCardsRow}>
               <AnimatedPressable
                 scaleTo={0.97}
                 onPress={() => navigation.navigate('FinanceReport')}
                 style={styles.walletSubCardWarm}
               >
-                <View style={styles.walletSubIconWrap}>
-                  <AssetVisual name="coin_gold" size={22} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.statItemLbl}>Masuk Hari Ini</Text>
-                  <Text style={styles.statItemValWarmIncome}>
-                    +{formatRupiah(cashflow.totalIncomeToday)}
+                <View style={styles.walletSubTopRow}>
+                  <View style={styles.walletSubIconWrap}>
+                    <AssetVisual name="coin_gold" size={20} />
+                  </View>
+                  <Text style={styles.statItemLbl} numberOfLines={1}>
+                    Masuk Hari Ini
                   </Text>
                 </View>
+                <Text
+                  style={styles.statItemValWarmIncome}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  +{formatRupiah(cashflow.totalIncomeToday)}
+                </Text>
               </AnimatedPressable>
 
               <AnimatedPressable
@@ -205,15 +215,21 @@ export const DashboardScreen = ({ navigation }) => {
                 onPress={() => navigation.navigate('MarketShopping')}
                 style={styles.walletSubCardPeach}
               >
-                <View style={styles.walletSubIconWrap}>
-                  <AssetVisual name="market_cart" size={22} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.statItemLbl}>Belanja Subuh</Text>
-                  <Text style={styles.statItemValWarmExpense}>
-                    -{formatRupiah(cashflow.totalExpenseToday)}
+                <View style={styles.walletSubTopRow}>
+                  <View style={styles.walletSubIconWrap}>
+                    <AssetVisual name="market_cart" size={20} />
+                  </View>
+                  <Text style={styles.statItemLbl} numberOfLines={1}>
+                    Belanja Subuh
                   </Text>
                 </View>
+                <Text
+                  style={styles.statItemValWarmExpense}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  -{formatRupiah(cashflow.totalExpenseToday)}
+                </Text>
               </AnimatedPressable>
             </View>
 
@@ -229,7 +245,7 @@ export const DashboardScreen = ({ navigation }) => {
               }
             >
               <AssetVisual name="check_badge" size={18} />
-              <Text style={styles.dailyClosingBtnText}>
+              <Text style={styles.dailyClosingBtnText} numberOfLines={1}>
                 Cek Laci Sore: Uang Fisik {formatRupiah(cashflow.walletBalance)} (Cocok)
               </Text>
               <Text style={styles.closingArrow}>Rekap ›</Text>
@@ -250,8 +266,10 @@ export const DashboardScreen = ({ navigation }) => {
               style={styles.quickActionTile}
               onPress={() => navigation.navigate('Pos')}
             >
-              <PastelReferenceIcon type="pos" size={64} />
-              <Text style={styles.actionTileLabel}>Kasir Lapak</Text>
+              <PastelReferenceIcon type="pos" size={62} />
+              <Text style={styles.actionTileLabel} numberOfLines={1}>
+                Kasir Lapak
+              </Text>
             </AnimatedPressable>
 
             <AnimatedPressable
@@ -259,8 +277,10 @@ export const DashboardScreen = ({ navigation }) => {
               style={styles.quickActionTile}
               onPress={() => navigation.navigate('Consignment')}
             >
-              <PastelReferenceIcon type="canteen" size={64} />
-              <Text style={styles.actionTileLabel}>Titip Kantin</Text>
+              <PastelReferenceIcon type="canteen" size={62} />
+              <Text style={styles.actionTileLabel} numberOfLines={1}>
+                Titip Kantin
+              </Text>
             </AnimatedPressable>
 
             <AnimatedPressable
@@ -268,8 +288,10 @@ export const DashboardScreen = ({ navigation }) => {
               style={styles.quickActionTile}
               onPress={() => navigation.navigate('Stock')}
             >
-              <PastelReferenceIcon type="stock" size={64} />
-              <Text style={styles.actionTileLabel}>Gudang Stok</Text>
+              <PastelReferenceIcon type="stock" size={62} />
+              <Text style={styles.actionTileLabel} numberOfLines={1}>
+                Gudang Stok
+              </Text>
             </AnimatedPressable>
 
             <AnimatedPressable
@@ -277,19 +299,23 @@ export const DashboardScreen = ({ navigation }) => {
               style={styles.quickActionTile}
               onPress={() => navigation.navigate('MarketShopping')}
             >
-              <PastelReferenceIcon type="market" size={64} />
-              <Text style={styles.actionTileLabel}>Belanja Subuh</Text>
+              <PastelReferenceIcon type="market" size={62} />
+              <Text style={styles.actionTileLabel} numberOfLines={1}>
+                Belanja Subuh
+              </Text>
             </AnimatedPressable>
           </View>
 
-          <View style={[styles.quickActionGrid, { marginTop: 2, marginBottom: 18 }]}>
+          <View style={[styles.quickActionGrid, { marginTop: 4, marginBottom: 18 }]}>
             <AnimatedPressable
               scaleTo={0.92}
               style={styles.quickActionTile}
               onPress={() => navigation.navigate('Hpp')}
             >
-              <PastelReferenceIcon type="hpp" size={64} />
-              <Text style={styles.actionTileLabel}>Hitung HPP</Text>
+              <PastelReferenceIcon type="hpp" size={62} />
+              <Text style={styles.actionTileLabel} numberOfLines={1}>
+                Hitung HPP
+              </Text>
             </AnimatedPressable>
 
             <AnimatedPressable
@@ -297,8 +323,10 @@ export const DashboardScreen = ({ navigation }) => {
               style={styles.quickActionTile}
               onPress={() => navigation.navigate('DebtLedger')}
             >
-              <PastelReferenceIcon type="debt" size={64} />
-              <Text style={styles.actionTileLabel}>Buku Piutang</Text>
+              <PastelReferenceIcon type="debt" size={62} />
+              <Text style={styles.actionTileLabel} numberOfLines={1}>
+                Buku Piutang
+              </Text>
             </AnimatedPressable>
 
             <AnimatedPressable
@@ -306,8 +334,10 @@ export const DashboardScreen = ({ navigation }) => {
               style={styles.quickActionTile}
               onPress={() => navigation.navigate('PartnerDirectory')}
             >
-              <PastelReferenceIcon type="partner" size={64} />
-              <Text style={styles.actionTileLabel}>Mitra Kantin</Text>
+              <PastelReferenceIcon type="partner" size={62} />
+              <Text style={styles.actionTileLabel} numberOfLines={1}>
+                Mitra Kantin
+              </Text>
             </AnimatedPressable>
 
             <AnimatedPressable
@@ -315,8 +345,10 @@ export const DashboardScreen = ({ navigation }) => {
               style={styles.quickActionTile}
               onPress={() => navigation.navigate('FinanceReport')}
             >
-              <PastelReferenceIcon type="report" size={64} />
-              <Text style={styles.actionTileLabel}>Laba Bersih</Text>
+              <PastelReferenceIcon type="report" size={62} />
+              <Text style={styles.actionTileLabel} numberOfLines={1}>
+                Laba Bersih
+              </Text>
             </AnimatedPressable>
           </View>
 
@@ -350,7 +382,7 @@ export const DashboardScreen = ({ navigation }) => {
                   </View>
 
                   <View style={styles.foodImageCenter}>
-                    <AssetVisual name={item.icon || item.type || 'risoles_rogout'} size={78} />
+                    <AssetVisual name={item.icon || item.type || 'risoles_rogout'} size={76} />
                   </View>
 
                   <Text style={styles.foodCardName} numberOfLines={1}>
@@ -485,7 +517,7 @@ export const DashboardScreen = ({ navigation }) => {
             })}
           </View>
 
-          <View style={{ height: 96 }} />
+          <View style={{ height: 104 }} />
         </View>
       </ScrollView>
 
@@ -503,7 +535,7 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   bodyPadding: {
-    paddingHorizontal: 18,
+    paddingHorizontal: 16,
     paddingTop: 14,
   },
   floatingSearchBox: {
@@ -542,7 +574,7 @@ const styles = StyleSheet.create({
   heroWalletCard: {
     backgroundColor: '#FFFBEB',
     borderRadius: 24,
-    padding: 16,
+    padding: 15,
     borderWidth: 1.8,
     borderColor: '#FDE68A',
     borderBottomWidth: 4.5,
@@ -580,7 +612,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   walletAmountText: {
-    fontSize: 30,
+    fontSize: 29,
     fontWeight: '900',
     color: '#431407',
     letterSpacing: -0.8,
@@ -593,81 +625,85 @@ const styles = StyleSheet.create({
   },
   walletDualCardsRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     gap: 10,
   },
   walletSubCardWarm: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#FEF3C7',
     borderRadius: 16,
-    paddingVertical: 10,
-    paddingHorizontal: 11,
+    paddingVertical: 11,
+    paddingHorizontal: 12,
     borderWidth: 1.5,
     borderColor: '#FDE68A',
-    borderBottomWidth: 3,
+    borderBottomWidth: 3.5,
     borderBottomColor: '#F59E0B',
-    gap: 8,
   },
   walletSubCardPeach: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#FFF7ED',
     borderRadius: 16,
-    paddingVertical: 10,
-    paddingHorizontal: 11,
+    paddingVertical: 11,
+    paddingHorizontal: 12,
     borderWidth: 1.5,
     borderColor: '#FED7AA',
-    borderBottomWidth: 3,
+    borderBottomWidth: 3.5,
     borderBottomColor: '#FDBA74',
-    gap: 8,
+  },
+  walletSubTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    marginBottom: 5,
   },
   walletSubIconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
+    width: 28,
+    height: 28,
+    borderRadius: 9,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
   },
   statItemLbl: {
-    fontSize: 10.5,
+    flex: 1,
+    fontSize: 11.5,
     fontWeight: '800',
     color: '#78350F',
   },
   statItemValWarmIncome: {
-    fontSize: 13.5,
+    fontSize: 16,
     fontWeight: '900',
     color: '#431407',
-    marginTop: 1,
+    letterSpacing: -0.3,
   },
   statItemValWarmExpense: {
-    fontSize: 13.5,
+    fontSize: 16,
     fontWeight: '900',
     color: '#9A3412',
-    marginTop: 1,
+    letterSpacing: -0.3,
   },
   dailyClosingBtn: {
-    marginTop: 10,
+    marginTop: 11,
     backgroundColor: '#FFF7ED',
-    borderRadius: 14,
+    borderRadius: 13,
     paddingVertical: 9,
     paddingHorizontal: 12,
+    borderWidth: 1.5,
+    borderColor: '#FED7AA',
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#FED7AA',
     gap: 7,
   },
   dailyClosingBtnText: {
     flex: 1,
-    fontSize: 11.5,
+    fontSize: 11,
     fontWeight: '800',
-    color: '#78350F',
+    color: '#9A3412',
   },
   closingArrow: {
-    fontSize: 11.5,
+    fontSize: 11,
     fontWeight: '900',
     color: '#EA580C',
   },
@@ -675,16 +711,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 11,
+    marginTop: 4,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 15.5,
     fontWeight: '900',
     color: '#431407',
     letterSpacing: -0.3,
   },
   sectionSubHint: {
-    fontSize: 11.5,
+    fontSize: 11,
     fontWeight: '600',
     color: '#78350F',
     marginTop: 1,
@@ -697,66 +734,67 @@ const styles = StyleSheet.create({
   quickActionGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
     marginBottom: 10,
   },
   quickActionTile: {
-    width: '23.5%',
+    flex: 1,
     alignItems: 'center',
+    paddingHorizontal: 2,
   },
   actionTileLabel: {
-    fontSize: 11.5,
+    marginTop: 6,
+    fontSize: 11,
     fontWeight: '800',
     color: '#431407',
-    marginTop: 6,
     textAlign: 'center',
   },
   foodCarouselScroll: {
-    paddingBottom: 14,
-    gap: 12,
+    paddingBottom: 8,
+    marginBottom: 14,
   },
   foodCardPlated: {
     width: 148,
     backgroundColor: '#FFFBEB',
-    borderRadius: 22,
+    borderRadius: 20,
     padding: 12,
+    marginRight: 12,
     borderWidth: 1.5,
     borderColor: '#FDE68A',
     borderBottomWidth: 4,
     borderBottomColor: '#F59E0B',
   },
   foodCardTopTag: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 9,
-    borderWidth: 1,
-    borderColor: '#FDE68A',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
   },
   foodCardLakuBadge: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#B45309',
+    color: '#9A3412',
+    backgroundColor: '#FFEDD5',
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+    borderRadius: 8,
   },
   foodImageCenter: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 4,
+    marginVertical: 6,
   },
   foodCardName: {
-    fontSize: 13.5,
+    fontSize: 12.5,
     fontWeight: '900',
     color: '#431407',
-    marginTop: 4,
+    marginBottom: 5,
   },
   foodPriceRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 6,
+    alignItems: 'center',
   },
   foodPriceText: {
-    fontSize: 13.5,
+    fontSize: 13,
     fontWeight: '900',
     color: '#EA580C',
   },
@@ -764,33 +802,35 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEF3C7',
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 7,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
   },
   profitMiniText: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontWeight: '800',
     color: '#92400E',
   },
   targetBentoCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FFF7ED',
     borderRadius: 22,
-    padding: 16,
+    padding: 15,
+    marginBottom: 16,
     borderWidth: 1.5,
-    borderColor: '#FED7AA',
+    borderColor: '#FDBA74',
     borderBottomWidth: 4,
-    borderBottomColor: '#FDBA74',
-    marginBottom: 14,
+    borderBottomColor: '#EA580C',
   },
   targetTopRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   targetOverline: {
     fontSize: 10,
-    fontWeight: '800',
-    color: '#9A3412',
-    letterSpacing: 0.4,
+    fontWeight: '900',
+    color: '#C2410C',
+    letterSpacing: 0.5,
   },
   targetHeadline: {
     fontSize: 15,
@@ -800,14 +840,14 @@ const styles = StyleSheet.create({
   },
   targetPctBadge: {
     backgroundColor: '#EA580C',
-    paddingHorizontal: 10,
+    paddingHorizontal: 11,
     paddingVertical: 5,
     borderRadius: 12,
   },
   targetPctText: {
+    color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '900',
-    color: '#FFFFFF',
   },
   targetMetricsRow: {
     flexDirection: 'row',
@@ -817,10 +857,12 @@ const styles = StyleSheet.create({
   },
   targetMetricChip: {
     flex: 1,
-    backgroundColor: '#FFF7ED',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
+    paddingVertical: 7,
+    paddingHorizontal: 9,
+    borderWidth: 1,
+    borderColor: '#FED7AA',
   },
   metricLabel: {
     fontSize: 10,
@@ -828,23 +870,23 @@ const styles = StyleSheet.create({
     color: '#78350F',
   },
   metricVal: {
-    fontSize: 13,
+    fontSize: 12.5,
     fontWeight: '900',
     color: '#431407',
-    marginTop: 2,
+    marginTop: 1,
   },
   debtBannerCard: {
-    backgroundColor: '#FFF7ED',
-    borderRadius: 20,
-    padding: 14,
+    backgroundColor: '#FEF3C7',
+    borderRadius: 18,
+    padding: 13,
+    marginBottom: 18,
     borderWidth: 1.5,
-    borderColor: '#FDBA74',
-    borderBottomWidth: 4,
-    borderBottomColor: '#EA580C',
+    borderColor: '#FDE68A',
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#D97706',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 18,
   },
   debtBannerLeft: {
     flexDirection: 'row',
@@ -853,54 +895,57 @@ const styles = StyleSheet.create({
     paddingRight: 8,
   },
   debtBannerTitle: {
-    fontSize: 13,
+    fontSize: 12.5,
     fontWeight: '900',
-    color: '#7C2D12',
+    color: '#78350F',
   },
   debtBannerSub: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#9A3412',
-    marginTop: 2,
+    color: '#92400E',
+    marginTop: 1,
   },
   debtActionPill: {
     backgroundColor: '#EA580C',
-    paddingHorizontal: 12,
+    paddingHorizontal: 11,
     paddingVertical: 7,
-    borderRadius: 12,
+    borderRadius: 11,
   },
   debtActionPillText: {
     color: '#FFFFFF',
     fontSize: 11.5,
-    fontWeight: '800',
+    fontWeight: '900',
   },
   activityListWrap: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    borderWidth: 1.5,
-    borderColor: '#FED7AA',
-    borderBottomWidth: 3.5,
-    borderBottomColor: '#FDBA74',
+    backgroundColor: '#FFFBEB',
+    borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 6,
+    borderWidth: 1.5,
+    borderColor: '#FDE68A',
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#F59E0B',
   },
   activityRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 11,
     borderBottomWidth: 1,
-    borderBottomColor: '#FFF7ED',
+    borderBottomColor: '#FEF3C7',
   },
   actIconWrap: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
   },
   actInfoCol: {
     flex: 1,
+    marginLeft: 11,
+    paddingRight: 8,
   },
   actTitleText: {
     fontSize: 13,
