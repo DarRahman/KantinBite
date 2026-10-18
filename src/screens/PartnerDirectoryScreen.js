@@ -1,175 +1,205 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, StatusBar, Linking, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  StatusBar,
+  Linking,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ModernBottomNav } from '../components/ModernBottomNav';
+import { ScenicBanner } from '../components/ScenicBanner';
 import AssetVisual from '../components/AssetVisual';
-import { BentoCard, TactileButton } from '../components/PlayfulComponents';
+import { PartnerAvatar, CanteenPodiumScene } from '../components/Mascot';
+import { AnimatedPressable, AnimatedProgressBar } from '../components/PlayfulComponents';
+import { getCanteens } from '../db/storage';
 
 export const PartnerDirectoryScreen = ({ navigation }) => {
   const [partners, setPartners] = useState([
     {
-      id: 'p1',
-      name: 'Kantin Fakultas Teknik (FT)',
+      id: 'c1',
+      name: 'Kantin Fakultas Teknik',
       pic: 'Pak Joko Sutrisno',
       phone: '081298765432',
-      address: 'Lantai 1 Gedung Sayap Barat STIKOM',
+      address: 'Lantai 1 Gedung Sayap Barat',
       dropSchedule: '06:30 Pagi',
-      fee: 'Rp 500 / pcs',
-      avgSold: '25-30 pcs / hari',
-      favoriteMenu: 'Risoles Rogout Mayo',
-      absorption: '92% Laku',
-      recommendation: 'Serapan tinggi: pasokan aman dinaikkan +5 pcs',
-      isActive: true,
+      fee: 'Rp 400 / pcs',
+      avgSold: '420 pcs / mgg',
+      favoriteMenu: 'Risoles Rogout Ayam',
+      absorption: 92,
+      recommendation: 'Serapan tertinggi: kuota aman ditambah +10 pcs',
     },
     {
-      id: 'p2',
-      name: 'Koperasi Mahasiswa STIKOM',
+      id: 'c2',
+      name: 'Koperasi Mahasiswa',
       pic: 'Mas Arif Hidayat',
       phone: '085711223344',
       address: 'Lobi Utama Gedung Rektorat',
       dropSchedule: '07:00 Pagi',
       fee: 'Rp 500 / pcs',
-      avgSold: '20-25 pcs / hari',
-      favoriteMenu: 'Pastel Telur Sayur',
-      absorption: '85% Laku',
-      recommendation: 'Serapan stabil: pertahankan kuota 25 pcs',
-      isActive: true,
+      avgSold: '315 pcs / mgg',
+      favoriteMenu: 'Pastel Sayur Telur',
+      absorption: 85,
+      recommendation: 'Penjualan stabil: pertahankan 25 pcs setiap pagi',
     },
     {
-      id: 'p3',
-      name: 'Kantin SMP Negeri 1 Cirebon',
-      pic: 'Ibu Hj. Siti Khodijah',
+      id: 'c3',
+      name: 'Kantin SMPN 1 Cirebon',
+      pic: 'Bu Siti Khodijah',
       phone: '081322334455',
-      address: 'Pujasera Belakang Lapangan Olahraga',
+      address: 'Pujasera Lapangan Olahraga',
       dropSchedule: '06:15 Pagi',
       fee: 'Rp 400 / pcs',
-      avgSold: '40-50 pcs / hari',
-      favoriteMenu: 'Dadar Gulung & Lemper Ayam',
-      absorption: '68% Laku',
-      recommendation: 'Retur agak tinggi: batasi 35 pcs agar kue tidak basi',
-      isActive: true,
+      avgSold: '280 pcs / mgg',
+      favoriteMenu: 'Dadar Gulung Pandan',
+      absorption: 78,
+      recommendation: 'Laris saat jam istirahat pertama pukul 09:30',
     },
     {
-      id: 'p4',
-      name: 'Lapak Subuh Pasar Kanoman',
-      pic: 'Bang Ujang',
+      id: 'c4',
+      name: 'Warung Kopi Kampus',
+      pic: 'Bang Hendra',
       phone: '087811992233',
-      address: 'Blok Kue Basah No. 14 Pasar Kanoman',
-      dropSchedule: '04:30 Subuh',
-      fee: 'Grosir Putus',
-      avgSold: '60 pcs / hari',
-      favoriteMenu: 'Aneka Gorengan Campur',
-      absorption: '98% Laku',
-      recommendation: 'Sangat laris: siap tambah variasi jajanan',
-      isActive: true,
+      address: 'Area Parkir Timur Kampus',
+      dropSchedule: '06:45 Pagi',
+      fee: 'Rp 300 / pcs',
+      avgSold: '210 pcs / mgg',
+      favoriteMenu: 'Lemper Ayam Ketan',
+      absorption: 88,
+      recommendation: 'Cocok ditambah variasi gorengan pedas',
     },
   ]);
 
+  useEffect(() => {
+    loadCanteens();
+  }, []);
+
+  const loadCanteens = async () => {
+    const list = await getCanteens();
+    if (list && list.length > 0) {
+      const merged = list.map((c, idx) => ({
+        id: c.id || String(idx),
+        name: c.name,
+        pic: c.pic,
+        phone: c.phone || '081298765432',
+        address: c.address || 'Area Kampus & Sekolah',
+        dropSchedule: c.dropSchedule || '06:30 Pagi',
+        fee: typeof c.fee === 'number' ? `Rp ${c.fee} / pcs` : c.fee || 'Rp 400 / pcs',
+        avgSold: c.avgSold || '30 pcs / hari',
+        favoriteMenu: c.favoriteMenu || 'Risoles Rogout Ayam',
+        absorption: Number(c.absorption) || 88,
+        recommendation: 'Mitra konsinyasi aktif dengan setoran rutin sore hari',
+      }));
+      setPartners(merged);
+    }
+  };
+
   const handleCallOrWhatsApp = (p) => {
-    const text = `Halo ${p.pic} (${p.name}), salam dari KantinBite. Mau konfirmasi jadwal titip kue besok pagi apakah tetap sama?`;
-    Linking.openURL(`whatsapp://send?phone=62${p.phone.slice(1)}&text=${encodeURIComponent(text)}`);
+    const cleanPhone = (p.phone || '081298765432').replace(/^0/, '62');
+    const text = `Halo ${p.pic} (${p.name}), salam dari Dapur Berkah Bunda. Ingin konfirmasi jadwal pengantaran kue besok pagi pukul ${p.dropSchedule}.`;
+    Linking.openURL(`whatsapp://send?phone=${cleanPhone}&text=${encodeURIComponent(text)}`).catch(
+      () => Alert.alert('Hubungi Mitra', `Membuka kontak WhatsApp ${p.pic} (${p.phone})`)
+    );
   };
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      
-      {/* HEADER AMAN */}
-      <View style={styles.header}>
-        <View>
-          <View style={styles.headerTag}>
-            <AssetVisual name="canteen_shop" size={16} />
-            <Text style={styles.headerTagText}>JARINGAN DISTRIBUSI KULINER</Text>
-          </View>
-          <Text style={styles.headerTitle}>Direktori Mitra Kantin</Text>
-        </View>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFEDD5" />
 
-        <TouchableOpacity 
-          style={styles.addBtn}
-          activeOpacity={0.8}
-          onPress={() => Alert.alert('Tambah Mitra', 'Form pendaftaran mitra kantin baru siap dibuka.')}
-        >
-          <Text style={styles.addBtnText}>+ Mitra Baru</Text>
-        </TouchableOpacity>
-      </View>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* 1. SCENIC CANTEEN DIRECTORY HEADER */}
+        <ScenicBanner
+          scene="canteen_afternoon"
+          badgeText="JARINGAN MITRA KONSINYASI"
+          title="Direktori & Podium Kantin"
+          subtitle="Peringkat serapan kue tertinggi & kontak pengurus kantin"
+          onBackPress={() => navigation.goBack()}
+          actionLabel="Titip Kue"
+          onActionPress={() => navigation.navigate('Consignment')}
+        />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        
-        {/* HERO TOTAL MITRA */}
-        <BentoCard bg="#FFFBEB" accentBorder="#FDE68A" style={styles.heroBento}>
-          <View style={styles.heroTopRow}>
-            <View>
-              <Text style={styles.heroSubLabel}>JARINGAN TITIP KONSINYASI AKTIF</Text>
-              <Text style={styles.heroCountText}>{partners.length} Gerai Mitra</Text>
-            </View>
-            <View style={styles.canteenVisualWrap}>
-              <AssetVisual name="canteen_shop" size={52} />
-            </View>
-          </View>
+        <View style={styles.bodyPadding}>
+          {/* 2. PODIUM 3 MITRA KANTIN TERLARIS (TERINSPIRASI REFERENSI 2 & 5) */}
+          <Text style={styles.sectionTitle}>Podium Mitra Serapan Tertinggi</Text>
+          <CanteenPodiumScene
+            topThree={[
+              { name: partners[0]?.name || 'Kantin Teknik', sold: '420 laku', pic: partners[0]?.pic },
+              { name: partners[1]?.name || 'Kopma STIKOM', sold: '315 laku', pic: partners[1]?.pic },
+              { name: partners[2]?.name || 'Kantin SMPN 1', sold: '280 laku', pic: partners[2]?.pic },
+            ]}
+          />
 
-          <Text style={styles.heroDesc}>
-            Menjangkau 4 titik distribusi sekolah, kampus, dan pasar dengan potensi serapan 150+ kue basah setiap pagi.
-          </Text>
-        </BentoCard>
+          {/* 3. DAFTAR KARTU MITRA DENGAN AVATAR KARAKTER PIC */}
+          <Text style={styles.sectionTitle}>Daftar Gerai & Pengurus Kantin</Text>
 
-        {/* LIST KARTU MITRA */}
-        <Text style={styles.sectionTitle}>Daftar Titik Penjualan & Kontak PIC</Text>
-        {partners.map((p) => (
-          <BentoCard key={p.id} bg="#FFFFFF" accentBorder="#E2E8F0" style={styles.partnerCard}>
-            
-            <View style={styles.cardHeaderRow}>
-              <View style={styles.iconBox}>
-                <AssetVisual name="canteen_shop" size={40} />
-              </View>
-
-              <View style={{ flex: 1, marginLeft: 12 }}>
-                <View style={styles.statusBadgeRow}>
-                  <Text style={styles.partnerScheduleDirect}>Jadwal drop {p.dropSchedule}</Text>
+          {partners.map((p, idx) => (
+            <View key={p.id} style={styles.partnerCard}>
+              <View style={styles.cardHeaderRow}>
+                <PartnerAvatar name={p.pic} variant={idx} size={52} />
+                <View style={styles.partnerHeadInfo}>
+                  <Text style={styles.partnerName}>{p.name}</Text>
+                  <Text style={styles.partnerPic}>
+                    PIC: {p.pic} • {p.address}
+                  </Text>
                 </View>
+                <View style={styles.absorptionBadge}>
+                  <Text style={styles.absorptionBadgeText}>{p.absorption}% Laku</Text>
+                </View>
+              </View>
 
-                <Text style={styles.partnerNameText}>{p.name}</Text>
-                <Text style={styles.picText}>PIC: {p.pic} • {p.phone}</Text>
+              <View style={{ marginVertical: 10 }}>
+                <AnimatedProgressBar
+                  percent={p.absorption}
+                  color="#059669"
+                  trackColor="#ECFDF5"
+                  height={8}
+                />
+              </View>
+
+              <View style={styles.metaGridRow}>
+                <View style={styles.metaCell}>
+                  <Text style={styles.metaLabel}>Antar Pagi</Text>
+                  <Text style={styles.metaVal}>{p.dropSchedule}</Text>
+                </View>
+                <View style={styles.metaCell}>
+                  <Text style={styles.metaLabel}>Komisi Kantin</Text>
+                  <Text style={styles.metaVal}>{p.fee}</Text>
+                </View>
+                <View style={styles.metaCell}>
+                  <Text style={styles.metaLabel}>Menu Favorit</Text>
+                  <Text style={styles.metaVal} numberOfLines={1}>
+                    {p.favoriteMenu}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.cardActionRow}>
+                <AnimatedPressable
+                  scaleTo={0.96}
+                  style={styles.waBtn}
+                  onPress={() => handleCallOrWhatsApp(p)}
+                >
+                  <Text style={styles.waBtnText}>Chat WhatsApp PIC</Text>
+                </AnimatedPressable>
+
+                <AnimatedPressable
+                  scaleTo={0.96}
+                  style={styles.dropBtn}
+                  onPress={() => navigation.navigate('Consignment')}
+                >
+                  <Text style={styles.dropBtnText}>Input Rekap ›</Text>
+                </AnimatedPressable>
               </View>
             </View>
+          ))}
 
-            <View style={styles.detailBox}>
-              <Text style={styles.addressText}>{p.address}</Text>
-              <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Komisi: <Text style={{ color: '#EA580C', fontWeight: '800' }}>{p.fee}</Text></Text>
-                <Text style={styles.metaLabel}>Serapan: <Text style={{ color: '#059669', fontWeight: '900' }}>{p.absorption}</Text></Text>
-              </View>
-              <Text style={styles.favText}>Menu Terlaris: {p.favoriteMenu}</Text>
-              <View style={styles.recomWrap}>
-                <Text style={styles.recomText}>Saran: {p.recommendation}</Text>
-              </View>
-            </View>
-
-            <View style={styles.actionBtnRow}>
-              <TactileButton
-                size="sm"
-                variant="secondary"
-                style={{ flex: 1 }}
-                icon={<AssetVisual name="receipt_bill" size={16} />}
-                onPress={() => navigation.navigate('Consignment')}
-              >
-                Titip Kue Pagi
-              </TactileButton>
-
-              <TactileButton
-                size="sm"
-                variant="accent"
-                style={{ flex: 1 }}
-                icon={<AssetVisual name="chef_mascot" size={16} />}
-                onPress={() => handleCallOrWhatsApp(p)}
-              >
-                Chat WA
-              </TactileButton>
-            </View>
-
-          </BentoCard>
-        ))}
-
-        <View style={{ height: 100 }} />
+          <View style={{ height: 100 }} />
+        </View>
       </ScrollView>
 
       <ModernBottomNav activeTab="Activity" navigation={navigation} />
@@ -180,182 +210,115 @@ export const PartnerDirectoryScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 12,
-    backgroundColor: '#FAF8F5',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1EFEA',
-  },
-  headerTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginBottom: 2,
-  },
-  headerTagText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#EA580C',
-    letterSpacing: 0.5,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#1E293B',
-    letterSpacing: -0.4,
-  },
-  addBtn: {
     backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-  },
-  addBtnText: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#334155',
   },
   scrollContent: {
-    padding: 18,
+    paddingBottom: 24,
   },
-  heroBento: {
-    padding: 18,
-    marginBottom: 18,
-    borderBottomWidth: 4,
-    borderBottomColor: '#F59E0B',
-  },
-  heroTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  heroSubLabel: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#92400E',
-    letterSpacing: 0.6,
-  },
-  heroCountText: {
-    fontSize: 28,
-    fontWeight: '900',
-    color: '#78350F',
-    letterSpacing: -0.8,
-    marginTop: 2,
-  },
-  canteenVisualWrap: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#FEF3C7',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#FDE68A',
-  },
-  heroDesc: {
-    fontSize: 11,
-    color: '#78350F',
-    lineHeight: 16,
+  bodyPadding: {
+    paddingHorizontal: 18,
+    paddingTop: 14,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#1E293B',
-    marginBottom: 12,
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#18181B',
+    marginBottom: 10,
   },
   partnerCard: {
-    padding: 16,
-    marginBottom: 14,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 15,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
     borderBottomWidth: 4,
     borderBottomColor: '#CBD5E1',
+    marginBottom: 14,
   },
   cardHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
   },
-  iconBox: {
-    width: 54,
-    height: 54,
-    borderRadius: 16,
-    backgroundColor: '#FAF8F5',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: '#F1EFEA',
+  partnerHeadInfo: {
+    flex: 1,
+    marginLeft: 12,
+    paddingRight: 6,
   },
-  statusBadgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 3,
+  partnerName: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#18181B',
   },
-  partnerScheduleDirect: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#059669',
+  partnerPic: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: '#71717A',
+    marginTop: 2,
   },
-  partnerNameText: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#1E293B',
+  absorptionBadge: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 10,
   },
-  picText: {
+  absorptionBadgeText: {
     fontSize: 11,
-    color: '#64748B',
-    marginTop: 1,
+    fontWeight: '900',
+    color: '#047857',
   },
-  detailBox: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
+  metaGridRow: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFBEB',
+    borderRadius: 14,
     padding: 10,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
-  },
-  addressText: {
-    fontSize: 11,
-    color: '#475569',
-    marginBottom: 4,
-  },
-  metaRow: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 2,
+    marginBottom: 12,
+  },
+  metaCell: {
+    flex: 1,
+    paddingRight: 4,
   },
   metaLabel: {
-    fontSize: 11,
-    color: '#64748B',
-  },
-  favText: {
-    fontSize: 11,
-    color: '#334155',
+    fontSize: 10,
     fontWeight: '700',
-    marginTop: 3,
+    color: '#92400E',
   },
-  recomWrap: {
-    marginTop: 6,
-    paddingTop: 6,
-    borderTopWidth: 1,
-    borderTopColor: '#F1EFEA',
+  metaVal: {
+    fontSize: 11.5,
+    fontWeight: '900',
+    color: '#18181B',
+    marginTop: 2,
   },
-  recomText: {
-    fontSize: 10.5,
-    fontWeight: '700',
-    color: '#059669',
-  },
-  actionBtnRow: {
+  cardActionRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 10,
+  },
+  waBtn: {
+    flex: 1,
+    backgroundColor: '#059669',
+    paddingVertical: 10,
+    borderRadius: 13,
+    alignItems: 'center',
+    borderBottomWidth: 3,
+    borderBottomColor: '#065F46',
+  },
+  waBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  dropBtn: {
+    flex: 1,
+    backgroundColor: '#FFF7ED',
+    paddingVertical: 10,
+    borderRadius: 13,
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#FDBA74',
+  },
+  dropBtnText: {
+    color: '#EA580C',
+    fontSize: 12,
+    fontWeight: '900',
   },
 });

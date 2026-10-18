@@ -1,30 +1,67 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, StatusBar, Alert, Modal, Linking, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  TextInput,
+  StyleSheet,
+  StatusBar,
+  Alert,
+  Modal,
+  Linking,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Path, Rect, Line, Circle } from 'react-native-svg';
-import { ScreenHeader } from '../components/ScreenHeader';
+import Svg, { Path } from 'react-native-svg';
 import { ModernBottomNav } from '../components/ModernBottomNav';
+import { ScenicBanner } from '../components/ScenicBanner';
 import AssetVisual from '../components/AssetVisual';
-import { getConsignment, getCanteens, addCanteen, saveConsignment, getProducts } from '../db/storage';
+import { PartnerAvatar } from '../components/Mascot';
+import { AnimatedPressable } from '../components/PlayfulComponents';
+import {
+  getCanteens,
+  addCanteen,
+  getConsignment,
+  saveConsignment,
+  addIncomeTransaction,
+} from '../db/storage';
 import { formatRupiah } from '../utils/formatters';
 
-const { width } = Dimensions.get('window');
-
-export const ConsignmentScreen = ({ route, navigation }) => {
+export const ConsignmentScreen = ({ navigation }) => {
   const [canteens, setCanteens] = useState([]);
   const [selectedCanteenId, setSelectedCanteenId] = useState('c1');
-  const [activeMode, setActiveMode] = useState('sore'); // 'pagi' (nitip) atau 'sore' (rekap)
-  
+  const [activeMode, setActiveMode] = useState('sore'); // 'pagi' | 'sore'
+
   const [sessionData, setSessionData] = useState({
-    c1: { initialQty: 30, returnQty: 5, unitPrice: 1000, isPaid: true, itemName: 'Risoles Rogout', itemType: 'risoles' },
-    c2: { initialQty: 25, returnQty: 0, unitPrice: 1500, isPaid: false, itemName: 'Pastel Telur', itemType: 'pastel' },
-    c3: { initialQty: 20, returnQty: 3, unitPrice: 1000, isPaid: true, itemName: 'Dadar Gulung', itemType: 'dadar' }
+    c1: {
+      initialQty: 30,
+      returnQty: 5,
+      unitPrice: 1000,
+      isPaid: true,
+      itemName: 'Risoles Rogout Ayam',
+      itemType: 'risoles_rogout',
+    },
+    c2: {
+      initialQty: 25,
+      returnQty: 2,
+      unitPrice: 1200,
+      isPaid: false,
+      itemName: 'Pastel Sayur Telur',
+      itemType: 'pastel_telur',
+    },
+    c3: {
+      initialQty: 20,
+      returnQty: 3,
+      unitPrice: 900,
+      isPaid: true,
+      itemName: 'Dadar Gulung Pandan',
+      itemType: 'dadar_gulung',
+    },
   });
 
-  const [returInput, setReturInput] = useState('5');
   const [titipInput, setTitipInput] = useState('30');
+  const [returInput, setReturInput] = useState('5');
 
-  // Modal Tambah Kantin Baru
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newCanteenName, setNewCanteenName] = useState('');
   const [newPic, setNewPic] = useState('');
@@ -37,47 +74,86 @@ export const ConsignmentScreen = ({ route, navigation }) => {
   }, [navigation]);
 
   const loadData = async () => {
-    const cList = await getCanteens();
+    const [cList, savedConsign] = await Promise.all([getCanteens(), getConsignment()]);
     if (cList && cList.length > 0) {
       setCanteens(cList);
-    } else {
-      setCanteens([
-        { id: 'c1', name: 'Kantin Fakultas Teknik', pic: 'Pak Joko', phone: '081298765432', debt: 0 },
-        { id: 'c2', name: 'Kantin Gedung Utama', pic: 'Bu Siti', phone: '081345678901', debt: 35000 },
-        { id: 'c3', name: 'Warung Kopi Kampus', pic: 'Bang Hendra', phone: '085712345678', debt: 15000 }
-      ]);
+    }
+    if (savedConsign) {
+      setSessionData((prev) => ({ ...prev, ...savedConsign }));
     }
   };
 
-  const currentCanteen = canteens.find(c => c.id === selectedCanteenId) || canteens[0] || {
-    id: 'c1', name: 'Kantin Fakultas Teknik', pic: 'Pak Joko', phone: '081298765432', debt: 0
-  };
+  const currentCanteen =
+    canteens.find((c) => c.id === selectedCanteenId) ||
+    canteens[0] || {
+      id: 'c1',
+      name: 'Kantin Fakultas Teknik',
+      pic: 'Pak Joko Sutrisno',
+      phone: '081298765432',
+      debt: 0,
+    };
 
   const currentSession = sessionData[selectedCanteenId] || {
-    initialQty: 30, returnQty: 5, unitPrice: 1000, isPaid: true, itemName: 'Risoles Rogout', itemType: 'risoles'
+    initialQty: 30,
+    returnQty: 5,
+    unitPrice: 1000,
+    isPaid: true,
+    itemName: 'Risoles Rogout Ayam',
+    itemType: 'risoles_rogout',
   };
 
-  const initialQty = Number(titipInput) || currentSession.initialQty;
-  const returnQty = Number(returInput) || 0;
+  const initialQty = Math.max(0, Math.round(Number(titipInput) || 0));
+  const rawRetur = Math.max(0, Math.round(Number(returInput) || 0));
+  const returnQty = Math.min(initialQty, rawRetur);
   const soldQty = Math.max(0, initialQty - returnQty);
-  const totalDue = Math.round(soldQty * currentSession.unitPrice);
+  const totalDue = Math.round(soldQty * (currentSession.unitPrice || 1000));
 
   const handleSelectCanteen = (cId) => {
     setSelectedCanteenId(cId);
-    const sess = sessionData[cId] || { initialQty: 20, returnQty: 0, unitPrice: 1000, isPaid: true, itemName: 'Risoles Rogout', itemType: 'risoles' };
-    setTitipInput(sess.initialQty.toString());
-    setReturInput(sess.returnQty.toString());
+    const sess = sessionData[cId] || {
+      initialQty: 25,
+      returnQty: 2,
+      unitPrice: 1000,
+      isPaid: true,
+      itemName: 'Risoles Rogout Ayam',
+      itemType: 'risoles_rogout',
+    };
+    setTitipInput(String(sess.initialQty));
+    setReturInput(String(sess.returnQty));
+  };
+
+  const adjustTitip = (delta) => {
+    const next = Math.max(1, initialQty + delta);
+    setTitipInput(String(next));
+    if (returnQty > next) {
+      setReturInput(String(next));
+    }
+  };
+
+  const adjustRetur = (delta) => {
+    const next = Math.max(0, Math.min(initialQty, returnQty + delta));
+    setReturInput(String(next));
+  };
+
+  const togglePaidStatus = (paidVal) => {
+    setSessionData((prev) => ({
+      ...prev,
+      [selectedCanteenId]: {
+        ...currentSession,
+        isPaid: paidVal,
+      },
+    }));
   };
 
   const handleChatWA = () => {
-    const phone = currentCanteen.phone || '08123456789';
-    const text = `Halo ${currentCanteen.pic}, saya dari Dapur Berkah Bunda ingin konfirmasi titip konsinyasi kue hari ini di ${currentCanteen.name}.`;
+    const phone = currentCanteen.phone || '081298765432';
+    const text = `Halo ${currentCanteen.pic}, dari Dapur Berkah Bunda ingin konfirmasi rekap titip kue di ${currentCanteen.name}: Titip ${initialQty} pcs, Sisa Retur ${returnQty} pcs, Laku ${soldQty} pcs. Total setoran ${formatRupiah(totalDue)}.`;
     Linking.openURL(`whatsapp://send?phone=${phone}&text=${encodeURIComponent(text)}`).catch(() => {
-      Alert.alert('Perhatian', 'Aplikasi WhatsApp tidak ditemukan di perangkat ini.');
+      Alert.alert('Info WhatsApp', 'Membuka pesan konfirmasi untuk pengurus kantin.');
     });
   };
 
-  const handleSaveSession = () => {
+  const handleSaveSession = async () => {
     const updated = {
       ...sessionData,
       [selectedCanteenId]: {
@@ -86,228 +162,390 @@ export const ConsignmentScreen = ({ route, navigation }) => {
         returnQty,
         soldQty,
         totalDue,
-        isPaid: currentSession.isPaid
-      }
+      },
     };
     setSessionData(updated);
+    await saveConsignment(updated);
+
+    if (currentSession.isPaid && totalDue > 0) {
+      await addIncomeTransaction(
+        currentCanteen.name,
+        `Setoran ${soldQty} pcs ${currentSession.itemName}`,
+        totalDue,
+        'Setoran Kantin'
+      );
+    }
 
     Alert.alert(
-      'Sesi Rekap Berhasil Disimpan',
-      `Setoran ${formatRupiah(totalDue)} dari ${currentCanteen.name} (${currentSession.isPaid ? 'LUNAS' : 'PIUTANG'}) tercatat di buku kas.`,
+      'Rekap Kantin Tersimpan',
+      `Setoran ${formatRupiah(totalDue)} dari ${currentCanteen.name} (${currentSession.isPaid ? 'LUNAS TUNAI' : 'MASUK BUKU PIUTANG'}) telah dicatat.`,
       [
-        { text: 'Kirim Nota WhatsApp', onPress: () => navigation.navigate('Receipt', {
-          canteenName: currentCanteen.name,
-          pic: currentCanteen.pic,
-          total: totalDue,
-          sold: soldQty,
-          retur: returnQty,
-          titip: initialQty,
-          item: currentSession.itemName
-        })},
-        { text: 'Selesai', onPress: () => navigation.navigate('Dashboard') }
+        {
+          text: 'Cetak Nota WA',
+          onPress: () =>
+            navigation.navigate('Receipt', {
+              canteenName: currentCanteen.name,
+              pic: currentCanteen.pic,
+              total: totalDue,
+              sold: soldQty,
+              retur: returnQty,
+              titip: initialQty,
+              item: currentSession.itemName,
+            }),
+        },
+        { text: 'Selesai' },
       ]
     );
   };
 
   const handleAddNewCanteen = async () => {
     if (!newCanteenName.trim() || !newPic.trim()) {
-      Alert.alert('Peringatan', 'Lengkapi nama kantin dan nama PIC.');
+      Alert.alert('Data Belum Lengkap', 'Mohon isi nama kantin dan nama pengurus (PIC).');
       return;
     }
     await addCanteen({
       name: newCanteenName.trim(),
       pic: newPic.trim(),
-      phone: newPhone.trim() || '08123456789'
+      phone: newPhone.trim() || '08123456789',
     });
     setNewCanteenName('');
     setNewPic('');
     setNewPhone('');
     setIsModalOpen(false);
     await loadData();
-    Alert.alert('Sukses', 'Mitra kantin baru berhasil ditambahkan.');
   };
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      
-      {/* 1. TOP HEADER TERSTANDARISASI 1:1 */}
-      <ScreenHeader
-        title="Titip Kantin"
-        subtitle="Pagi Nitip, Sore Ambil Uang"
-        actionLabel="+ Kantin Baru"
-        onActionPress={() => setIsModalOpen(true)}
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor={activeMode === 'pagi' ? '#E0F2FE' : '#FFEDD5'}
       />
 
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent} 
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* 2. DATE STRIP PILL */}
-        <View style={styles.dateStrip}>
-          <View style={styles.datePill}>
-            <Svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="#EA580C" strokeWidth={2.5}>
-              <Rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-              <Line x1="16" y1="2" x2="16" y2="6" />
-              <Line x1="8" y1="2" x2="8" y2="6" />
-              <Line x1="3" y1="10" x2="21" y2="10" />
-            </Svg>
-            <Text style={styles.datePillText}>
-              HARI INI: <Text style={styles.datePillBold}>Kamis, 8 Okt 2026</Text>
-            </Text>
-          </View>
-        </View>
-
-        {/* SHORTCUT BUKU PIUTANG KANTIN */}
-        <TouchableOpacity
-          style={styles.debtAlertBanner}
-          activeOpacity={0.85}
-          onPress={() => navigation.navigate('DebtLedger')}
-          accessibilityLabel="Buka Buku Piutang Mitra"
-          accessibilityRole="button"
+        {/* 1. SCENIC CANTEEN BANNER (BERUBAH SUASANA PAGI VS SORE) */}
+        <ScenicBanner
+          scene={activeMode === 'pagi' ? 'canteen_morning' : 'canteen_afternoon'}
+          badgeText={
+            activeMode === 'pagi' ? 'SESI PAGI • NITIP KUE' : 'SESI SORE • REKAP & SETORAN'
+          }
+          title="Titip Jual Kantin"
+          subtitle="Kelola nampan titipan pagi & hitung sisa kue sore hari"
+          actionLabel="+ Mitra Baru"
+          onActionPress={() => setIsModalOpen(true)}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#DC2626' }} />
-            <Text style={{ fontSize: 11.5, fontWeight: '800', color: '#991B1B' }}>Buku Piutang: Rp 50.000 Tertunda</Text>
-          </View>
-          <Text style={{ fontSize: 11, fontWeight: '800', color: '#DC2626' }}>Buka Buku ›</Text>
-        </TouchableOpacity>
-
-        {/* 3. PILIH KANTIN REKANAN HORIZONTAL CAROUSEL */}
-        <Text style={styles.sectionLbl}>PILIH KANTIN REKANAN</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.canteenCarousel}>
-          {canteens.map((c) => {
-            const isAct = c.id === selectedCanteenId;
-            const hasDebt = (c.debt || 0) > 0;
-            return (
-              <TouchableOpacity
-                key={c.id}
-                style={[styles.canteenCard, isAct && styles.canteenCardActive]}
-                activeOpacity={0.8}
-                onPress={() => handleSelectCanteen(c.id)}
+          {/* Switcher Sesi Pagi vs Sore Mengambang */}
+          <View style={styles.sessionSwitcher}>
+            <TouchableOpacity
+              style={[
+                styles.sessionTab,
+                activeMode === 'pagi' && styles.sessionTabMorningActive,
+              ]}
+              onPress={() => setActiveMode('pagi')}
+              activeOpacity={0.85}
+            >
+              <AssetVisual name="canteen_shop" size={18} />
+              <Text
+                style={[
+                  styles.sessionTabText,
+                  activeMode === 'pagi' && styles.sessionTabTextActive,
+                ]}
               >
-                <View style={styles.canteenCardTop}>
-                  <AssetVisual name="canteen_shop" size={22} />
-                  {hasDebt ? (
-                    <View style={styles.statusTextDebtWrap}>
-                      <Text style={styles.statusTextDebt}>Piutang {formatRupiah(c.debt)}</Text>
-                    </View>
-                  ) : (
-                    <View style={styles.statusTextPaidWrap}>
-                      <Svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth={3}>
-                        <Path d="M20 6L9 17L4 12" />
-                      </Svg>
-                      <Text style={styles.statusTextPaid}>Lunas</Text>
-                    </View>
-                  )}
-                </View>
+                06:00 Nitip Pagi
+              </Text>
+            </TouchableOpacity>
 
-                <Text style={styles.canteenName} numberOfLines={1}>{c.name}</Text>
-                <Text style={styles.canteenPic}>PIC: {c.pic}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+            <TouchableOpacity
+              style={[
+                styles.sessionTab,
+                activeMode === 'sore' && styles.sessionTabAfternoonActive,
+              ]}
+              onPress={() => setActiveMode('sore')}
+              activeOpacity={0.85}
+            >
+              <AssetVisual name="coin_gold" size={18} />
+              <Text
+                style={[
+                  styles.sessionTabText,
+                  activeMode === 'sore' && styles.sessionTabTextActive,
+                ]}
+              >
+                15:30 Rekap Sore
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScenicBanner>
 
-        {/* 4. ACTIVE CANTEEN BAR WITH WA BUTTON */}
-        <View style={styles.activeCanteenBar}>
-          <View style={styles.activeCanteenInfo}>
-            <Text style={styles.activeCanteenTitle}>{currentCanteen.name}</Text>
-            <Text style={styles.activeCanteenContact}>PIC: {currentCanteen.pic} • {currentCanteen.phone}</Text>
+        <View style={styles.bodyPadding}>
+          {/* 2. KARUSEL MITRA KANTIN DENGAN AVATAR KARAKTER PIC */}
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionTitle}>Pilih Gerai Kantin Mitra</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('PartnerDirectory')}>
+              <Text style={styles.sectionLink}>Direktori & Podium ›</Text>
+            </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.chatWaBtn} activeOpacity={0.8} onPress={handleChatWA}>
-            <Svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={2.5}>
-              <Path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-            </Svg>
-            <Text style={styles.chatWaBtnText}>Chat WA</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* 5. SEGMENTED TAB SESI WAKTU */}
-        <View style={styles.sessionTabBar}>
-          <TouchableOpacity 
-            style={[styles.sessionTab, activeMode === 'pagi' && styles.sessionTabActive]}
-            onPress={() => setActiveMode('pagi')}
-            activeOpacity={0.8}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.canteenCarousel}
           >
-            <Text style={[styles.sessionTabText, activeMode === 'pagi' && styles.sessionTabTextActive]}>
-              Sesi Pagi (Nitip)
-            </Text>
-          </TouchableOpacity>
+            {canteens.map((c, idx) => {
+              const isAct = c.id === selectedCanteenId;
+              const hasDebt = (c.debt || 0) > 0;
+              return (
+                <AnimatedPressable
+                  key={c.id}
+                  scaleTo={0.95}
+                  style={[styles.canteenCard, isAct && styles.canteenCardActive]}
+                  onPress={() => handleSelectCanteen(c.id)}
+                >
+                  <View style={styles.canteenCardTop}>
+                    <PartnerAvatar name={c.pic} variant={idx} size={42} />
+                    {hasDebt ? (
+                      <View style={styles.debtBadge}>
+                        <Text style={styles.debtBadgeText}>
+                          Piutang {formatRupiah(c.debt)}
+                        </Text>
+                      </View>
+                    ) : (
+                      <View style={styles.paidBadge}>
+                        <Text style={styles.paidBadgeText}>Lancar</Text>
+                      </View>
+                    )}
+                  </View>
 
-          <TouchableOpacity 
-            style={[styles.sessionTab, activeMode === 'sore' && styles.sessionTabActive]}
-            onPress={() => setActiveMode('sore')}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.sessionTabText, activeMode === 'sore' && styles.sessionTabTextActive]}>
-              Sesi Sore (Rekap)
-            </Text>
-          </TouchableOpacity>
-        </View>
+                  <Text style={styles.canteenName} numberOfLines={1}>
+                    {c.name}
+                  </Text>
+                  <Text style={styles.canteenPic} numberOfLines={1}>
+                    PIC: {c.pic}
+                  </Text>
+                </AnimatedPressable>
+              );
+            })}
+          </ScrollView>
 
-        {/* 6. KARTU REKAP PRODUK (RECEIPT LEDGER ASLI HP) */}
-        <View style={styles.recapProductCard}>
-          <View style={styles.recapCardHeader}>
-            <View style={styles.foodThumbBox}>
-              <AssetVisual name={currentSession.itemType || 'risoles_rogout'} size={48} />
-            </View>
-            <View style={styles.recapHeaderInfo}>
-              <Text style={styles.recapFoodName}>{currentSession.itemName}</Text>
-              <Text style={styles.recapUnitPrice}>
-                Harga Titip: <Text style={styles.recapUnitPriceBold}>{formatRupiah(currentSession.unitPrice)} / pcs</Text>
+          {/* 3. KARTU DETAIL MITRA AKTIF & CHAT WA */}
+          <View style={styles.activePartnerBar}>
+            <PartnerAvatar name={currentCanteen.pic} size={46} />
+            <View style={{ flex: 1, marginLeft: 10 }}>
+              <Text style={styles.activePartnerName}>{currentCanteen.name}</Text>
+              <Text style={styles.activePartnerSub}>
+                {currentCanteen.pic} • {currentCanteen.phone}
               </Text>
             </View>
+            <AnimatedPressable
+              scaleTo={0.94}
+              style={styles.waChatBtn}
+              onPress={handleChatWA}
+            >
+              <Text style={styles.waChatBtnText}>Hubungi WA</Text>
+            </AnimatedPressable>
           </View>
 
-          {/* RINCIAN MATEMATIS REKONSILIASI */}
-          <View style={styles.recapCalcBox}>
-            <View style={styles.recapRow}>
-              <Text style={styles.recapRowLbl}>Titip Pagi:</Text>
-              <Text style={styles.recapValDark}>{initialQty} pcs</Text>
-            </View>
-
-            <View style={styles.recapRow}>
-              <Text style={styles.recapRowLbl}>Sisa Retur Fisik:</Text>
-              <View style={styles.returInputWrap}>
-                <TextInput
-                  style={styles.returInputBox}
-                  keyboardType="number-pad"
-                  value={returInput}
-                  onChangeText={setReturInput}
-                />
-                <Text style={styles.returPcsLbl}>pcs</Text>
+          {/* 4. KARTU KALKULATOR REKONSILIASI TITIP & RETUR */}
+          <View style={styles.reconcileCard}>
+            <View style={styles.productBannerRow}>
+              <AssetVisual name={currentSession.itemType || 'risoles_rogout'} size={64} />
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={styles.productTag}>JATAH KUE TITIPAN UTAMA</Text>
+                <Text style={styles.productTitle}>{currentSession.itemName}</Text>
+                <Text style={styles.productSubPrice}>
+                  Harga Setor Bersih: {formatRupiah(currentSession.unitPrice)} / pcs
+                </Text>
               </View>
             </View>
 
-            <View style={styles.recapRow}>
-              <Text style={styles.recapRowLbl}>Kue Terjual Laku:</Text>
-              <Text style={styles.recapValGreen}>{soldQty} pcs</Text>
+            {/* Stepper Jumlah Titip Pagi & Sisa Retur Sore */}
+            <View style={styles.dualInputRow}>
+              {/* Kolom Titip Pagi */}
+              <View style={styles.qtyControlCard}>
+                <Text style={styles.qtyControlLabel}>TITIP PAGI (PCS)</Text>
+                <View style={styles.stepperControlRow}>
+                  <TouchableOpacity
+                    style={styles.stepMiniBtn}
+                    onPress={() => adjustTitip(-5)}
+                  >
+                    <Text style={styles.stepMiniBtnText}>−5</Text>
+                  </TouchableOpacity>
+                  <TextInput
+                    style={styles.qtyBigInput}
+                    keyboardType="numeric"
+                    value={titipInput}
+                    onChangeText={setTitipInput}
+                  />
+                  <TouchableOpacity
+                    style={[styles.stepMiniBtn, styles.stepMiniBtnPlus]}
+                    onPress={() => adjustTitip(5)}
+                  >
+                    <Text style={styles.stepMiniBtnPlusText}>+5</Text>
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.qtyHintText}>Nampan diantar pagi</Text>
+              </View>
+
+              {/* Kolom Sisa Retur Sore */}
+              <View style={[styles.qtyControlCard, styles.qtyControlCardRetur]}>
+                <Text style={[styles.qtyControlLabel, { color: '#B91C1C' }]}>
+                  SISA RETUR SORE
+                </Text>
+                <View style={styles.stepperControlRow}>
+                  <TouchableOpacity
+                    style={styles.stepMiniBtn}
+                    onPress={() => adjustRetur(-1)}
+                  >
+                    <Text style={styles.stepMiniBtnText}>−</Text>
+                  </TouchableOpacity>
+                  <TextInput
+                    style={[styles.qtyBigInput, { color: '#DC2626' }]}
+                    keyboardType="numeric"
+                    value={String(returnQty)}
+                    onChangeText={(v) => {
+                      const num = Math.min(initialQty, Math.max(0, Number(v) || 0));
+                      setReturInput(String(num));
+                    }}
+                  />
+                  <TouchableOpacity
+                    style={[styles.stepMiniBtn, styles.stepMiniBtnReturPlus]}
+                    onPress={() => adjustRetur(1)}
+                  >
+                    <Text style={styles.stepMiniBtnPlusText}>+</Text>
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.qtyHintText}>Maksimal {initialQty} pcs</Text>
+              </View>
             </View>
 
-            <View style={styles.recapDivider} />
-
-            <View style={styles.dueTotalRow}>
-              <Text style={styles.dueTotalLbl}>Wajib Setor Tunai:</Text>
-              <Text style={styles.dueTotalVal}>{formatRupiah(totalDue)}</Text>
+            {/* Hasil Perhitungan Otomatis: Kue Terjual & Uang Setoran */}
+            <View style={styles.settlementHighlightBox}>
+              <View style={styles.settlementLeft}>
+                <Text style={styles.settlementOverline}>TERJUAL BERSIH HARI INI</Text>
+                <Text style={styles.settlementSoldCount}>{soldQty} Kue Laku</Text>
+                <Text style={styles.settlementFormula}>
+                  ({initialQty} titip − {returnQty} retur) × {formatRupiah(currentSession.unitPrice)}
+                </Text>
+              </View>
+              <View style={styles.settlementRight}>
+                <Text style={styles.settlementTotalLabel}>Wajib Setor</Text>
+                <Text style={styles.settlementTotalAmount}>{formatRupiah(totalDue)}</Text>
+              </View>
             </View>
+
+            {/* Pilihan Status Pembayaran: Lunas Tunai vs Masuk Buku Piutang */}
+            <Text style={styles.paymentMethodLabel}>STATUS UANG SETORAN SORE:</Text>
+            <View style={styles.paymentToggleRow}>
+              <TouchableOpacity
+                style={[
+                  styles.paymentOptionBtn,
+                  currentSession.isPaid && styles.paymentOptionPaidActive,
+                ]}
+                onPress={() => togglePaidStatus(true)}
+                activeOpacity={0.85}
+              >
+                <AssetVisual name="check_badge" size={20} />
+                <Text
+                  style={[
+                    styles.paymentOptionText,
+                    currentSession.isPaid && { color: '#047857', fontWeight: '900' },
+                  ]}
+                >
+                  Lunas Diterima Tunai
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.paymentOptionBtn,
+                  !currentSession.isPaid && styles.paymentOptionDebtActive,
+                ]}
+                onPress={() => togglePaidStatus(false)}
+                activeOpacity={0.85}
+              >
+                <AssetVisual name="warning_badge" size={20} />
+                <Text
+                  style={[
+                    styles.paymentOptionText,
+                    !currentSession.isPaid && { color: '#B91C1C', fontWeight: '900' },
+                  ]}
+                >
+                  Tunda / Catat Piutang
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Tombol Simpan Rekap & Kirim Nota */}
+            <AnimatedPressable
+              scaleTo={0.97}
+              style={styles.saveSessionBtn}
+              onPress={handleSaveSession}
+            >
+              <AssetVisual name="receipt_bill" size={22} />
+              <Text style={styles.saveSessionBtnText}>
+                Simpan Rekap & Buat Nota Setoran
+              </Text>
+            </AnimatedPressable>
           </View>
 
-          {/* CTA SIMPAN REKAP ORANYE SOLID */}
-          <TouchableOpacity style={styles.saveRecapBtn} activeOpacity={0.85} onPress={handleSaveSession}>
-            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
-              <Path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-              <Path d="M17 21v-8H7v8" />
-              <Path d="M7 3v5h8" />
-            </Svg>
-            <Text style={styles.saveRecapBtnText}>Simpan Rekap ke Buku Kas</Text>
-          </TouchableOpacity>
+          <View style={{ height: 100 }} />
         </View>
-
       </ScrollView>
 
-      {/* 5. MODERN BOTTOM DOCK */}
+      {/* MODAL TAMBAH MITRA KANTIN BARU */}
+      <Modal visible={isModalOpen} transparent animationType="fade">
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Tambah Mitra Kantin Baru</Text>
+            <Text style={styles.modalSub}>
+              Daftarkan gerai sekolah, kampus, atau warung titipan baru
+            </Text>
+
+            <Text style={styles.inputLbl}>Nama Kantin / Lapak</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Contoh: Kantin SMAN 2"
+              value={newCanteenName}
+              onChangeText={setNewCanteenName}
+            />
+
+            <Text style={styles.inputLbl}>Nama Pengurus (PIC)</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Contoh: Bu Rahma"
+              value={newPic}
+              onChangeText={setNewPic}
+            />
+
+            <Text style={styles.inputLbl}>Nomor WhatsApp</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="0812xxxxxxxx"
+              keyboardType="phone-pad"
+              value={newPhone}
+              onChangeText={setNewPhone}
+            />
+
+            <View style={styles.modalActionRow}>
+              <TouchableOpacity
+                style={styles.modalCancelBtn}
+                onPress={() => setIsModalOpen(false)}
+              >
+                <Text style={styles.modalCancelText}>Batal</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalSaveBtn}
+                onPress={handleAddNewCanteen}
+              >
+                <Text style={styles.modalSaveText}>Simpan Mitra</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <ModernBottomNav activeTab="Activity" navigation={navigation} />
     </SafeAreaView>
   );
@@ -319,321 +557,425 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   scrollContent: {
+    paddingBottom: 24,
+  },
+  bodyPadding: {
     paddingHorizontal: 18,
-    paddingBottom: 110,
+    paddingTop: 14,
   },
-  dateStrip: {
-    marginVertical: 10,
-  },
-  debtAlertBanner: {
-    backgroundColor: '#FFF1F2',
+  sessionSwitcher: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 4,
     borderWidth: 1.5,
-    borderColor: '#FECACA',
-    borderRadius: 14,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 14,
+    borderColor: '#FED7AA',
   },
-  datePill: {
+  sessionTab: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    borderRadius: 12,
     gap: 6,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    borderRadius: 20,
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-    alignSelf: 'flex-start',
   },
-  datePillText: {
-    fontSize: 11,
-    color: '#475569',
+  sessionTabMorningActive: {
+    backgroundColor: '#ECFDF5',
+  },
+  sessionTabAfternoonActive: {
+    backgroundColor: '#FFF7ED',
+  },
+  sessionTabText: {
+    fontSize: 12,
     fontWeight: '700',
+    color: '#71717A',
   },
-  datePillBold: {
-    color: '#0F172A',
+  sessionTabTextActive: {
+    color: '#18181B',
     fontWeight: '900',
   },
-  sectionLbl: {
-    fontSize: 11.5,
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  sectionTitle: {
+    fontSize: 15.5,
+    fontWeight: '900',
+    color: '#18181B',
+  },
+  sectionLink: {
+    fontSize: 12,
     fontWeight: '800',
-    color: '#64748B',
-    letterSpacing: 0.5,
-    marginBottom: 8,
-    marginTop: 4,
+    color: '#EA580C',
   },
   canteenCarousel: {
+    paddingBottom: 14,
     gap: 10,
-    paddingBottom: 4,
-    marginBottom: 14,
   },
   canteenCard: {
-    width: 175,
+    width: 168,
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 20,
     padding: 12,
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
-    gap: 6,
-    elevation: 2,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.02,
-    shadowRadius: 6,
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#CBD5E1',
   },
   canteenCardActive: {
+    backgroundColor: '#FFFBEB',
     borderColor: '#EA580C',
-    borderWidth: 2,
-    backgroundColor: '#FFFDF9',
+    borderBottomColor: '#9A3412',
   },
   canteenCardTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 8,
+  },
+  debtBadge: {
+    backgroundColor: '#FEF2F2',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  debtBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#DC2626',
+  },
+  paidBadge: {
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  paidBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#059669',
   },
   canteenName: {
     fontSize: 13.5,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '900',
+    color: '#18181B',
   },
   canteenPic: {
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '600',
-    color: '#64748B',
+    color: '#71717A',
+    marginTop: 2,
   },
-  statusTextPaidWrap: {
+  activePartnerBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-  },
-  statusTextPaid: {
-    color: '#059669',
-    fontSize: 10.5,
-    fontWeight: '800',
-  },
-  statusTextDebtWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  statusTextDebt: {
-    color: '#DC2626',
-    fontSize: 10.5,
-    fontWeight: '800',
-  },
-  activeCanteenBar: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    backgroundColor: '#FFF7ED',
+    borderRadius: 18,
+    padding: 12,
+    borderWidth: 1.5,
+    borderColor: '#FED7AA',
     marginBottom: 14,
   },
-  activeCanteenInfo: {
-    flex: 1,
-    gap: 2,
-  },
-  activeCanteenTitle: {
+  activePartnerName: {
     fontSize: 14,
     fontWeight: '900',
-    color: '#0F172A',
+    color: '#18181B',
   },
-  activeCanteenContact: {
-    fontSize: 11,
-    color: '#64748B',
+  activePartnerSub: {
+    fontSize: 11.5,
     fontWeight: '600',
+    color: '#78350F',
+    marginTop: 1,
   },
-  chatWaBtn: {
-    backgroundColor: '#22C55E',
-    borderRadius: 12,
-    paddingVertical: 6,
+  waChatBtn: {
+    backgroundColor: '#059669',
     paddingHorizontal: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    elevation: 2,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderBottomWidth: 3,
+    borderBottomColor: '#065F46',
   },
-  chatWaBtnText: {
+  waChatBtnText: {
     color: '#FFFFFF',
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '800',
   },
-  sessionTabBar: {
-    backgroundColor: '#F1F5F9',
-    borderRadius: 14,
-    padding: 4,
-    flexDirection: 'row',
-    gap: 4,
-    marginBottom: 16,
-  },
-  sessionTab: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  sessionTabActive: {
+  reconcileCard: {
     backgroundColor: '#FFFFFF',
-    elevation: 2,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    borderRadius: 24,
+    padding: 16,
+    borderWidth: 1.8,
+    borderColor: '#FDE68A',
+    borderBottomWidth: 4.5,
+    borderBottomColor: '#F59E0B',
   },
-  sessionTabText: {
+  productBannerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFBEB',
+    borderRadius: 18,
+    padding: 12,
+    marginBottom: 14,
+  },
+  productTag: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#B45309',
+  },
+  productTitle: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#18181B',
+    marginTop: 1,
+  },
+  productSubPrice: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#64748B',
+    color: '#059669',
+    marginTop: 2,
   },
-  sessionTabTextActive: {
-    color: '#EA580C',
-    fontWeight: '900',
+  dualInputRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 14,
   },
-  recapProductCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 16,
+  qtyControlCard: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 18,
+    padding: 12,
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
-    elevation: 2,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    gap: 14,
-    marginBottom: 16,
+    alignItems: 'center',
   },
-  recapCardHeader: {
+  qtyControlCardRetur: {
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FECACA',
+  },
+  qtyControlLabel: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#475569',
+    marginBottom: 8,
+  },
+  stepperControlRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    justifyContent: 'space-between',
+    width: '100%',
   },
-  foodThumbBox: {
-    width: 60,
-    height: 60,
-    borderRadius: 16,
-    backgroundColor: '#FFFBEB',
-    borderWidth: 1.5,
-    borderColor: '#FDE68A',
+  stepMiniBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  recapHeaderInfo: {
-    flex: 1,
-    gap: 2,
+  stepMiniBtnPlus: {
+    backgroundColor: '#EA580C',
+    borderColor: '#9A3412',
   },
-  recapFoodName: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: '#0F172A',
+  stepMiniBtnReturPlus: {
+    backgroundColor: '#DC2626',
+    borderColor: '#991B1B',
   },
-  recapUnitPrice: {
-    fontSize: 11.5,
-    fontWeight: '600',
-    color: '#64748B',
-  },
-  recapUnitPriceBold: {
-    color: '#EA580C',
-    fontWeight: '800',
-  },
-  recapCalcBox: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    gap: 9,
-  },
-  recapRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  recapRowLbl: {
-    fontSize: 12.5,
-    color: '#334155',
-    fontWeight: '600',
-  },
-  recapValDark: {
-    fontSize: 12.5,
-    fontWeight: '800',
-    color: '#0F172A',
-  },
-  returInputWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  returInputBox: {
-    width: 38,
-    height: 26,
-    borderRadius: 6,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.2,
-    borderColor: '#CBD5E1',
-    color: '#DC2626',
-    fontSize: 12.5,
-    fontWeight: '800',
-    textAlign: 'center',
-    padding: 0,
-  },
-  returPcsLbl: {
-    fontSize: 12.5,
-    fontWeight: '700',
-    color: '#64748B',
-  },
-  recapValGreen: {
-    fontSize: 13.5,
-    fontWeight: '900',
-    color: '#059669',
-  },
-  recapDivider: {
-    height: 1,
-    backgroundColor: '#E2E8F0',
-    marginVertical: 2,
-  },
-  dueTotalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 4,
-  },
-  dueTotalLbl: {
+  stepMiniBtnText: {
     fontSize: 13,
-    fontWeight: '800',
-    color: '#0F172A',
+    fontWeight: '900',
+    color: '#18181B',
   },
-  dueTotalVal: {
+  stepMiniBtnPlusText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  qtyBigInput: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#18181B',
+    textAlign: 'center',
+    minWidth: 46,
+  },
+  qtyHintText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#71717A',
+    marginTop: 6,
+  },
+  settlementHighlightBox: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#ECFDF5',
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: '#A7F3D0',
+    marginBottom: 14,
+  },
+  settlementLeft: {
+    flex: 1,
+  },
+  settlementOverline: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#047857',
+  },
+  settlementSoldCount: {
     fontSize: 18,
     fontWeight: '900',
+    color: '#065F46',
+    marginTop: 1,
+  },
+  settlementFormula: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#047857',
+    marginTop: 2,
+  },
+  settlementRight: {
+    alignItems: 'flex-end',
+  },
+  settlementTotalLabel: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#047857',
+  },
+  settlementTotalAmount: {
+    fontSize: 22,
+    fontWeight: '900',
     color: '#059669',
   },
-  saveRecapBtn: {
+  paymentMethodLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#52525B',
+    marginBottom: 8,
+  },
+  paymentToggleRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 16,
+  },
+  paymentOptionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    backgroundColor: '#F8FAFC',
+    gap: 6,
+  },
+  paymentOptionPaidActive: {
+    backgroundColor: '#ECFDF5',
+    borderColor: '#10B981',
+  },
+  paymentOptionDebtActive: {
+    backgroundColor: '#FEF2F2',
+    borderColor: '#F87171',
+  },
+  paymentOptionText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#52525B',
+  },
+  saveSessionBtn: {
     backgroundColor: '#EA580C',
     borderRadius: 16,
-    paddingVertical: 13,
+    paddingVertical: 14,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    elevation: 3,
-    shadowColor: '#EA580C',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    borderBottomWidth: 4,
+    borderBottomColor: '#9A3412',
   },
-  saveRecapBtnText: {
+  saveSessionBtnText: {
     color: '#FFFFFF',
-    fontSize: 13.5,
+    fontSize: 14.5,
     fontWeight: '900',
   },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(24, 24, 27, 0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 380,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#18181B',
+  },
+  modalSub: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#71717A',
+    marginTop: 2,
+    marginBottom: 14,
+  },
+  inputLbl: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#3F3F46',
+    marginBottom: 5,
+    marginTop: 8,
+  },
+  modalInput: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderRadius: 13,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#18181B',
+  },
+  modalActionRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 18,
+  },
+  modalCancelBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 13,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+  },
+  modalCancelText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#475569',
+  },
+  modalSaveBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 13,
+    backgroundColor: '#EA580C',
+    alignItems: 'center',
+  },
+  modalSaveText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
 });
-

@@ -1,158 +1,216 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, StatusBar, Dimensions } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  StatusBar,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Path, Line } from 'react-native-svg';
+import { ModernBottomNav } from '../components/ModernBottomNav';
+import { ScenicBanner } from '../components/ScenicBanner';
 import AssetVisual from '../components/AssetVisual';
-
-const { width } = Dimensions.get('window');
+import { AnimatedPressable, AnimatedProgressBar, TactilePill } from '../components/PlayfulComponents';
+import { getStockItems, saveStockItems } from '../db/storage';
 
 export const StockScreen = ({ navigation }) => {
-  const [activeFilter, setActiveFilter] = useState('Semua (8)');
+  const [activeFilter, setActiveFilter] = useState('Semua');
+  const [stockItems, setStockItems] = useState([
+    { id: '1', name: 'Tepung Terigu', qty: '4.5 kg', numQty: 4.5, unit: 'kg', min: '2 kg', cap: 75, status: 'safe', icon: 'wheat_flour', category: 'Bahan Kering' },
+    { id: '2', name: 'Telur Ayam', qty: '38 Butir', numQty: 38, unit: 'Butir', min: '15 butir', cap: 65, status: 'safe', icon: 'egg_raw', category: 'Bahan Basah' },
+    { id: '3', name: 'Minyak Goreng', qty: '0.8 Liter', numQty: 0.8, unit: 'Liter', min: '2 Liter', cap: 20, status: 'critical', icon: 'oil_butter', category: 'Bahan Basah' },
+    { id: '4', name: 'Gas LPG 3kg', qty: '1 Tabung', numQty: 1, unit: 'Tabung', min: '2 Tabung', cap: 25, status: 'critical', icon: 'gas_cylinder', category: 'Operasional' },
+    { id: '5', name: 'Gula Pasir & Aren', qty: '3.0 kg', numQty: 3.0, unit: 'kg', min: '1 kg', cap: 80, status: 'safe', icon: 'sugar_cane', category: 'Bahan Kering' },
+    { id: '6', name: 'Daging Ayam', qty: '2.5 kg', numQty: 2.5, unit: 'kg', min: '1 kg', cap: 70, status: 'safe', icon: 'meat_chicken', category: 'Bahan Basah' },
+    { id: '7', name: 'Wortel & Kentang', qty: '1.8 kg', numQty: 1.8, unit: 'kg', min: '1 kg', cap: 60, status: 'safe', icon: 'carrot_veg', category: 'Bahan Basah' },
+    { id: '8', name: 'Mika Plastik Kue', qty: '80 Pcs', numQty: 80, unit: 'Pcs', min: '30 pcs', cap: 85, status: 'safe', icon: 'package_box', category: 'Operasional' },
+  ]);
 
-  const stockItems = [
-    { id: '1', name: 'Tepung Terigu', qty: '4.5 kg', min: '2 kg', cap: 75, status: 'safe', icon: 'wheat_flour', category: 'Bahan Kering' },
-    { id: '2', name: 'Telur Ayam', qty: '38 Butir', min: '15 butir', cap: 65, status: 'safe', icon: 'egg_raw', category: 'Bahan Basah' },
-    { id: '3', name: 'Minyak Goreng', qty: '0.8 Liter', min: '2 Liter', cap: 20, status: 'critical', icon: 'oil_butter', category: 'Bahan Basah' },
-    { id: '4', name: 'Gas LPG 3kg', qty: '1 Tabung', min: '2 Tabung', cap: 25, status: 'critical', icon: 'gas_cylinder', category: 'Operasional' },
-    { id: '5', name: 'Gula Pasir', qty: '3.0 kg', min: '1 kg', cap: 80, status: 'safe', icon: 'sugar_cane', category: 'Bahan Kering' },
-    { id: '6', name: 'Daging Ayam', qty: '2.5 kg', min: '1 kg', cap: 70, status: 'safe', icon: 'meat_chicken', category: 'Bahan Basah' },
-    { id: '7', name: 'Wortel & Sayur', qty: '1.8 kg', min: '1 kg', cap: 60, status: 'safe', icon: 'carrot_veg', category: 'Bahan Basah' },
-    { id: '8', name: 'Mika Plastik', qty: '80 Pcs', min: '30 pcs', cap: 85, status: 'safe', icon: 'package_box', category: 'Operasional' },
-  ];
+  useEffect(() => {
+    loadStock();
+  }, []);
 
-  const filteredItems = activeFilter === 'Semua (8)' 
-    ? stockItems 
-    : activeFilter === 'Kritis (2)' 
-      ? stockItems.filter(i => i.status === 'critical')
-      : stockItems.filter(i => i.category === activeFilter);
+  const loadStock = async () => {
+    const saved = await getStockItems();
+    if (saved && saved.length > 0) {
+      setStockItems(saved);
+    }
+  };
+
+  const handleQuickRestock = async (id) => {
+    const updated = stockItems.map((item) => {
+      if (item.id !== id) return item;
+      const nextCap = Math.min(100, (item.cap || 30) + 35);
+      const baseNum = item.numQty || parseFloat(item.qty) || 1;
+      const step = item.unit === 'Butir' || item.unit === 'Pcs' ? 15 : 2;
+      const nextNum = Math.round((baseNum + step) * 10) / 10;
+      const unitStr = item.unit || item.qty.split(' ').slice(1).join(' ') || 'kg';
+      return {
+        ...item,
+        numQty: nextNum,
+        qty: `${nextNum} ${unitStr}`,
+        cap: nextCap,
+        status: nextCap >= 40 ? 'safe' : 'critical',
+      };
+    });
+    setStockItems(updated);
+    await saveStockItems(updated);
+  };
+
+  const criticalCount = stockItems.filter((i) => i.status === 'critical').length;
+  const filters = ['Semua', `Perlu Restok (${criticalCount})`, 'Bahan Kering', 'Bahan Basah', 'Operasional'];
+
+  const filteredItems = stockItems.filter((item) => {
+    if (activeFilter === 'Semua') return true;
+    if (activeFilter.startsWith('Perlu Restok')) return item.status === 'critical';
+    return item.category === activeFilter;
+  });
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F3E8FF" />
 
-      {/* 1. TOP HEADER SUB-LAYAR (DENGAN TOMBOL BACK) */}
-      <View style={styles.subpageHeader}>
-        <View style={styles.backBtnRow}>
-          <TouchableOpacity 
-            style={styles.backBtn} 
-            activeOpacity={0.7}
-            onPress={() => navigation.goBack()}
-          >
-            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-              <Line x1="19" y1="12" x2="5" y2="12" />
-              <Path d="M12 19L5 12L12 5" />
-            </Svg>
-          </TouchableOpacity>
-
-          <View style={styles.headerTextCol}>
-            <Text style={styles.pageTitle}>Gudang Bahan Baku</Text>
-            <Text style={styles.pageSub}>Inventaris Dapur • 8 Komoditas</Text>
-          </View>
-        </View>
-
-        <TouchableOpacity 
-          style={styles.addStockBtn} 
-          activeOpacity={0.85}
-          onPress={() => navigation.navigate('MarketShopping')}
-        >
-          <Text style={styles.addStockBtnText}>+ Beli Bahan</Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent} 
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* 2. KARTU NOTIFIKASI RESTOK HANGAT & MENARIK (KOTAK RAMPING ELEGAN) */}
-        <View style={styles.toastRestockCard}>
-          <View style={styles.toastLeft}>
-            <View style={styles.toastIconWrap}>
-              <AssetVisual name="market_cart" size={22} />
-            </View>
-            <View style={styles.toastTextCol}>
-              <Text style={styles.toastHeadline}>2 Bahan Mendekati Batas Min</Text>
-              <Text style={styles.toastDesc}>Minyak & Gas LPG butuh restok subuh.</Text>
-            </View>
-          </View>
+        {/* 1. SCENIC PANTRY HEADER DENGAN CHEF BITEY MEMERIKSA STOK */}
+        <ScenicBanner
+          scene="stock_pantry"
+          badgeText="INVENTARIS DAPUR"
+          title="Gudang Bahan Baku"
+          subtitle="Pantau ketersediaan tepung, telur, minyak & gas produksi"
+          onBackPress={() => navigation.goBack()}
+          actionLabel="Belanja Subuh"
+          onActionPress={() => navigation.navigate('MarketShopping')}
+        />
 
-          <TouchableOpacity 
-            style={styles.toastCtaBtn}
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('MarketShopping')}
-          >
-            <Text style={styles.toastCtaBtnText}>Belanja Subuh</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* 3. SEGMENTED CONTROL TABS (1 BARIS RINGKAS DENGAN TEKS NOWRAP) */}
-        <View style={styles.filterSegmentBar}>
-          {['Semua (8)', 'Kritis (2)', 'Bahan Kering', 'Bahan Basah'].map((cat) => {
-            const isAct = activeFilter === cat;
-            const isCrit = cat === 'Kritis (2)';
-            return (
-              <TouchableOpacity 
-                key={cat}
-                style={[styles.filterSegmentItem, isAct && styles.filterSegmentItemActive]}
-                onPress={() => setActiveFilter(cat)}
-                activeOpacity={0.8}
-              >
-                <Text 
-                  style={[
-                    styles.filterSegmentText, 
-                    isAct && styles.filterSegmentTextActive,
-                    isCrit && !isAct && styles.criticalText
-                  ]}
-                  numberOfLines={1}
-                >
-                  {cat}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-
-        {/* 4. STOCK GRID (ASET BAHAN BAKU ASLI + STATUS TEKS BERSIH) */}
-        <Text style={styles.sectionLbl}>DAFTAR BAHAN BAKU DAPUR</Text>
-
-        <View style={styles.stockGrid}>
-          {filteredItems.map((item) => {
-            const isCrit = item.status === 'critical';
-
-            return (
-              <View key={item.id} style={[styles.stockCard, isCrit && styles.stockCardCritical]}>
-                <View style={styles.stockCardTop}>
-                  <Text style={styles.stockUnitType}>{item.category}</Text>
-                  
-                  {isCrit ? (
-                    <Text style={styles.statusDirectCritText}>Segera Beli</Text>
-                  ) : (
-                    <Text style={styles.statusDirectSafeText}>Cukup</Text>
-                  )}
-                </View>
-
-                <View style={styles.stockThumbWrap}>
-                  <AssetVisual name={item.icon} size={44} />
-                </View>
-
-                <Text style={styles.stockItemName} numberOfLines={1}>{item.name}</Text>
-                <Text style={[styles.stockItemQty, isCrit && styles.stockItemQtyCrit]}>{item.qty}</Text>
-
-                {/* PROGRESS BAR KAPASITAS SISA */}
-                <View style={styles.progressBg}>
-                  <View style={[styles.progressFill, isCrit ? styles.progressFillCrit : { width: `${item.cap}%` }]} />
-                </View>
-
-                <View style={styles.stockFooterMeta}>
-                  <Text style={styles.metaMinText}>Min: {item.min}</Text>
-                  <Text style={[styles.metaCapText, isCrit && styles.metaCapTextCrit]}>
-                    {item.cap}% {isCrit ? 'Sisa' : 'Aman'}
+        <View style={styles.bodyPadding}>
+          {/* 2. BANNER PERINGATAN BAHAN MENIPIS */}
+          {criticalCount > 0 && (
+            <AnimatedPressable
+              scaleTo={0.98}
+              onPress={() => navigation.navigate('MarketShopping')}
+              style={styles.restockAlertCard}
+            >
+              <View style={styles.restockLeft}>
+                <AssetVisual name="warning_badge" size={36} />
+                <View style={{ marginLeft: 10, flex: 1 }}>
+                  <Text style={styles.restockTitle}>
+                    {criticalCount} Bahan Dapur Hampir Habis
+                  </Text>
+                  <Text style={styles.restockDesc}>
+                    Segera masukkan ke daftar belanja pasar subuh esok pagi
                   </Text>
                 </View>
               </View>
-            );
-          })}
+              <View style={styles.restockCtaPill}>
+                <Text style={styles.restockCtaText}>Beli ›</Text>
+              </View>
+            </AnimatedPressable>
+          )}
+
+          {/* 3. FILTER KATEGORI BAHAN */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterRow}
+          >
+            {filters.map((cat) => (
+              <TactilePill
+                key={cat}
+                label={cat}
+                active={activeFilter === cat}
+                onPress={() => setActiveFilter(cat)}
+              />
+            ))}
+          </ScrollView>
+
+          {/* 4. GRID 2 KOLOM BAHAN BAKU DENGAN BAR KAPASITAS BERANIMASI */}
+          <View style={styles.stockGrid}>
+            {filteredItems.map((item) => {
+              const isCrit = item.status === 'critical';
+              return (
+                <View
+                  key={item.id}
+                  style={[styles.stockCard, isCrit && styles.stockCardCritical]}
+                >
+                  <View style={styles.cardTopRow}>
+                    <View
+                      style={[
+                        styles.iconWrap,
+                        { backgroundColor: isCrit ? '#FEE2E2' : '#FFFBEB' },
+                      ]}
+                    >
+                      <AssetVisual name={item.icon} size={38} />
+                    </View>
+                    <View
+                      style={[
+                        styles.statusBadge,
+                        isCrit ? styles.statusBadgeCrit : styles.statusBadgeSafe,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.statusText,
+                          isCrit ? styles.statusTextCrit : styles.statusTextSafe,
+                        ]}
+                      >
+                        {isCrit ? 'Menipis' : 'Aman'}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Text style={styles.itemName} numberOfLines={1}>
+                    {item.name}
+                  </Text>
+                  <Text style={styles.itemCategory}>{item.category}</Text>
+
+                  <View style={styles.qtyRow}>
+                    <Text style={[styles.qtyValue, isCrit && { color: '#DC2626' }]}>
+                      {item.qty}
+                    </Text>
+                    <Text style={styles.minText}>Min {item.min}</Text>
+                  </View>
+
+                  <View style={{ marginVertical: 8 }}>
+                    <AnimatedProgressBar
+                      percent={item.cap}
+                      color={isCrit ? '#DC2626' : '#10B981'}
+                      trackColor={isCrit ? '#FEE2E2' : '#E2E8F0'}
+                      height={7}
+                    />
+                  </View>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.quickAddBtn,
+                      isCrit && styles.quickAddBtnCritical,
+                    ]}
+                    activeOpacity={0.8}
+                    onPress={() => handleQuickRestock(item.id)}
+                  >
+                    <Text
+                      style={[
+                        styles.quickAddText,
+                        isCrit && styles.quickAddTextCritical,
+                      ]}
+                    >
+                      + Tambah Stok
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              );
+            })}
+          </View>
+
+          <View style={{ height: 100 }} />
         </View>
       </ScrollView>
+
+      <ModernBottomNav activeTab="Home" navigation={navigation} />
     </SafeAreaView>
   );
 };
@@ -162,223 +220,158 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-  subpageHeader: {
-    paddingHorizontal: 18,
-    paddingTop: 16,
-    paddingBottom: 12,
-    backgroundColor: '#FFFFFF',
+  scrollContent: {
+    paddingBottom: 24,
+  },
+  bodyPadding: {
+    paddingHorizontal: 16,
+    paddingTop: 14,
+  },
+  restockAlertCard: {
+    backgroundColor: '#FEF2F2',
+    borderRadius: 20,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: '#FECACA',
+    borderBottomWidth: 4,
+    borderBottomColor: '#FCA5A5',
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1EFEA',
+    marginBottom: 14,
   },
-  backBtnRow: {
+  restockLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    flex: 1,
+    paddingRight: 8,
   },
-  backBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    alignItems: 'center',
-    justifyContent: 'center',
+  restockTitle: {
+    fontSize: 13.5,
+    fontWeight: '900',
+    color: '#991B1B',
   },
-  headerTextCol: {
-    gap: 1,
-  },
-  pageSub: {
+  restockDesc: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#64748B',
+    color: '#B91C1C',
+    marginTop: 2,
   },
-  pageTitle: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#0F172A',
-    letterSpacing: -0.4,
-  },
-  addStockBtn: {
-    backgroundColor: '#EA580C',
+  restockCtaPill: {
+    backgroundColor: '#DC2626',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
     borderRadius: 12,
-    paddingVertical: 7,
-    paddingHorizontal: 13,
-    elevation: 2,
   },
-  addStockBtnText: {
+  restockCtaText: {
     color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '800',
-  },
-  scrollContent: {
-    paddingHorizontal: 18,
-    paddingTop: 14,
-    paddingBottom: 40,
-  },
-  toastRestockCard: {
-    backgroundColor: '#FFF7ED',
-    borderRadius: 18,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderWidth: 1.5,
-    borderColor: '#FED7AA',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  filterSegmentBar: {
-    backgroundColor: '#F1F5F9',
-    borderRadius: 14,
-    padding: 4,
-    flexDirection: 'row',
-    gap: 4,
-    marginBottom: 16,
-  },
-  filterSegmentItem: {
-    flex: 1,
-    paddingVertical: 7,
-    paddingHorizontal: 4,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  filterSegmentItemActive: {
-    backgroundColor: '#FFFFFF',
-    elevation: 2,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-  },
-  filterSegmentText: {
-    fontSize: 10.5,
-    fontWeight: '700',
-    color: '#64748B',
-    textAlign: 'center',
-  },
-  filterSegmentTextActive: {
-    color: '#0F172A',
-    fontWeight: '900',
-  },
-  criticalText: {
-    color: '#DC2626',
-  },
-  sectionLbl: {
     fontSize: 11.5,
     fontWeight: '800',
-    color: '#64748B',
-    letterSpacing: 0.5,
-    marginBottom: 10,
+  },
+  filterRow: {
+    paddingBottom: 14,
   },
   stockGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: 12,
+    rowGap: 12,
   },
   stockCard: {
-    width: (width - 36 - 12) / 2,
+    width: '48.2%',
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 14,
+    borderRadius: 22,
+    padding: 13,
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
-    gap: 8,
-    elevation: 2,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.02,
-    shadowRadius: 6,
+    borderBottomWidth: 4,
+    borderBottomColor: '#CBD5E1',
   },
   stockCardCritical: {
+    backgroundColor: '#FFF5F5',
     borderColor: '#FECACA',
-    backgroundColor: '#FFFDFD',
+    borderBottomColor: '#F87171',
   },
-  stockCardTop: {
+  cardTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 8,
   },
-  stockUnitType: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#94A3B8',
-    textTransform: 'uppercase',
-  },
-  statusDirectSafeText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#059669',
-  },
-  statusDirectCritText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#DC2626',
-  },
-  stockThumbWrap: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+  iconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'center',
-    marginVertical: 2,
   },
-  stockItemName: {
-    fontSize: 13.5,
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  statusBadgeSafe: {
+    backgroundColor: '#DCFCE7',
+  },
+  statusBadgeCrit: {
+    backgroundColor: '#FEE2E2',
+  },
+  statusText: {
+    fontSize: 10,
     fontWeight: '800',
-    color: '#0F172A',
-    textAlign: 'center',
   },
-  stockItemQty: {
-    fontSize: 13,
+  statusTextSafe: {
+    color: '#047857',
+  },
+  statusTextCrit: {
+    color: '#B91C1C',
+  },
+  itemName: {
+    fontSize: 14,
     fontWeight: '900',
-    color: '#0F172A',
-    textAlign: 'center',
+    color: '#18181B',
   },
-  stockItemQtyCrit: {
-    color: '#DC2626',
+  itemCategory: {
+    fontSize: 10.5,
+    fontWeight: '600',
+    color: '#71717A',
+    marginTop: 1,
   },
-  progressBg: {
-    width: '100%',
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#F1F5F9',
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 3,
-    backgroundColor: '#10B981',
-  },
-  progressFillCrit: {
-    width: '20%',
-    backgroundColor: '#EF4444',
-  },
-  stockFooterMeta: {
+  qtyRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'baseline',
+    marginTop: 8,
+  },
+  qtyValue: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#18181B',
+  },
+  minText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#71717A',
+  },
+  quickAddBtn: {
+    marginTop: 4,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 11,
+    paddingVertical: 7,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
-  metaMinText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#64748B',
+  quickAddBtnCritical: {
+    backgroundColor: '#DC2626',
+    borderColor: '#991B1B',
   },
-  metaCapText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#64748B',
+  quickAddText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#334155',
   },
-  metaCapTextCrit: {
-    color: '#DC2626',
+  quickAddTextCritical: {
+    color: '#FFFFFF',
   },
 });

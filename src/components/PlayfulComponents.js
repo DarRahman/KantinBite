@@ -1,10 +1,106 @@
-import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import {
+  Pressable,
+  Text,
+  StyleSheet,
+  View,
+  Animated,
+} from 'react-native';
+
+/**
+ * AnimatedPressable — Pembungkus Sentuhan Membal (Spring Scale Micro-interaction)
+ * Membuat setiap kartu, tombol, dan ikon squircle terasa responsif seperti aplikasi mobile native.
+ */
+export function AnimatedPressable({
+  children,
+  onPress,
+  style,
+  scaleTo = 0.96,
+  disabled = false,
+  accessibilityLabel,
+  accessibilityRole = 'button',
+}) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    if (disabled) return;
+    Animated.spring(scaleAnim, {
+      toValue: scaleTo,
+      useNativeDriver: true,
+      speed: 28,
+      bounciness: 6,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    if (disabled) return;
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 22,
+      bounciness: 8,
+    }).start();
+  };
+
+  return (
+    <Pressable
+      onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      disabled={disabled}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole={accessibilityRole}
+    >
+      <Animated.View style={[style, { transform: [{ scale: scaleAnim }] }]}>
+        {children}
+      </Animated.View>
+    </Pressable>
+  );
+}
+
+/**
+ * AnimatedProgressBar — Bar Kapasitas & Target Beranimasi Halus
+ */
+export function AnimatedProgressBar({
+  percent = 50,
+  color = '#10B981',
+  trackColor = '#F1F5F9',
+  height = 8,
+}) {
+  const widthAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const clamped = Math.max(0, Math.min(100, Number(percent) || 0));
+    Animated.timing(widthAnim, {
+      toValue: clamped,
+      duration: 550,
+      useNativeDriver: false,
+    }).start();
+  }, [percent, widthAnim]);
+
+  const widthInterpolated = widthAnim.interpolate({
+    inputRange: [0, 100],
+    outputRange: ['0%', '100%'],
+  });
+
+  return (
+    <View style={[styles.progressTrack, { backgroundColor: trackColor, height, borderRadius: height / 2 }]}>
+      <Animated.View
+        style={{
+          width: widthInterpolated,
+          height: '100%',
+          backgroundColor: color,
+          borderRadius: height / 2,
+        }}
+      />
+    </View>
+  );
+}
 
 export function TactileButton({
   children,
   onPress,
-  variant = 'primary', // 'primary' | 'secondary' | 'accent' | 'danger'
+  variant = 'primary',
   size = 'md',
   style,
   disabled = false,
@@ -19,7 +115,9 @@ export function TactileButton({
       case 'accent':
         return { bg: '#FEF3C7', border: '#FDE68A', text: '#B45309', shadow: '#F59E0B' };
       case 'success':
-        return { bg: '#DCFCE7', border: '#BBF7D0', text: '#15803D', shadow: '#86EFAC' };
+        return { bg: '#10B981', border: '#059669', text: '#FFFFFF', shadow: '#047857' };
+      case 'danger':
+        return { bg: '#FEF2F2', border: '#FECACA', text: '#DC2626', shadow: '#FCA5A5' };
       default:
         return { bg: '#EA580C', border: '#C2410C', text: '#FFFFFF', shadow: '#9A3412' };
     }
@@ -28,10 +126,10 @@ export function TactileButton({
   const colors = getColors();
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.85}
+    <AnimatedPressable
       onPress={onPress}
       disabled={disabled}
+      scaleTo={0.96}
       style={[
         styles.btn,
         {
@@ -63,7 +161,7 @@ export function TactileButton({
           children
         )}
       </View>
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }
 
@@ -74,69 +172,85 @@ export function BentoCard({
   accentBorder,
   onPress,
 }) {
-  const CardContainer = onPress ? TouchableOpacity : View;
+  if (onPress) {
+    return (
+      <AnimatedPressable
+        onPress={onPress}
+        scaleTo={0.98}
+        style={[
+          styles.bento,
+          {
+            backgroundColor: bg,
+            borderColor: accentBorder || '#E2E8F0',
+          },
+          style,
+        ]}
+      >
+        {children}
+      </AnimatedPressable>
+    );
+  }
 
   return (
-    <CardContainer
-      activeOpacity={0.88}
-      onPress={onPress}
+    <View
       style={[
         styles.bento,
         {
           backgroundColor: bg,
-          borderColor: accentBorder || '#F1F5F9',
+          borderColor: accentBorder || '#E2E8F0',
         },
         style,
       ]}
     >
       {children}
-    </CardContainer>
+    </View>
   );
 }
 
 export function TactilePill({ label, icon, active, onPress, count }) {
   return (
-    <TouchableOpacity
-      activeOpacity={0.8}
+    <AnimatedPressable
       onPress={onPress}
-      style={[
-        styles.pill,
-        active ? styles.pillActive : styles.pillInactive,
-      ]}
+      scaleTo={0.95}
+      style={[styles.pill, active ? styles.pillActive : styles.pillInactive]}
     >
       {icon && <View style={styles.pillIcon}>{icon}</View>}
-      <Text style={[styles.pillText, active && styles.pillTextActive]}>
-        {label}
-      </Text>
+      <Text style={[styles.pillText, active && styles.pillTextActive]}>{label}</Text>
       {count !== undefined && (
         <View style={[styles.pillBadge, active ? styles.pillBadgeActive : styles.pillBadgeInactive]}>
           <Text style={[styles.pillBadgeText, active && styles.pillBadgeTextActive]}>{count}</Text>
         </View>
       )}
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 }
 
 const styles = StyleSheet.create({
+  progressTrack: {
+    width: '100%',
+    overflow: 'hidden',
+  },
   btn: {
-    borderRadius: 18,
+    borderRadius: 16,
     borderWidth: 1.5,
     paddingVertical: 12,
     paddingHorizontal: 18,
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: 48,
   },
   btnLg: {
-    paddingVertical: 16,
+    paddingVertical: 15,
     paddingHorizontal: 22,
-    borderRadius: 22,
-    minHeight: 56,
+    borderRadius: 18,
+    minHeight: 54,
   },
   btnSm: {
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 14,
+    borderRadius: 12,
     borderBottomWidth: 3,
+    minHeight: 38,
   },
   contentRow: {
     flexDirection: 'row',
@@ -147,73 +261,71 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   btnText: {
-    fontSize: 15,
+    fontSize: 14.5,
     fontWeight: '800',
     letterSpacing: -0.2,
   },
   btnTextLg: {
-    fontSize: 17,
+    fontSize: 16,
   },
   btnTextSm: {
-    fontSize: 13,
+    fontSize: 12.5,
   },
   bento: {
-    borderRadius: 22,
+    borderRadius: 20,
     borderWidth: 1.5,
+    borderBottomWidth: 3.5,
     padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
-    elevation: 2,
   },
   pill: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingVertical: 9,
+    borderRadius: 16,
     borderWidth: 1.5,
     marginRight: 8,
   },
   pillActive: {
     backgroundColor: '#EA580C',
     borderColor: '#C2410C',
-    borderBottomWidth: 3,
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#9A3412',
   },
   pillInactive: {
     backgroundColor: '#FFFFFF',
     borderColor: '#E2E8F0',
-    borderBottomWidth: 2,
+    borderBottomWidth: 3,
+    borderBottomColor: '#CBD5E1',
   },
   pillIcon: {
     marginRight: 6,
   },
   pillText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#64748B',
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#52525B',
   },
   pillTextActive: {
     color: '#FFFFFF',
-    fontWeight: '800',
+    fontWeight: '900',
   },
   pillBadge: {
     marginLeft: 6,
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 10,
+    borderRadius: 8,
   },
   pillBadgeActive: {
-    backgroundColor: '#C2410C',
+    backgroundColor: '#9A3412',
   },
   pillBadgeInactive: {
     backgroundColor: '#F1F5F9',
   },
   pillBadgeText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '800',
-    color: '#64748B',
+    color: '#52525B',
   },
   pillBadgeTextActive: {
     color: '#FFFFFF',

@@ -1,61 +1,78 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import Svg, { Rect, Line, Text as SvgText } from 'react-native-svg';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import Svg, { Rect, Line, Text as SvgText, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { formatRupiah } from '../utils/formatters';
+import AssetVisual from './AssetVisual';
 
+/**
+ * WeeklyBarChart — Grafik Batang Interaktif 7 Hari
+ * Pengguna dapat menyentuh hari tertentu untuk melihat nominal penjualan hari tersebut.
+ */
 export const WeeklyBarChart = ({ data = [] }) => {
   if (!data || data.length === 0) return null;
 
-  const maxAmount = Math.max(...data.map(d => d.amount), 500000);
-  const chartHeight = 110;
-  const barWidth = 24;
-  const spacing = 18;
-  const totalWidth = data.length * (barWidth + spacing);
+  const [selectedIdx, setSelectedIdx] = useState(data.length - 1);
+  const selectedItem = data[selectedIdx] || data[data.length - 1];
+
+  const maxAmount = Math.max(...data.map((d) => d.amount), 450000);
+  const avgAmount = Math.round(
+    data.reduce((sum, d) => sum + d.amount, 0) / Math.max(1, data.length)
+  );
 
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
-        <Text style={styles.chartTitle}>Tren Penjualan 7 Hari</Text>
-        <Text style={styles.chartLegend}>Rata-rata: Rp 330.000 / hari</Text>
+        <View style={styles.titleRow}>
+          <AssetVisual name="chart_up" size={26} />
+          <View style={{ marginLeft: 8 }}>
+            <Text style={styles.chartTitle}>Tren Omzet 7 Hari</Text>
+            <Text style={styles.chartLegend}>Rata-rata {formatRupiah(avgAmount)} / hari</Text>
+          </View>
+        </View>
+
+        <View style={styles.activeCallout}>
+          <Text style={styles.activeDayText}>Hari {selectedItem.day}</Text>
+          <Text style={styles.activeAmountText}>{formatRupiah(selectedItem.amount)}</Text>
+        </View>
       </View>
 
-      <View style={styles.svgContainer}>
-        <Svg width="100%" height={chartHeight + 28} viewBox={`0 0 ${totalWidth} ${chartHeight + 28}`}>
-          {/* Baseline horizontal */}
-          <Line x1="0" y1={chartHeight} x2={totalWidth} y2={chartHeight} stroke="#E4E4E7" strokeWidth="1" />
+      {/* Bar Interaktif */}
+      <View style={styles.barsRow}>
+        {data.map((item, idx) => {
+          const isSelected = idx === selectedIdx;
+          const heightRatio = Math.max(0.18, item.amount / maxAmount);
+          const barHeight = Math.round(heightRatio * 96);
 
-          {data.map((item, idx) => {
-            const x = idx * (barWidth + spacing) + 4;
-            const barH = Math.max(12, (item.amount / maxAmount) * (chartHeight - 16));
-            const y = chartHeight - barH;
-            const isToday = idx === data.length - 1;
-
-            return (
-              <React.Fragment key={idx}>
-                {/* Bar */}
-                <Rect
-                  x={x}
-                  y={y}
-                  width={barWidth}
-                  height={barH}
-                  rx={6}
-                  fill={isToday ? '#EA580C' : '#FED7AA'}
+          return (
+            <TouchableOpacity
+              key={idx}
+              style={styles.barColumn}
+              activeOpacity={0.75}
+              onPress={() => setSelectedIdx(idx)}
+            >
+              <Text style={[styles.barTopLabel, isSelected && styles.barTopLabelActive]}>
+                {Math.round(item.amount / 1000)}rb
+              </Text>
+              <View style={styles.barTrack}>
+                <View
+                  style={[
+                    styles.barFill,
+                    {
+                      height: barHeight,
+                      backgroundColor: isSelected ? '#EA580C' : '#FED7AA',
+                      borderColor: isSelected ? '#9A3412' : '#FDBA74',
+                    },
+                  ]}
                 />
-                {/* Day Label */}
-                <SvgText
-                  x={x + barWidth / 2}
-                  y={chartHeight + 18}
-                  fontSize="10"
-                  fontWeight={isToday ? '800' : '600'}
-                  fill={isToday ? '#EA580C' : '#71717A'}
-                  textAnchor="middle"
-                >
+              </View>
+              <View style={[styles.dayChip, isSelected && styles.dayChipActive]}>
+                <Text style={[styles.dayText, isSelected && styles.dayTextActive]}>
                   {item.day}
-                </SvgText>
-              </React.Fragment>
-            );
-          })}
-        </Svg>
+                </Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );
@@ -64,32 +81,103 @@ export const WeeklyBarChart = ({ data = [] }) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 22,
     padding: 16,
-    borderWidth: 2,
-    borderColor: '#1E293B',
+    borderWidth: 1.5,
+    borderColor: '#FED7AA',
     borderBottomWidth: 4,
-    borderBottomColor: '#1E293B',
-    marginVertical: 12
+    borderBottomColor: '#FDBA74',
+    marginBottom: 14,
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'baseline',
-    marginBottom: 10
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   chartTitle: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#18181B'
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#18181B',
   },
   chartLegend: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '600',
-    color: '#71717A'
+    color: '#71717A',
+    marginTop: 1,
   },
-  svgContainer: {
+  activeCallout: {
+    backgroundColor: '#FFF7ED',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+    alignItems: 'flex-end',
+    borderWidth: 1,
+    borderColor: '#FED7AA',
+  },
+  activeDayText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#9A3412',
+  },
+  activeAmountText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#EA580C',
+  },
+  barsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    paddingTop: 6,
+  },
+  barColumn: {
+    flex: 1,
     alignItems: 'center',
-    justifyContent: 'center'
-  }
+  },
+  barTopLabel: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#A1A1AA',
+    marginBottom: 4,
+  },
+  barTopLabelActive: {
+    color: '#EA580C',
+    fontWeight: '900',
+  },
+  barTrack: {
+    height: 98,
+    width: 24,
+    backgroundColor: '#FFFBEB',
+    borderRadius: 10,
+    justifyContent: 'flex-end',
+    overflow: 'hidden',
+  },
+  barFill: {
+    width: '100%',
+    borderRadius: 10,
+    borderWidth: 1.5,
+  },
+  dayChip: {
+    marginTop: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  dayChipActive: {
+    backgroundColor: '#EA580C',
+  },
+  dayText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#52525B',
+  },
+  dayTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+  },
 });

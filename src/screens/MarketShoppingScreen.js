@@ -1,12 +1,22 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, StatusBar, Alert, Dimensions, Share } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  StatusBar,
+  Alert,
+  Share,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Path, Line, Rect, Circle, Polyline } from 'react-native-svg';
+import Svg, { Polyline } from 'react-native-svg';
 import { ModernBottomNav } from '../components/ModernBottomNav';
+import { ScenicBanner } from '../components/ScenicBanner';
 import AssetVisual from '../components/AssetVisual';
+import { AnimatedPressable, AnimatedProgressBar } from '../components/PlayfulComponents';
+import { getMarketItems, saveMarketItems, addExpenseTransaction } from '../db/storage';
 import { formatRupiah } from '../utils/formatters';
-
-const { width } = Dimensions.get('window');
 
 export const MarketShoppingScreen = ({ navigation }) => {
   const [shoppingItems, setShoppingItems] = useState([
@@ -18,157 +28,179 @@ export const MarketShoppingScreen = ({ navigation }) => {
     { id: 'b6', name: 'Gula Pasir & Daun Pisang', qtyNeeded: '1 Kg + 2 Ikat', estCost: 23000, icon: 'sugar_cane', checked: false, note: 'Pembungkus lemper harum' },
   ]);
 
-  const toggleCheck = (id) => {
-    setShoppingItems(prev => prev.map(item => {
-      if (item.id === id) {
-        return { ...item, checked: !item.checked };
-      }
-      return item;
-    }));
+  useEffect(() => {
+    loadItems();
+  }, []);
+
+  const loadItems = async () => {
+    const saved = await getMarketItems();
+    if (saved && saved.length > 0) {
+      setShoppingItems(saved);
+    }
   };
 
-  const checkedCount = shoppingItems.filter(i => i.checked).length;
-  const totalCost = shoppingItems.reduce((sum, i) => sum + i.estCost, 0);
-  const remainingCost = shoppingItems.filter(i => !i.checked).reduce((sum, i) => sum + i.estCost, 0);
-  const boughtCost = totalCost - remainingCost;
+  const toggleCheck = async (id) => {
+    const updated = shoppingItems.map((item) =>
+      item.id === id ? { ...item, checked: !item.checked } : item
+    );
+    setShoppingItems(updated);
+    await saveMarketItems(updated);
+  };
+
+  const checkedCount = shoppingItems.filter((i) => i.checked).length;
+  const totalCost = shoppingItems.reduce((sum, i) => sum + (Number(i.estCost) || 0), 0);
+  const remainingCost = shoppingItems
+    .filter((i) => !i.checked)
+    .reduce((sum, i) => sum + (Number(i.estCost) || 0), 0);
+  const boughtCost = Math.max(0, totalCost - remainingCost);
+  const progressPct = Math.round((checkedCount / Math.max(1, shoppingItems.length)) * 100);
+
+  const handleRecordExpense = async () => {
+    if (boughtCost <= 0) {
+      Alert.alert('Pilih Bahan Terbeli', 'Centang minimal 1 bahan yang sudah dibeli di pasar.');
+      return;
+    }
+    await addExpenseTransaction(
+      'Belanja Pasar Subuh',
+      boughtCost,
+      `${checkedCount} Komoditas Dapur`
+    );
+    Alert.alert(
+      'Tercatat di Buku Kas',
+      `Pengeluaran pasar sebesar ${formatRupiah(boughtCost)} telah memotong saldo kas laci secara otomatis.`
+    );
+  };
 
   const handleShareToWhatsApp = async () => {
     let text = `*DAFTAR BELANJA PASAR SUBUH - KANTINBITE*\n`;
     text += `Jadwal: 04:00 Subuh di Pasar Tradisional\n\n`;
     shoppingItems.forEach((i, idx) => {
-      const mark = i.checked ? '✓ [Sudah Dibeli]' : '◻ [Belum]';
-      text += `${idx + 1}. ${mark} *${i.name}* - ${i.qtyNeeded} (~${formatRupiah(i.estCost)})\n   _Catatan: ${i.note}_\n`;
+      const mark = i.checked ? '[Sudah]' : '[Belum]';
+      text += `${idx + 1}. ${mark} *${i.name}* - ${i.qtyNeeded} (${formatRupiah(i.estCost)})\n`;
     });
     text += `\n*Total Estimasi Anggaran: ${formatRupiah(totalCost)}*`;
-    
+
     try {
       await Share.share({ message: text });
     } catch (e) {
-      Alert.alert('Gagal membagikan', e.message);
+      Alert.alert('Info', e.message);
     }
   };
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      
-      {/* 1. TOP HEADER SUB-LAYAR (DENGAN TOMBOL BACK) */}
-      <View style={styles.subpageHeader}>
-        <View style={styles.backBtnRow}>
-          <TouchableOpacity 
-            style={styles.backBtn}
-            activeOpacity={0.7}
-            onPress={() => navigation.goBack()}
-          >
-            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-              <Line x1="19" y1="12" x2="5" y2="12" />
-              <Path d="M12 19L5 12L12 5" />
-            </Svg>
-          </TouchableOpacity>
+      <StatusBar barStyle="dark-content" backgroundColor="#ECFDF5" />
 
-          <View style={styles.headerTextCol}>
-            <Text style={styles.pageTitle}>Belanja Pasar Subuh</Text>
-            <Text style={styles.pageSub}>Operasional 04:00 • Pasar Tradisional</Text>
-          </View>
-        </View>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* 1. SCENIC DAWN MARKET HEADER */}
+        <ScenicBanner
+          scene="market_dawn"
+          badgeText="PASAR TRADISIONAL 04:00"
+          title="Belanja Pasar Subuh"
+          subtitle="Ceklis bahan baku segar untuk adonan pagi ini"
+          onBackPress={() => navigation.goBack()}
+          actionLabel="Kirim WA"
+          onActionPress={handleShareToWhatsApp}
+        />
 
-        <TouchableOpacity 
-          style={styles.shareWaBtn}
-          activeOpacity={0.85}
-          onPress={() => Alert.alert('Simpan Belanja', 'Daftar belanjaan subuh tersimpan aman.')}
-        >
-          <Text style={styles.shareWaBtnText}>Simpan</Text>
-        </TouchableOpacity>
-      </View>
+        <View style={styles.bodyPadding}>
+          {/* 2. KARTU RINGKASAN ANGGARAN & PROGRESS BELANJA */}
+          <View style={styles.budgetCard}>
+            <View style={styles.budgetTopRow}>
+              <View>
+                <Text style={styles.budgetLabelText}>ANGGARAN BELANJA SUBUH</Text>
+                <Text style={styles.budgetBigNum}>{formatRupiah(totalCost)}</Text>
+              </View>
+              <AssetVisual name="market_cart" size={48} />
+            </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        
-        {/* 2. HERO ESTIMASI ANGGARAN PASAR (KARTU PUTIH BERSIH) */}
-        <View style={styles.budgetCard}>
-          <View style={styles.budgetTopRow}>
-            <Text style={styles.budgetLabelText}>ESTIMASI ANGGARAN BELANJA PASAR</Text>
-            <View style={styles.cartBadge}>
-              <AssetVisual name="market_cart" size={20} />
+            <View style={{ marginVertical: 10 }}>
+              <AnimatedProgressBar
+                percent={progressPct}
+                color="#10B981"
+                trackColor="#E2E8F0"
+                height={9}
+              />
+            </View>
+
+            <View style={styles.budgetSummaryStrip}>
+              <View style={styles.summaryPillGreen}>
+                <Text style={styles.summaryDoneText}>
+                  Terbeli ({checkedCount}/{shoppingItems.length}): {formatRupiah(boughtCost)}
+                </Text>
+              </View>
+              <Text style={styles.summaryRemainingText}>
+                Sisa: {formatRupiah(remainingCost)}
+              </Text>
             </View>
           </View>
 
-          <View style={styles.budgetMainRow}>
-            <Text style={styles.budgetBigNum}>{formatRupiah(totalCost)}</Text>
-            <Text style={styles.budgetStatusText}>{checkedCount} dari {shoppingItems.length} Terbeli</Text>
-          </View>
+          {/* 3. DAFTAR CEKLIS KOMODITAS PASAR */}
+          <Text style={styles.sectionTitle}>Daftar Belanjaan Dapur</Text>
 
-          <View style={styles.budgetSummaryStrip}>
-            <View style={styles.summaryDoneWrap}>
-              <Svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth={3}>
-                <Polyline points="20 6 9 17 4 12" />
-              </Svg>
-              <Text style={styles.summaryDoneText}>Terbeli: {formatRupiah(boughtCost)}</Text>
-            </View>
-            <Text style={styles.summaryRemainingText}>Sisa Belanja: {formatRupiah(remainingCost)}</Text>
-          </View>
-        </View>
-
-        {/* 2B. OTOMASI PERHITUNGAN KEBUTUHAN PRODUKSI (AUTO-REPLENISHMENT) */}
-        <View style={styles.autoCalcCard}>
-          <View style={styles.autoCalcHeadRow}>
-            <Text style={styles.autoCalcBadgeTitle}>OTOMASI KEBUTUHAN BESOK</Text>
-            <TouchableOpacity 
-              onPress={() => Alert.alert('Rencana Produksi', 'Rencana esok subuh: 50 Risoles Rogout + 40 Pastel Sayur. Kebutuhan bahan otomatis disesuaikan dengan sisa stok di gudang dapur.')}
-              accessibilityLabel="Sesuaikan target produksi"
-              accessibilityRole="button"
-            >
-              <Text style={styles.autoCalcAdjustText}>Ubah Rencana ›</Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.autoCalcDetailText}>Target Produksi: 50 Risoles + 40 Pastel</Text>
-          <Text style={styles.autoCalcHelperText}>Daftar belanjaan di bawah dihitung otomatis dari formulasi resep & sisa stok gudang dapur.</Text>
-        </View>
-
-        {/* 3. CHECKLIST ITEM BELANJAAN SUBUH */}
-        <Text style={styles.sectionLbl}>DAFTAR BAHAN YANG HARUS DIBELI ({shoppingItems.length} ITEM)</Text>
-
-        {shoppingItems.map((item) => {
-          return (
-            <TouchableOpacity
+          {shoppingItems.map((item) => (
+            <AnimatedPressable
               key={item.id}
-              activeOpacity={0.8}
+              scaleTo={0.98}
               onPress={() => toggleCheck(item.id)}
               style={[styles.itemCard, item.checked && styles.itemCardChecked]}
             >
-              {/* ROUND CHECKBOX */}
-              <View style={[styles.checkboxRound, item.checked && styles.checkboxRoundChecked]}>
-                {item.checked && <Text style={styles.checkMark}>✓</Text>}
-              </View>
-
-              <View style={[
-                styles.itemThumbBox,
-                item.icon === 'package_box' && { backgroundColor: '#F0F9FF', borderColor: '#BAE6FD' },
-                item.icon === 'sugar_cane' && { backgroundColor: '#F0FDF4', borderColor: '#BBF7D0' }
-              ]}>
-                <AssetVisual name={item.icon || 'wheat_flour'} size={34} />
+              <View style={styles.itemIconBox}>
+                <AssetVisual name={item.icon} size={38} />
               </View>
 
               <View style={styles.itemInfoCol}>
-                <Text style={[styles.itemNameText, item.checked && styles.textStrike]}>
+                <Text
+                  style={[styles.itemName, item.checked && styles.itemNameChecked]}
+                >
                   {item.name}
                 </Text>
-                <Text style={[styles.itemQtyText, item.checked && styles.textStrikeMuted]}>
-                  Kebutuhan: <Text style={styles.itemQtyHighlight}>{item.qtyNeeded}</Text>
-                </Text>
-                <Text style={styles.itemNoteText} numberOfLines={1}>
-                  {item.note}
+                <Text style={styles.itemSub}>
+                  {item.qtyNeeded} • {item.note}
                 </Text>
               </View>
 
-              <Text style={[styles.itemCostText, item.checked && styles.textStrikeMuted]}>
-                {formatRupiah(item.estCost)}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+              <View style={styles.itemRightCol}>
+                <Text
+                  style={[styles.itemPrice, item.checked && styles.itemPriceChecked]}
+                >
+                  {formatRupiah(item.estCost)}
+                </Text>
+                <View
+                  style={[
+                    styles.checkBox,
+                    item.checked ? styles.checkBoxActive : styles.checkBoxIdle,
+                  ]}
+                >
+                  {item.checked && (
+                    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={3}>
+                      <Polyline points="20 6 9 17 4 12" />
+                    </Svg>
+                  )}
+                </View>
+              </View>
+            </AnimatedPressable>
+          ))}
+
+          {/* 4. TOMBOL CATAT PENGELUARAN KE BUKU KAS */}
+          <AnimatedPressable
+            scaleTo={0.97}
+            style={styles.recordExpenseBtn}
+            onPress={handleRecordExpense}
+          >
+            <AssetVisual name="wallet_purse" size={22} />
+            <Text style={styles.recordExpenseText}>
+              Catat Belanja Terbeli ({formatRupiah(boughtCost)}) ke Kas
+            </Text>
+          </AnimatedPressable>
+
+          <View style={{ height: 100 }} />
+        </View>
       </ScrollView>
 
-      {/* 5. MODERN BOTTOM DOCK */}
       <ModernBottomNav activeTab="Home" navigation={navigation} />
     </SafeAreaView>
   );
@@ -179,127 +211,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-  subpageHeader: {
-    paddingHorizontal: 18,
-    paddingTop: 16,
-    paddingBottom: 14,
-    backgroundColor: '#FFFFFF',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1EFEA',
-  },
-  backBtnRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    flex: 1,
-    minWidth: 0,
-  },
-  backBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  headerTextCol: {
-    gap: 2,
-    flex: 1,
-    minWidth: 0,
-  },
-  pageSub: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#64748B',
-  },
-  pageTitle: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#0F172A',
-    letterSpacing: -0.4,
-  },
-  shareWaBtn: {
-    backgroundColor: '#FAF8F5',
-    borderWidth: 1.8,
-    borderColor: '#1E293B',
-    borderBottomWidth: 3,
-    borderBottomColor: '#1E293B',
-    borderRadius: 12,
-    paddingVertical: 7,
-    paddingHorizontal: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  shareWaBtnText: {
-    color: '#0F172A',
-    fontSize: 11.5,
-    fontWeight: '900',
-  },
   scrollContent: {
+    paddingBottom: 24,
+  },
+  bodyPadding: {
     paddingHorizontal: 18,
     paddingTop: 14,
-    paddingBottom: 110, // Ruang lega di atas ModernBottomNav
   },
   budgetCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 16,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    borderBottomWidth: 3.5,
-    borderBottomColor: '#CBD5E1',
-    gap: 10,
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-  },
-  autoCalcCard: {
     backgroundColor: '#FFFBEB',
-    borderRadius: 18,
-    padding: 14,
-    borderWidth: 1.5,
+    borderRadius: 24,
+    padding: 16,
+    borderWidth: 1.8,
     borderColor: '#FDE68A',
-    borderBottomWidth: 3.5,
+    borderBottomWidth: 4.5,
     borderBottomColor: '#F59E0B',
-    gap: 6,
-    marginBottom: 16,
-  },
-  autoCalcHeadRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  autoCalcBadgeTitle: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#B45309',
-    letterSpacing: 0.6,
-  },
-  autoCalcAdjustText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#EA580C',
-  },
-  autoCalcDetailText: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#0F172A',
-  },
-  autoCalcHelperText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#64748B',
-    lineHeight: 15,
+    marginBottom: 18,
   },
   budgetTopRow: {
     flexDirection: 'row',
@@ -307,155 +234,131 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   budgetLabelText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: '800',
-    color: '#64748B',
-    letterSpacing: 0.5,
-  },
-  cartBadge: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: '#FFF7ED',
-    borderWidth: 1.5,
-    borderColor: '#FED7AA',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  budgetMainRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
+    color: '#92400E',
+    letterSpacing: 0.4,
   },
   budgetBigNum: {
     fontSize: 28,
     fontWeight: '900',
-    color: '#0F172A',
-    letterSpacing: -0.5,
-  },
-  budgetStatusText: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    color: '#059669',
+    color: '#18181B',
+    marginTop: 2,
   },
   budgetSummaryStrip: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
-    borderStyle: 'dashed',
-  },
-  summaryDoneWrap: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+  },
+  summaryPillGreen: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
   },
   summaryDoneText: {
     fontSize: 11.5,
-    color: '#059669',
     fontWeight: '800',
+    color: '#047857',
   },
   summaryRemainingText: {
-    fontSize: 11.5,
-    color: '#DC2626',
+    fontSize: 12,
     fontWeight: '800',
+    color: '#B45309',
   },
-  sectionLbl: {
-    fontSize: 11.5,
-    fontWeight: '800',
-    color: '#64748B',
-    letterSpacing: 0.5,
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#18181B',
     marginBottom: 10,
-    marginTop: 4,
   },
   itemCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.02,
-    shadowRadius: 6,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 13,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#CBD5E1',
+    marginBottom: 10,
   },
   itemCardChecked: {
-    backgroundColor: '#F8FAFC',
-    borderColor: '#CBD5E1',
+    backgroundColor: '#F0FDF4',
+    borderColor: '#86EFAC',
+    borderBottomColor: '#22C55E',
   },
-  checkboxRound: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 1.8,
-    borderColor: '#CBD5E1',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  checkboxRoundChecked: {
-    backgroundColor: '#059669',
-    borderColor: '#059669',
-  },
-  checkMark: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '900',
-  },
-  itemThumbBox: {
+  itemIconBox: {
     width: 48,
     height: 48,
     borderRadius: 14,
     backgroundColor: '#FFFBEB',
-    borderWidth: 1,
-    borderColor: '#FEF08A',
     alignItems: 'center',
     justifyContent: 'center',
-    flexShrink: 0,
+    marginRight: 12,
   },
   itemInfoCol: {
     flex: 1,
-    gap: 3,
-    minWidth: 0,
+    paddingRight: 8,
   },
-  itemNameText: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#0F172A',
-  },
-  itemQtyText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#64748B',
-  },
-  itemQtyHighlight: {
-    color: '#EA580C',
-    fontWeight: '800',
-  },
-  itemNoteText: {
-    fontSize: 11,
-    color: '#94A3B8',
-    fontWeight: '500',
-  },
-  itemCostText: {
+  itemName: {
     fontSize: 14,
     fontWeight: '900',
-    color: '#0F172A',
-    flexShrink: 0,
+    color: '#18181B',
   },
-  textStrike: {
+  itemNameChecked: {
     textDecorationLine: 'line-through',
-    color: '#94A3B8',
+    color: '#15803D',
   },
-  textStrikeMuted: {
-    textDecorationLine: 'line-through',
-    color: '#CBD5E1',
+  itemSub: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#71717A',
+    marginTop: 2,
+  },
+  itemRightCol: {
+    alignItems: 'flex-end',
+    gap: 6,
+  },
+  itemPrice: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#EA580C',
+  },
+  itemPriceChecked: {
+    color: '#059669',
+  },
+  checkBox: {
+    width: 24,
+    height: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkBoxIdle: {
+    borderWidth: 2,
+    borderColor: '#CBD5E1',
+    backgroundColor: '#F8FAFC',
+  },
+  checkBoxActive: {
+    backgroundColor: '#10B981',
+  },
+  recordExpenseBtn: {
+    marginTop: 8,
+    backgroundColor: '#EA580C',
+    borderRadius: 18,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderBottomWidth: 4,
+    borderBottomColor: '#9A3412',
+  },
+  recordExpenseText: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
+    fontWeight: '900',
   },
 });

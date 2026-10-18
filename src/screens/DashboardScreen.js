@@ -1,328 +1,495 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, StatusBar, TextInput, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+  StatusBar,
+  TextInput,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Path, Rect, Circle } from 'react-native-svg';
+import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import { ModernBottomNav } from '../components/ModernBottomNav';
+import { ScenicBanner } from '../components/ScenicBanner';
 import AssetVisual from '../components/AssetVisual';
-import { Mascot } from '../components/Mascot';
 import { PastelReferenceIcon } from '../components/PastelReferenceIcon';
 import { WeeklyBarChart } from '../components/WeeklyBarChart';
 import { DonutIncomeRatio } from '../components/DonutIncomeRatio';
-import { getCashflow, getProfile } from '../db/storage';
+import { AnimatedPressable, AnimatedProgressBar } from '../components/PlayfulComponents';
+import { getCashflow, getProfile, getProducts, getDebts } from '../db/storage';
 import { formatRupiah } from '../utils/formatters';
 
-const { width } = Dimensions.get('window');
-
 export const DashboardScreen = ({ navigation }) => {
-  const [profile, setProfile] = useState({ businessName: 'Dapur Berkah Bunda', ownerName: 'Bunda Sumiati' });
+  const [profile, setProfile] = useState({
+    businessName: 'Dapur Berkah Bunda',
+    ownerName: 'Bunda Sumiati',
+  });
+  const [cashflow, setCashflow] = useState({
+    walletBalance: 850000,
+    totalIncomeToday: 320000,
+    totalExpenseToday: 150000,
+    weeklyTrend: [
+      { day: 'Sen', amount: 280000 },
+      { day: 'Sel', amount: 310000 },
+      { day: 'Rab', amount: 290000 },
+      { day: 'Kam', amount: 350000 },
+      { day: 'Jum', amount: 320000 },
+      { day: 'Sab', amount: 410000 },
+      { day: 'Min', amount: 330000 },
+    ],
+    activities: [],
+  });
+  const [products, setProducts] = useState([]);
+  const [totalDebt, setTotalDebt] = useState(50000);
   const [hideBalance, setHideBalance] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('Semua');
-
-  const categories = ['Semua', 'Gorengan', 'Kue Basah', 'Titip Kantin', 'Bahan Dapur'];
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    const load = async () => {
-      const p = await getProfile();
-      if (p) setProfile(p);
-    };
-    load();
-  }, []);
+    loadAll();
+    const unsub = navigation.addListener('focus', loadAll);
+    return unsub;
+  }, [navigation]);
+
+  const loadAll = async () => {
+    const [p, c, prods, debts] = await Promise.all([
+      getProfile(),
+      getCashflow(),
+      getProducts(),
+      getDebts(),
+    ]);
+    if (p) setProfile(p);
+    if (c) setCashflow(c);
+    if (prods && prods.length > 0) setProducts(prods);
+    if (debts) {
+      const sumDebt = debts.reduce((acc, d) => acc + (Number(d.amount) || 0), 0);
+      setTotalDebt(sumDebt);
+    }
+  };
+
+  const featuredSnacks =
+    products.length > 0
+      ? products
+      : [
+          { id: 'p1', name: 'Risoles Rogout Ayam', price: 1200, stock: 50, icon: 'risoles_rogout', netProfit: 200 },
+          { id: 'p2', name: 'Pastel Sayur Telur', price: 1500, stock: 35, icon: 'pastel_telur', netProfit: 250 },
+          { id: 'p3', name: 'Dadar Gulung Pandan', price: 1000, stock: 40, icon: 'dadar_gulung', netProfit: 200 },
+          { id: 'p4', name: 'Lemper Ayam Ketan', price: 1500, stock: 30, icon: 'lemper_ayam', netProfit: 300 },
+        ];
+
+  const filteredSnacks = featuredSnacks.filter((item) =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const activitiesList =
+    cashflow.activities && cashflow.activities.length > 0
+      ? cashflow.activities
+      : [
+          {
+            id: 'a1',
+            title: 'Setoran Kantin Fak. Teknik',
+            subtitle: '25 Risoles Rogout Lunas',
+            time: '15:20 WIB',
+            amount: 50000,
+            type: 'income',
+          },
+          {
+            id: 'a2',
+            title: 'Belanja Pasar Subuh Kanoman',
+            subtitle: 'Terigu, Telur & Minyak Goreng',
+            time: '04:45 Subuh',
+            amount: 150000,
+            type: 'expense',
+          },
+          {
+            id: 'a3',
+            title: 'Penjualan Kasir Teras Pagi',
+            subtitle: '20 pcs Aneka Jajanan',
+            time: '07:15 Pagi',
+            amount: 24000,
+            type: 'income',
+          },
+        ];
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFF7ED" />
 
-      {/* 1. TOP HEADER: BERSIH & BERNAFAS (ZERO PARASITE BADGES, ZERO DEV JARGON) */}
-      <View style={styles.topHeader}>
-        <View style={styles.greetingWrap}>
-          <Text style={styles.businessTitle}>{profile.businessName || 'Dapur Berkah Bunda'}</Text>
-          <Text style={styles.greetingSub}>{profile.ownerName || 'Bunda Sumiati'} • Sesi Pagi</Text>
-        </View>
-
-        <TouchableOpacity 
-          style={styles.avatarBtn} 
-          activeOpacity={0.8}
-          onPress={() => navigation.navigate('Settings')}
-          accessibilityLabel="Buka Pengaturan Profil Usaha"
-          accessibilityRole="button"
-        >
-          <AssetVisual name="chef_mascot" size={38} />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent} 
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        
-        {/* 2. SEARCH BAR MODERN BERBENTUK KAPSUL DENGAN FILTER ICON */}
-        <View style={styles.searchBarContainer}>
-          <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth={2}>
-            <Circle cx="11" cy="11" r="8" />
-            <Path d="M21 21l-4.35-4.35" />
-          </Svg>
-          <TextInput 
-            placeholder="Cari jajanan, resep HPP, atau mitra kantin..." 
-            placeholderTextColor="#94A3B8"
-            style={styles.searchInput}
-          />
-          <TouchableOpacity style={styles.filterIconBtn}>
-            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#EA580C" strokeWidth={2}>
-              <Path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
-            </Svg>
-          </TouchableOpacity>
-        </View>
-
-        {/* 3. HERO CASH WALLET CARD ZERO DEAD SPACE (KREM MADU & DUAL STATS) */}
-        <View style={styles.heroWalletCard}>
-          <View style={styles.walletHeaderRow}>
-            <View style={styles.walletLabelBox}>
-              <AssetVisual name="coin_gold" size={22} />
-              <Text style={styles.walletLabelText}>Uang Kas di Dompet</Text>
-            </View>
-            <TouchableOpacity onPress={() => setHideBalance(!hideBalance)} style={styles.eyeBtn}>
-              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#1E293B" strokeWidth={2.2}>
-                <Path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <Circle cx="12" cy="12" r="3" />
-              </Svg>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.walletBalanceRow}>
-            <View>
-              <Text style={styles.walletAmountText}>
-                {hideBalance ? 'Rp ••••••••' : 'Rp 850.000'}
-              </Text>
-              <Text style={styles.walletSubHelper}>Modal kas siap pakai di laci toko</Text>
-            </View>
-            <AssetVisual name="wallet_purse" size={38} />
-          </View>
-
-          {/* DUAL STAT PANEL PEMASUKAN & PENGELUARAN RAPAT */}
-          <View style={styles.walletDualStatStrip}>
-            <View style={styles.walletStatItem}>
-              <View style={styles.statDotGreen} />
-              <View>
-                <Text style={styles.statItemLbl}>Pemasukan Hari Ini</Text>
-                <Text style={styles.statItemValGreen}>+Rp 320.000</Text>
-              </View>
-            </View>
-
-            <View style={styles.walletStatDivider} />
-
-            <View style={styles.walletStatItem}>
-              <View style={styles.statDotOrange} />
-              <View>
-                <Text style={styles.statItemLbl}>Belanja Subuh</Text>
-                <Text style={styles.statItemValOrange}>-Rp 150.000</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* TOMBOL TUTUP KAS SORE / PENCOCOKAN UANG LACI */}
-          <TouchableOpacity
-            style={styles.dailyClosingBtn}
-            activeOpacity={0.8}
-            onPress={() => Alert.alert(
-              'Pencocokan Kas Sore (Tutup Kas)',
-              '• Saldo Kas Awal Pagi: Rp 680.000\n• Pemasukan Hari Ini: +Rp 320.000\n• Belanja Pasar Subuh: -Rp 150.000\n--------------------------------\nUang Fisik Wajib di Laci: Rp 850.000\nStatus: Seimbang (Selisih Rp 0)\n\nBuku kas sore siap dikunci.'
-            )}
-            accessibilityLabel="Pencocokan Kas Sore atau Tutup Kas"
-            accessibilityRole="button"
-          >
-            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#B45309" strokeWidth={2.5}>
-              <Path d="M9 11l3 3L22 4" />
-              <Path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-            </Svg>
-            <Text style={styles.dailyClosingBtnText}>Tutup Kas Sore: Uang Laci Fisik Rp 850.000 (Cocok)</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* 4. 4 TOMBOL AKSI OPERASIONAL 1:1 GAYA REFERENSI PASTEL 8-ICON (IKON BESAR 75%) */}
-        <View style={styles.quickActionGrid}>
-          <TouchableOpacity 
-            style={styles.quickActionTile}
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('Pos')}
-          >
-            <PastelReferenceIcon type="pos" size={68} />
-            <Text style={styles.actionTileLabel}>Kasir Lapak</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.quickActionTile}
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('Consignment')}
-          >
-            <PastelReferenceIcon type="canteen" size={68} />
-            <Text style={styles.actionTileLabel}>Titip Kantin</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.quickActionTile}
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('Stock')}
-          >
-            <PastelReferenceIcon type="stock" size={68} />
-            <Text style={styles.actionTileLabel}>Gudang Stok</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.quickActionTile}
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('MarketShopping')}
-          >
-            <PastelReferenceIcon type="market" size={68} />
-            <Text style={styles.actionTileLabel}>Belanja Pasar</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* 5. POPULAR / FAVORITE FOOD CAROUSEL ASLI (GAYA KARTU KREM MENTEGA #FFF9D6 + '25 LAKU') */}
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>Katalog Jajanan Unggulan</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Hpp')}>
-            <Text style={styles.sectionSeeAll}>Lihat Semua</Text>
-          </TouchableOpacity>
-        </View>
-
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.foodCarouselScroll}>
-          {[
-            { id: '1', name: 'Risoles Rogout', price: 1200, laku: '25 laku', icon: 'risoles_rogout' },
-            { id: '2', name: 'Pastel Sayur', price: 1500, laku: '18 laku', icon: 'pastel_telur' },
-            { id: '3', name: 'Dadar Gulung', price: 1000, laku: '30 laku', icon: 'dadar_gulung' },
-            { id: '4', name: 'Lemper Ayam', price: 1500, laku: '22 laku', icon: 'lemper_ayam' },
-          ].map((item) => (
-            <TouchableOpacity 
-              key={item.id}
-              activeOpacity={0.85}
-              onPress={() => navigation.navigate('Hpp')}
-              style={styles.foodCardButter}
-            >
-              {/* GAMBAR MAKANAN BERVOLUME DENGAN BAYANGAN MENGAMBANG */}
-              <View style={styles.foodImageCenter}>
-                <AssetVisual name={item.icon} size={64} />
-              </View>
-
-              {/* NAMA KUE TEBAL NAVY */}
-              <Text style={styles.foodCardNameButter} numberOfLines={1}>{item.name}</Text>
-              
-              {/* BARIS HARGA ORANYE & METRIK LAKU ALAMI PEDAGANG */}
-              <View style={styles.foodPriceLakuRow}>
-                <Text style={styles.foodPriceTextButter}>{formatRupiah(item.price)}</Text>
-                <Text style={styles.foodLakuTextButter}>{item.laku}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        {/* 7. DUA GRAFIK ANALITIK ASLI YANG DIKEMBALIKAN (TREN 7 HARI & DONUT RASIO) */}
-        <View style={styles.analyticsSectionWrap}>
-          <WeeklyBarChart 
-            data={[
-              { day: 'Sen', amount: 280000 },
-              { day: 'Sel', amount: 310000 },
-              { day: 'Rab', amount: 290000 },
-              { day: 'Kam', amount: 350000 },
-              { day: 'Jum', amount: 320000 },
-              { day: 'Sab', amount: 410000 },
-              { day: 'Min', amount: 330000 },
-            ]}
-          />
-          <DonutIncomeRatio posAmount={145000} consignmentAmount={175000} />
-        </View>
-
-        {/* KARTU PINTASAN BUKU PIUTANG MITRA */}
-        <TouchableOpacity
-          style={styles.debtBannerCard}
-          activeOpacity={0.85}
-          onPress={() => navigation.navigate('DebtLedger')}
-          accessibilityLabel="Buka Buku Piutang Mitra"
-          accessibilityRole="button"
+        {/* 1. SCENIC MORNING KITCHEN BANNER + LIVING MASCOT BITEY */}
+        <ScenicBanner
+          scene="kitchen_morning"
+          badgeText="DAPUR PRODUKSI PAGI"
+          title={profile.businessName || 'Dapur Berkah Bunda'}
+          subtitle={`Halo ${profile.ownerName || 'Bunda Sumiati'}, adonan siap disajikan hari ini`}
+          rightAvatarOnPress={() => navigation.navigate('Settings')}
         >
-          <View style={styles.debtBannerLeft}>
-            <View style={styles.debtAlertDot} />
-            <View>
-              <Text style={styles.debtBannerTitle}>Buku Piutang Mitra (Rp 50.000)</Text>
-              <Text style={styles.debtBannerSub}>2 Kantin menunda setoran retur sore</Text>
-            </View>
+          {/* Search Bar Kapsul Mengambang di Bawah Ilustrasi (Gaya Referensi 4) */}
+          <View style={styles.floatingSearchBox}>
+            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#9A3412" strokeWidth={2.2}>
+              <Circle cx="11" cy="11" r="8" />
+              <Path d="M21 21l-4.35-4.35" />
+            </Svg>
+            <TextInput
+              placeholder="Cari kue jajanan, resep HPP, atau kantin..."
+              placeholderTextColor="#A1A1AA"
+              style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            <TouchableOpacity
+              style={styles.searchShortcutBtn}
+              onPress={() => navigation.navigate('Pos')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.searchShortcutText}>Kasir</Text>
+            </TouchableOpacity>
           </View>
-          <View style={styles.debtActionPill}>
-            <Text style={styles.debtActionPillText}>Tagih ›</Text>
-          </View>
-        </TouchableOpacity>
+        </ScenicBanner>
 
-        {/* 7. TARGET OPERASIONAL & METRIK HARIAN */}
-        <View style={styles.targetBanner}>
-          <View style={styles.targetBannerTop}>
-            <View>
-              <Text style={styles.targetSubLabel}>TARGET OPERASIONAL HARIAN</Text>
-              <Text style={styles.targetTitle}>Produksi & Serapan Lapak</Text>
-            </View>
-          </View>
-
-          <View style={styles.targetMetricsGrid}>
-            <View style={styles.targetMetricItem}>
-              <Text style={styles.metricItemLabel}>Kue Terjual</Text>
-              <Text style={styles.metricItemVal}>93 / 110</Text>
-              <Text style={styles.metricItemSub}>84.5% Sukses</Text>
-            </View>
-
-            <View style={styles.targetMetricItem}>
-              <Text style={styles.metricItemLabel}>Sisa Retur</Text>
-              <Text style={[styles.metricItemVal, { color: '#DC2626' }]}>5 Pcs</Text>
-              <Text style={styles.metricItemSub}>Terkendali</Text>
-            </View>
-
-            <View style={styles.targetMetricItem}>
-              <Text style={styles.metricItemLabel}>Setoran Bersih</Text>
-              <Text style={[styles.metricItemVal, { color: '#15803D' }]}>Rp 175k</Text>
-              <Text style={styles.metricItemSub}>Lunas Sore</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* 8. LOG TRANSAKSI & AKTIVITAS DAPUR */}
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>Aktivitas & Riwayat Transaksi</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Consignment')}>
-            <Text style={styles.sectionSeeAll}>Riwayat</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.activityListWrap}>
-          {[
-            { id: 'a1', title: 'Setoran Kantin Fak. Teknik', time: '15:20 WIB', amount: 50000, isIncome: true, icon: 'canteen_shop' },
-            { id: 'a2', title: 'Belanja Pasar Subuh Kanoman', time: '04:45 Subuh', amount: 150000, isIncome: false, icon: 'market_cart' },
-            { id: 'a3', title: 'Kasir Langsung Pelanggan Lapak', time: '07:15 Pagi', amount: 24000, isIncome: true, icon: 'receipt_bill' },
-          ].map((act) => (
-            <View key={act.id} style={styles.activityRow}>
-              <View style={[styles.actIconWrap, { backgroundColor: act.isIncome ? '#DCFCE7' : '#FEE2E2' }]}>
-                <AssetVisual name={act.icon} size={22} />
+        <View style={styles.bodyPadding}>
+          {/* 2. HERO DOMPET KAS HARIAN BERVOLUME */}
+          <View style={styles.heroWalletCard}>
+            <View style={styles.walletHeaderRow}>
+              <View style={styles.walletLabelBox}>
+                <AssetVisual name="coin_gold" size={24} />
+                <Text style={styles.walletLabelText}>Uang Kas Tunai di Laci</Text>
               </View>
-              
-              <View style={styles.actInfoCol}>
-                <Text style={styles.actTitleText}>{act.title}</Text>
-                <Text style={styles.actTimeText}>{act.time}</Text>
-              </View>
+              <TouchableOpacity
+                onPress={() => setHideBalance(!hideBalance)}
+                style={styles.eyeBtn}
+                accessibilityLabel="Sembunyikan atau tampilkan saldo kas"
+                accessibilityRole="button"
+              >
+                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#78350F" strokeWidth={2.2}>
+                  <Path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <Circle cx="12" cy="12" r="3" />
+                </Svg>
+              </TouchableOpacity>
+            </View>
 
-              <View style={styles.actAmountCol}>
-                <Text style={[styles.actAmountText, { color: act.isIncome ? '#15803D' : '#DC2626' }]}>
-                  {act.isIncome ? '+' : '-'}{formatRupiah(act.amount)}
+            <View style={styles.walletBalanceRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.walletAmountText}>
+                  {hideBalance ? 'Rp ••••••••' : formatRupiah(cashflow.walletBalance)}
                 </Text>
-                {act.isIncome && (
-                  <View style={styles.lunasStamp}>
-                    <Text style={styles.lunasStampText}>LUNAS</Text>
+                <Text style={styles.walletSubHelper}>
+                  Siap putar modal belanja & kembalian pelanggan
+                </Text>
+              </View>
+              <AssetVisual name="wallet_purse" size={50} />
+            </View>
+
+            {/* Strip Ringkasan Pemasukan vs Belanja Subuh */}
+            <View style={styles.walletDualStatStrip}>
+              <AnimatedPressable
+                scaleTo={0.97}
+                onPress={() => navigation.navigate('FinanceReport')}
+                style={styles.walletStatItem}
+              >
+                <View style={styles.statDotGreen} />
+                <View>
+                  <Text style={styles.statItemLbl}>Masuk Hari Ini</Text>
+                  <Text style={styles.statItemValGreen}>
+                    +{formatRupiah(cashflow.totalIncomeToday)}
+                  </Text>
+                </View>
+              </AnimatedPressable>
+
+              <View style={styles.walletStatDivider} />
+
+              <AnimatedPressable
+                scaleTo={0.97}
+                onPress={() => navigation.navigate('MarketShopping')}
+                style={styles.walletStatItem}
+              >
+                <View style={styles.statDotOrange} />
+                <View>
+                  <Text style={styles.statItemLbl}>Belanja Subuh</Text>
+                  <Text style={styles.statItemValOrange}>
+                    -{formatRupiah(cashflow.totalExpenseToday)}
+                  </Text>
+                </View>
+              </AnimatedPressable>
+            </View>
+
+            {/* Tombol Tutup Kas Sore */}
+            <AnimatedPressable
+              scaleTo={0.98}
+              style={styles.dailyClosingBtn}
+              onPress={() =>
+                Alert.alert(
+                  'Pencocokan Kas Sore (Tutup Buku)',
+                  `• Uang Masuk Hari Ini: +${formatRupiah(cashflow.totalIncomeToday)}\n• Belanja Pasar Subuh: -${formatRupiah(cashflow.totalExpenseToday)}\n--------------------------------\nUang Fisik Wajib di Laci: ${formatRupiah(cashflow.walletBalance)}\nStatus: Seimbang & Cocok`
+                )
+              }
+            >
+              <AssetVisual name="check_badge" size={18} />
+              <Text style={styles.dailyClosingBtnText}>
+                Cek Laci Sore: Uang Fisik {formatRupiah(cashflow.walletBalance)} (Cocok)
+              </Text>
+              <Text style={styles.closingArrow}>Rekap ›</Text>
+            </AnimatedPressable>
+          </View>
+
+          {/* 3. MENU PINTASAN SQUIRCLE 3D (GAYA REFERENSI 1 PASTEL 8-ICON) */}
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionTitle}>Operasional Dapur & Lapak</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('FinanceReport')}>
+              <Text style={styles.sectionSeeAll}>Laporan Laba ›</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.quickActionGrid}>
+            <AnimatedPressable
+              scaleTo={0.92}
+              style={styles.quickActionTile}
+              onPress={() => navigation.navigate('Pos')}
+            >
+              <PastelReferenceIcon type="pos" size={64} />
+              <Text style={styles.actionTileLabel}>Kasir Lapak</Text>
+            </AnimatedPressable>
+
+            <AnimatedPressable
+              scaleTo={0.92}
+              style={styles.quickActionTile}
+              onPress={() => navigation.navigate('Consignment')}
+            >
+              <PastelReferenceIcon type="canteen" size={64} />
+              <Text style={styles.actionTileLabel}>Titip Kantin</Text>
+            </AnimatedPressable>
+
+            <AnimatedPressable
+              scaleTo={0.92}
+              style={styles.quickActionTile}
+              onPress={() => navigation.navigate('Stock')}
+            >
+              <PastelReferenceIcon type="stock" size={64} />
+              <Text style={styles.actionTileLabel}>Gudang Stok</Text>
+            </AnimatedPressable>
+
+            <AnimatedPressable
+              scaleTo={0.92}
+              style={styles.quickActionTile}
+              onPress={() => navigation.navigate('MarketShopping')}
+            >
+              <PastelReferenceIcon type="market" size={64} />
+              <Text style={styles.actionTileLabel}>Belanja Subuh</Text>
+            </AnimatedPressable>
+          </View>
+
+          {/* Baris Kedua Pintasan: Mitra Kantin, Buku Piutang, Resep HPP, Laporan */}
+          <View style={[styles.quickActionGrid, { marginTop: 2, marginBottom: 18 }]}>
+            <AnimatedPressable
+              scaleTo={0.92}
+              style={styles.quickActionTile}
+              onPress={() => navigation.navigate('Hpp')}
+            >
+              <PastelReferenceIcon type="hpp" size={64} />
+              <Text style={styles.actionTileLabel}>Hitung HPP</Text>
+            </AnimatedPressable>
+
+            <AnimatedPressable
+              scaleTo={0.92}
+              style={styles.quickActionTile}
+              onPress={() => navigation.navigate('DebtLedger')}
+            >
+              <PastelReferenceIcon type="debt" size={64} />
+              <Text style={styles.actionTileLabel}>Buku Piutang</Text>
+            </AnimatedPressable>
+
+            <AnimatedPressable
+              scaleTo={0.92}
+              style={styles.quickActionTile}
+              onPress={() => navigation.navigate('PartnerDirectory')}
+            >
+              <PastelReferenceIcon type="partner" size={64} />
+              <Text style={styles.actionTileLabel}>Mitra Kantin</Text>
+            </AnimatedPressable>
+
+            <AnimatedPressable
+              scaleTo={0.92}
+              style={styles.quickActionTile}
+              onPress={() => navigation.navigate('FinanceReport')}
+            >
+              <PastelReferenceIcon type="report" size={64} />
+              <Text style={styles.actionTileLabel}>Laba Bersih</Text>
+            </AnimatedPressable>
+          </View>
+
+          {/* 4. ETALASE JAJANAN HARI INI (KARTU PIRING SAJI GAYA JUJULY CAFE) */}
+          <View style={styles.sectionHeaderRow}>
+            <View>
+              <Text style={styles.sectionTitle}>Etalase Jajanan Pagi Ini</Text>
+              <Text style={styles.sectionSubHint}>Sentuh kue untuk cek resep & modal HPP</Text>
+            </View>
+            <TouchableOpacity onPress={() => navigation.navigate('Hpp')}>
+              <Text style={styles.sectionSeeAll}>Semua Kue ›</Text>
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.foodCarouselScroll}
+          >
+            {filteredSnacks.map((item, index) => {
+              const soldCount = [28, 22, 34, 19][index % 4];
+              return (
+                <AnimatedPressable
+                  key={item.id}
+                  scaleTo={0.95}
+                  onPress={() => navigation.navigate('Hpp')}
+                  style={styles.foodCardPlated}
+                >
+                  <View style={styles.foodCardTopTag}>
+                    <Text style={styles.foodCardLakuBadge}>{soldCount} laku</Text>
                   </View>
-                )}
+
+                  <View style={styles.foodImageCenter}>
+                    <AssetVisual name={item.icon || item.type || 'risoles_rogout'} size={78} />
+                  </View>
+
+                  <Text style={styles.foodCardName} numberOfLines={1}>
+                    {item.name}
+                  </Text>
+
+                  <View style={styles.foodPriceRow}>
+                    <Text style={styles.foodPriceText}>{formatRupiah(item.price)}</Text>
+                    <View style={styles.profitMiniTag}>
+                      <Text style={styles.profitMiniText}>
+                        +{formatRupiah(item.netProfit || 200)}
+                      </Text>
+                    </View>
+                  </View>
+                </AnimatedPressable>
+              );
+            })}
+          </ScrollView>
+
+          {/* 5. TARGET SERAPAN HARIAN DENGAN PROGRESS BAR BERANIMASI */}
+          <AnimatedPressable
+            scaleTo={0.98}
+            onPress={() => navigation.navigate('Consignment')}
+            style={styles.targetBentoCard}
+          >
+            <View style={styles.targetTopRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.targetOverline}>TARGET SERAPAN KUE HARI INI</Text>
+                <Text style={styles.targetHeadline}>103 dari 120 Kue Laku Terjual</Text>
+              </View>
+              <View style={styles.targetPctBadge}>
+                <Text style={styles.targetPctText}>86%</Text>
               </View>
             </View>
-          ))}
-        </View>
 
-        <View style={{ height: 100 }} />
+            <View style={{ marginVertical: 10 }}>
+              <AnimatedProgressBar percent={86} color="#EA580C" trackColor="#FFEDD5" height={10} />
+            </View>
+
+            <View style={styles.targetMetricsRow}>
+              <View style={styles.targetMetricChip}>
+                <Text style={styles.metricLabel}>Titip 3 Kantin</Text>
+                <Text style={styles.metricVal}>75 Pcs</Text>
+              </View>
+              <View style={styles.targetMetricChip}>
+                <Text style={styles.metricLabel}>Sisa Retur</Text>
+                <Text style={[styles.metricVal, { color: '#DC2626' }]}>5 Pcs</Text>
+              </View>
+              <View style={styles.targetMetricChip}>
+                <Text style={styles.metricLabel}>Setoran Sore</Text>
+                <Text style={[styles.metricVal, { color: '#059669' }]}>Rp 175.000</Text>
+              </View>
+            </View>
+          </AnimatedPressable>
+
+          {/* 6. GRAFIK ANALITIK INTERAKTIF */}
+          <WeeklyBarChart data={cashflow.weeklyTrend} />
+          <DonutIncomeRatio posAmount={145000} consignmentAmount={175000} />
+
+          {/* 7. PINTASAN BUKU PIUTANG MITRA */}
+          <AnimatedPressable
+            scaleTo={0.97}
+            style={styles.debtBannerCard}
+            onPress={() => navigation.navigate('DebtLedger')}
+          >
+            <View style={styles.debtBannerLeft}>
+              <AssetVisual name="warning_badge" size={34} />
+              <View style={{ marginLeft: 10, flex: 1 }}>
+                <Text style={styles.debtBannerTitle}>
+                  Tagihan Kantin Belum Setor: {formatRupiah(totalDebt)}
+                </Text>
+                <Text style={styles.debtBannerSub}>
+                  Sentuh untuk kirim pengingat WhatsApp ke pengurus kantin
+                </Text>
+              </View>
+            </View>
+            <View style={styles.debtActionPill}>
+              <Text style={styles.debtActionPillText}>Tagih ›</Text>
+            </View>
+          </AnimatedPressable>
+
+          {/* 8. CATATAN ARUS KAS TERBARU */}
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionTitle}>Catatan Kas Hari Ini</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('FinanceReport')}>
+              <Text style={styles.sectionSeeAll}>Semua Riwayat ›</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.activityListWrap}>
+            {activitiesList.slice(0, 4).map((act, idx) => {
+              const isIncome = act.type === 'income' || act.isIncome;
+              const iconName = isIncome ? 'canteen_shop' : 'market_cart';
+              return (
+                <View
+                  key={act.id || idx}
+                  style={[
+                    styles.activityRow,
+                    idx === Math.min(activitiesList.length, 4) - 1 && { borderBottomWidth: 0 },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.actIconWrap,
+                      { backgroundColor: isIncome ? '#ECFDF5' : '#FEF2F2' },
+                    ]}
+                  >
+                    <AssetVisual name={iconName} size={26} />
+                  </View>
+
+                  <View style={styles.actInfoCol}>
+                    <Text style={styles.actTitleText}>{act.title}</Text>
+                    <Text style={styles.actTimeText}>
+                      {act.subtitle ? `${act.subtitle} • ` : ''}
+                      {act.time}
+                    </Text>
+                  </View>
+
+                  <View style={styles.actAmountCol}>
+                    <Text
+                      style={[
+                        styles.actAmountText,
+                        { color: isIncome ? '#059669' : '#DC2626' },
+                      ]}
+                    >
+                      {isIncome ? '+' : '-'}
+                      {formatRupiah(act.amount)}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+
+          <View style={{ height: 96 }} />
+        </View>
       </ScrollView>
 
-      {/* 9. BOTTOM NAVIGATION MODERN ELEVATED FAB (ICON-ONLY STANDARD) */}
       <ModernBottomNav activeTab="Home" navigation={navigation} />
     </SafeAreaView>
   );
@@ -333,101 +500,107 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-  topHeader: {
-    paddingHorizontal: 22,
-    paddingTop: 16,
-    paddingBottom: 14,
-    backgroundColor: '#FFFFFF',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  greetingWrap: {
-    flex: 1,
-  },
-  businessTitle: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#0F172A',
-    letterSpacing: -0.5,
-  },
-  greetingSub: {
-    fontSize: 12,
-    color: '#64748B',
-    fontWeight: '700',
-    marginTop: 2,
-  },
-  avatarBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#EA580C',
-    elevation: 2,
-  },
   scrollContent: {
-    paddingHorizontal: 22,
-    paddingTop: 8,
+    paddingBottom: 24,
   },
-  searchBarContainer: {
+  bodyPadding: {
+    paddingHorizontal: 18,
+    paddingTop: 14,
+  },
+  floatingSearchBox: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderWidth: 1.8,
-    borderColor: '#1E293B',
+    borderRadius: 18,
+    paddingHorizontal: 13,
+    paddingVertical: 8,
+    borderWidth: 1.5,
+    borderColor: '#FED7AA',
     borderBottomWidth: 3.5,
-    borderBottomColor: '#1E293B',
-    marginBottom: 16,
+    borderBottomColor: '#FDBA74',
   },
   searchInput: {
     flex: 1,
     marginLeft: 8,
-    fontSize: 13,
-    color: '#1E293B',
-    fontWeight: '600',
+    fontSize: 12.5,
+    color: '#18181B',
+    fontWeight: '700',
+    paddingVertical: 2,
   },
-  filterIconBtn: {
-    padding: 4,
+  searchShortcutBtn: {
+    backgroundColor: '#FFF7ED',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#FDBA74',
   },
-  // 3. HERO KARTU KAS ASLI (ZERO DEAD SPACE - PASTEL MADU & NEO-BRUTAL BORDER)
+  searchShortcutText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#EA580C',
+  },
   heroWalletCard: {
     backgroundColor: '#FFFBEB',
-    borderRadius: 22,
-    paddingVertical: 16,
-    paddingHorizontal: 18,
-    borderWidth: 2,
-    borderColor: '#1E293B',
+    borderRadius: 24,
+    padding: 16,
+    borderWidth: 1.8,
+    borderColor: '#FDE68A',
     borderBottomWidth: 4.5,
-    borderBottomColor: '#1E293B',
-    elevation: 3,
-    shadowColor: '#1E293B',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 0,
-    marginBottom: 16,
+    borderBottomColor: '#F59E0B',
+    marginBottom: 18,
+  },
+  walletHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  walletLabelBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+  },
+  walletLabelText: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#92400E',
+  },
+  eyeBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 11,
+    backgroundColor: '#FEF3C7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  walletBalanceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  walletAmountText: {
+    fontSize: 30,
+    fontWeight: '900',
+    color: '#18181B',
+    letterSpacing: -0.8,
   },
   walletSubHelper: {
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '600',
-    color: '#64748B',
+    color: '#78350F',
     marginTop: 2,
   },
   walletDualStatStrip: {
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: '#1E293B',
-    paddingVertical: 8,
+    borderColor: '#FDE68A',
+    paddingVertical: 10,
     paddingHorizontal: 12,
     alignItems: 'center',
-    marginTop: 10,
   },
   walletStatItem: {
     flex: 1,
@@ -436,335 +609,239 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   statDotGreen: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 9,
+    height: 9,
+    borderRadius: 4.5,
     backgroundColor: '#10B981',
-    borderWidth: 1,
-    borderColor: '#1E293B',
   },
   statDotOrange: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 9,
+    height: 9,
+    borderRadius: 4.5,
     backgroundColor: '#EA580C',
-    borderWidth: 1,
-    borderColor: '#1E293B',
+  },
+  walletStatDivider: {
+    width: 1.5,
+    height: 26,
+    backgroundColor: '#FEF3C7',
+    marginHorizontal: 10,
   },
   statItemLbl: {
-    fontSize: 9.5,
+    fontSize: 10.5,
     fontWeight: '700',
-    color: '#64748B',
+    color: '#71717A',
   },
   statItemValGreen: {
-    fontSize: 12.5,
+    fontSize: 13.5,
     fontWeight: '900',
     color: '#059669',
   },
   statItemValOrange: {
-    fontSize: 12.5,
-    fontWeight: '900',
-    color: '#DC2626',
-  },
-  walletStatDivider: {
-    width: 1.5,
-    height: 24,
-    backgroundColor: '#E2E8F0',
-    marginHorizontal: 8,
-  },
-  dailyClosingBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    backgroundColor: '#FEF3C7',
-    borderWidth: 1.2,
-    borderColor: '#FDE68A',
-    borderRadius: 10,
-    paddingVertical: 7,
-    paddingHorizontal: 10,
-    marginTop: 10,
-  },
-  dailyClosingBtnText: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#B45309',
-  },
-  walletHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  walletLabelBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  walletLabelText: {
-    fontSize: 11.5,
-    fontWeight: '800',
-    color: '#71717A',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-  },
-  eyeBtn: {
-    padding: 4,
-  },
-  walletBalanceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 6,
-    marginBottom: 2,
-  },
-  walletAmountText: {
-    fontSize: 28,
-    fontWeight: '900',
-    color: '#18181B',
-    letterSpacing: -0.5,
-  },
-  // KARTU KAS CATATAN BERSATU (KONTRAS TINGGI, BUKAN PILLS AI SLOP)
-  cashFlowLedgerWrap: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    gap: 7,
-    marginTop: 4,
-  },
-  ledgerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  ledgerDotGreen: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#059669',
-    marginRight: 8,
-  },
-  ledgerDotRed: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#DC2626',
-    marginRight: 8,
-  },
-  ledgerLabel: {
-    flex: 1,
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#334155',
-  },
-  ledgerValGreen: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#059669',
-  },
-  ledgerValRed: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#DC2626',
-  },
-
-  // KARTU JAJANAN KREM MENTEGA (#FFFBEB) CHUNKY OUTLINE
-  foodCardButter: {
-    width: 154,
-    backgroundColor: '#FFFBEB',
-    borderRadius: 22,
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    borderWidth: 2,
-    borderColor: '#1E293B',
-    borderBottomWidth: 4,
-    borderBottomColor: '#1E293B',
-    elevation: 3,
-    shadowColor: '#1E293B',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 0,
-    marginBottom: 6,
-  },
-  foodCardNameButter: {
-    fontSize: 13.5,
-    fontWeight: '800',
-    color: '#0F172A',
-    marginTop: 6,
-    marginBottom: 6,
-  },
-  foodPriceLakuRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'space-between',
-    marginTop: 2,
-  },
-  foodPriceTextButter: {
     fontSize: 13.5,
     fontWeight: '900',
     color: '#EA580C',
   },
-  foodLakuTextButter: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#475569',
-  },
-  foodCarouselScroll: {
-    paddingRight: 22,
-    paddingBottom: 8,
-    gap: 12,
-  },
-  analyticsSectionWrap: {
-    marginVertical: 10,
-  },
-  quickActionGrid: {
+  dailyClosingBtn: {
+    marginTop: 10,
+    backgroundColor: '#FEF3C7',
+    borderRadius: 13,
+    paddingVertical: 9,
+    paddingHorizontal: 12,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  quickActionTile: {
     alignItems: 'center',
-    gap: 6,
-    width: (width - 44 - 36) / 4,
+    gap: 7,
   },
-  actionIconBox: {
-    width: 68,
-    height: 68,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 3,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-  },
-  actionTileLabel: {
-    fontSize: 11,
+  dailyClosingBtnText: {
+    flex: 1,
+    fontSize: 11.5,
     fontWeight: '800',
-    color: '#334155',
+    color: '#92400E',
   },
-  categoryChipsWrap: {
-    marginBottom: 16,
-    marginHorizontal: -22,
-  },
-  categoryScroll: {
-    paddingHorizontal: 22,
-    gap: 8,
-  },
-  categoryChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 14,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-  },
-  categoryChipActive: {
-    backgroundColor: '#EA580C',
-    borderColor: '#EA580C',
-  },
-  categoryChipText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#64748B',
-  },
-  categoryChipTextActive: {
-    color: '#FFFFFF',
+  closingArrow: {
+    fontSize: 11.5,
+    fontWeight: '900',
+    color: '#EA580C',
   },
   sectionHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   sectionTitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '900',
-    color: '#1E293B',
+    color: '#18181B',
+    letterSpacing: -0.3,
+  },
+  sectionSubHint: {
+    fontSize: 11.5,
+    fontWeight: '600',
+    color: '#71717A',
+    marginTop: 1,
   },
   sectionSeeAll: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '800',
     color: '#EA580C',
   },
-  foodCarouselScroll: {
-    gap: 14,
-    paddingRight: 22,
-    marginBottom: 22,
+  quickActionGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
   },
-  foodCard: {
-    width: 155,
+  quickActionTile: {
+    width: '23.5%',
+    alignItems: 'center',
+  },
+  actionTileLabel: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#18181B',
+    marginTop: 6,
+    textAlign: 'center',
+  },
+  foodCarouselScroll: {
+    paddingBottom: 14,
+    gap: 12,
+  },
+  foodCardPlated: {
+    width: 148,
+    backgroundColor: '#FFFBEB',
     borderRadius: 22,
-    padding: 14,
+    padding: 12,
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    borderBottomWidth: 3.5,
-    borderBottomColor: '#CBD5E1',
+    borderColor: '#FDE68A',
+    borderBottomWidth: 4,
+    borderBottomColor: '#F59E0B',
+  },
+  foodCardTopTag: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 9,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  foodCardLakuBadge: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#B45309',
   },
   foodImageCenter: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
-    marginTop: 4,
+    marginVertical: 4,
   },
   foodCardName: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#0F172A',
-    marginBottom: 2,
+    fontSize: 13.5,
+    fontWeight: '900',
+    color: '#18181B',
+    marginTop: 4,
+  },
+  foodPriceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 6,
   },
   foodPriceText: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '900',
     color: '#EA580C',
-    marginBottom: 6,
   },
-  foodMetaBottomRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 6,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.05)',
+  profitMiniTag: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 7,
   },
-  profitNaturalText: {
+  profitMiniText: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#16A34A',
+    color: '#059669',
   },
-  titipCountText: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: '#64748B',
-  },
-  debtBannerCard: {
-    backgroundColor: '#FFF1F2',
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: '#1E293B',
+  targetBentoCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 16,
+    borderWidth: 1.5,
+    borderColor: '#FED7AA',
     borderBottomWidth: 4,
-    borderBottomColor: '#1E293B',
-    padding: 14,
+    borderBottomColor: '#FDBA74',
+    marginBottom: 14,
+  },
+  targetTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+  },
+  targetOverline: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#9A3412',
+    letterSpacing: 0.4,
+  },
+  targetHeadline: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#18181B',
+    marginTop: 2,
+  },
+  targetPctBadge: {
+    backgroundColor: '#EA580C',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+  },
+  targetPctText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  targetMetricsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+    marginTop: 4,
+  },
+  targetMetricChip: {
+    flex: 1,
+    backgroundColor: '#FFF7ED',
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+  metricLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#71717A',
+  },
+  metricVal: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#18181B',
+    marginTop: 2,
+  },
+  debtBannerCard: {
+    backgroundColor: '#FEF2F2',
+    borderRadius: 20,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: '#FECACA',
+    borderBottomWidth: 4,
+    borderBottomColor: '#FCA5A5',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 18,
   },
   debtBannerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
     flex: 1,
-  },
-  debtAlertDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#DC2626',
-    borderWidth: 1.5,
-    borderColor: '#1E293B',
+    paddingRight: 8,
   },
   debtBannerTitle: {
     fontSize: 13,
@@ -772,101 +849,38 @@ const styles = StyleSheet.create({
     color: '#991B1B',
   },
   debtBannerSub: {
-    fontSize: 10.5,
-    fontWeight: '600',
-    color: '#64748B',
-    marginTop: 1,
-  },
-  debtActionPill: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.8,
-    borderColor: '#1E293B',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-  },
-  debtActionPillText: {
     fontSize: 11,
-    fontWeight: '900',
-    color: '#DC2626',
-  },
-  targetBanner: {
-    backgroundColor: '#F0FDF4',
-    borderRadius: 22,
-    padding: 16,
-    borderWidth: 2,
-    borderColor: '#1E293B',
-    borderBottomWidth: 4.5,
-    borderBottomColor: '#1E293B',
-    marginBottom: 20,
-  },
-  targetBannerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  targetSubLabel: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#EA580C',
-    letterSpacing: 0.5,
-  },
-  targetTitle: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: '#1E293B',
+    fontWeight: '600',
+    color: '#B91C1C',
     marginTop: 2,
   },
-  fireIconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#FFF7ED',
-    alignItems: 'center',
-    justifyContent: 'center',
+  debtActionPill: {
+    backgroundColor: '#DC2626',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 12,
   },
-  targetMetricsGrid: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  targetMetricItem: {
-    flex: 1,
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  metricItemLabel: {
-    fontSize: 10,
-    color: '#64748B',
-    fontWeight: '700',
-  },
-  metricItemVal: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: '#1E293B',
-    marginVertical: 2,
-  },
-  metricItemSub: {
-    fontSize: 9,
+  debtActionPillText: {
+    color: '#FFFFFF',
+    fontSize: 11.5,
     fontWeight: '800',
-    color: '#15803D',
   },
   activityListWrap: {
-    gap: 10,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#CBD5E1',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
   },
   activityRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    padding: 12,
-    borderWidth: 1.8,
-    borderColor: '#1E293B',
-    borderBottomWidth: 3.5,
-    borderBottomColor: '#1E293B',
+    paddingVertical: 11,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
   },
   actIconWrap: {
     width: 42,
@@ -874,7 +888,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 10,
+    marginRight: 12,
   },
   actInfoCol: {
     flex: 1,
@@ -882,31 +896,19 @@ const styles = StyleSheet.create({
   actTitleText: {
     fontSize: 13,
     fontWeight: '800',
-    color: '#1E293B',
+    color: '#18181B',
   },
   actTimeText: {
-    fontSize: 10,
-    color: '#94A3B8',
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#71717A',
     marginTop: 2,
   },
   actAmountCol: {
     alignItems: 'flex-end',
   },
   actAmountText: {
-    fontSize: 13,
+    fontSize: 13.5,
     fontWeight: '900',
-  },
-  lunasStamp: {
-    backgroundColor: '#DCFCE7',
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: 4,
-    marginTop: 2,
-  },
-  lunasStampText: {
-    fontSize: 8,
-    fontWeight: '900',
-    color: '#15803D',
   },
 });
-

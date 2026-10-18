@@ -1,112 +1,94 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, StatusBar, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  TextInput,
+  StyleSheet,
+  StatusBar,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Path, Line, Circle } from 'react-native-svg';
 import { ModernBottomNav } from '../components/ModernBottomNav';
+import { ScenicBanner } from '../components/ScenicBanner';
 import AssetVisual from '../components/AssetVisual';
+import { AnimatedPressable } from '../components/PlayfulComponents';
+import { addProduct, getProducts } from '../db/storage';
 import { formatRupiah } from '../utils/formatters';
 
 export const RecipeEditorScreen = ({ navigation, route }) => {
   const recipeId = route?.params?.recipeId;
-  const isEditMode = Boolean(recipeId);
+
+  const availableIcons = [
+    { key: 'risoles_rogout', label: 'Risoles' },
+    { key: 'pastel_telur', label: 'Pastel' },
+    { key: 'dadar_gulung', label: 'Dadar' },
+    { key: 'lemper_ayam', label: 'Lemper' },
+    { key: 'kue_lumpur', label: 'Lumpur' },
+    { key: 'tahu_isi', label: 'Tahu Isi' },
+    { key: 'klepon_pandan', label: 'Klepon' },
+    { key: 'onde_onde', label: 'Onde' },
+  ];
 
   const [selectedIcon, setSelectedIcon] = useState('risoles_rogout');
-  const availableIcons = ['risoles_rogout', 'pastel_telur', 'dadar_gulung', 'lemper_ayam'];
   const [recipeName, setRecipeName] = useState('Risoles Rogout Ayam');
   const [batchPortions, setBatchPortions] = useState('50');
   const [suggestedSellingPrice, setSuggestedSellingPrice] = useState('1200');
   const [canteenShare, setCanteenShare] = useState('400');
 
   const [ingredients, setIngredients] = useState([
-    { id: '1', name: 'Tepung Terigu Segitiga', qty: '500 gram', cost: 6000, icon: 'wheat_flour' },
-    { id: '2', name: 'Telur Ayam & Minyak Goreng', qty: '2 Butir & Minyak', cost: 8000, icon: 'egg_raw' },
-    { id: '3', name: 'Ayam Suwir & Sayuran Isian', qty: 'Isian Rogout Gurih', cost: 10000, icon: 'meat_chicken' },
-    { id: '4', name: 'Gas LPG & Kemasan Mika', qty: 'Alokasi Operasional', cost: 6000, icon: 'gas_cylinder' },
+    { id: '1', name: 'Tepung Terigu Segitiga 500g', cost: 6000, icon: 'wheat_flour' },
+    { id: '2', name: 'Telur Ayam & Minyak Goreng', cost: 8000, icon: 'egg_raw' },
+    { id: '3', name: 'Ayam Suwir & Wortel Rogout', cost: 10000, icon: 'meat_chicken' },
+    { id: '4', name: 'Gas LPG & Kemasan Mika', cost: 6000, icon: 'gas_cylinder' },
   ]);
-
-  useEffect(() => {
-    if (recipeId === 'r2' || recipeId === 'p2') {
-      setSelectedIcon('pastel_telur');
-      setRecipeName('Pastel Sayur Telur');
-      setBatchPortions('50');
-      setSuggestedSellingPrice('1500');
-      setCanteenShare('500');
-      setIngredients([
-        { id: '1', name: 'Tepung Terigu Cakra 500g', qty: 'Kulit Renyah', cost: 7000, icon: 'wheat_flour' },
-        { id: '2', name: 'Telur Rebus & Sayur Wortel', qty: 'Isian Sayur Telur', cost: 12000, icon: 'egg_raw' },
-        { id: '3', name: 'Daging Ayam Cincang', qty: 'Daging Isian', cost: 10000, icon: 'meat_chicken' },
-        { id: '4', name: 'Minyak Goreng & Gas LPG', qty: 'Alokasi Goreng', cost: 8500, icon: 'gas_cylinder' },
-      ]);
-    } else if (recipeId === 'r3' || recipeId === 'p3') {
-      setSelectedIcon('dadar_gulung');
-      setRecipeName('Dadar Gulung Pandan');
-      setBatchPortions('50');
-      setSuggestedSellingPrice('1000');
-      setCanteenShare('300');
-      setIngredients([
-        { id: '1', name: 'Tepung Terigu & Daun Suji', qty: 'Adonan Kulit Hijau', cost: 5000, icon: 'wheat_flour' },
-        { id: '2', name: 'Kelapa Parut & Gula Jawa', qty: 'Unti Kelapa Manis', cost: 9000, icon: 'sugar_cane' },
-        { id: '3', name: 'Santan Kelapa Gurih', qty: 'Santan Kental', cost: 6000, icon: 'oil_butter' },
-        { id: '4', name: 'Gas LPG & Plastik Kemasan', qty: 'Biaya Pengolahan', cost: 5000, icon: 'gas_cylinder' },
-      ]);
-    } else if (recipeId === 'r4' || recipeId === 'p4') {
-      setSelectedIcon('lemper_ayam');
-      setRecipeName('Lemper Ayam Ketan');
-      setBatchPortions('40');
-      setSuggestedSellingPrice('1500');
-      setCanteenShare('500');
-      setIngredients([
-        { id: '1', name: 'Beras Ketan Putih Pulen', qty: 'Ketan Gurih', cost: 8000, icon: 'wheat_flour' },
-        { id: '2', name: 'Daging Dada Ayam Suwir', qty: 'Isian Ayam Bumbu', cost: 12000, icon: 'meat_chicken' },
-        { id: '3', name: 'Santan Kental Gurih', qty: 'Santan Masak', cost: 5000, icon: 'oil_butter' },
-        { id: '4', name: 'Daun Pisang & Lidi Semat', qty: 'Pembungkus Tradisional', cost: 3000, icon: 'package_box' },
-      ]);
-    } else if (recipeId === 'r1' || recipeId === 'p1') {
-      setSelectedIcon('risoles_rogout');
-      setRecipeName('Risoles Rogout Ayam');
-      setBatchPortions('50');
-      setSuggestedSellingPrice('1200');
-      setCanteenShare('400');
-      setIngredients([
-        { id: '1', name: 'Tepung Terigu Segitiga', qty: '500 gram', cost: 6000, icon: 'wheat_flour' },
-        { id: '2', name: 'Telur Ayam & Minyak Goreng', qty: '2 Butir & Minyak', cost: 8000, icon: 'egg_raw' },
-        { id: '3', name: 'Ayam Suwir & Sayuran Isian', qty: 'Isian Rogout Gurih', cost: 10000, icon: 'meat_chicken' },
-        { id: '4', name: 'Gas LPG & Kemasan Mika', qty: 'Alokasi Operasional', cost: 6000, icon: 'gas_cylinder' },
-      ]);
-    } else if (!recipeId) {
-      setSelectedIcon('risoles_rogout');
-      setRecipeName('');
-      setBatchPortions('50');
-      setSuggestedSellingPrice('');
-      setCanteenShare('');
-      setIngredients([
-        { id: '1', name: 'Tepung / Bahan Pokok', qty: 'Takaran Adonan', cost: 8000, icon: 'wheat_flour' },
-        { id: '2', name: 'Bahan Isian Jajanan', qty: 'Bahan Utama', cost: 12000, icon: 'meat_chicken' },
-        { id: '3', name: 'Minyak / Gas Operasional', qty: 'Biaya Masak', cost: 6000, icon: 'gas_cylinder' },
-      ]);
-    }
-  }, [recipeId]);
 
   const [newIngName, setNewIngName] = useState('');
   const [newIngCost, setNewIngCost] = useState('');
 
-  const totalRawCost = ingredients.reduce((sum, item) => sum + (Number(item.cost) || 0), 0);
-  const portions = Number(batchPortions) || 1;
+  useEffect(() => {
+    const loadExisting = async () => {
+      if (!recipeId) return;
+      const list = await getProducts();
+      const found = list.find((p) => p.id === recipeId);
+      if (found) {
+        setSelectedIcon(found.icon || 'risoles_rogout');
+        setRecipeName(found.name || 'Risoles Rogout Ayam');
+        setBatchPortions(String(found.batchPortions || 50));
+        setSuggestedSellingPrice(String(found.price || found.retailPrice || 1200));
+        setCanteenShare(String(found.canteenCut || 400));
+        if (found.ingredients && found.ingredients.length > 0) {
+          setIngredients(found.ingredients);
+        }
+      }
+    };
+    loadExisting();
+  }, [recipeId]);
+
+  const totalRawCost = Math.round(
+    ingredients.reduce((sum, item) => sum + (Number(item.cost) || 0), 0)
+  );
+  const portions = Math.max(1, Math.round(Number(batchPortions) || 1));
   const costPerPiece = Math.round(totalRawCost / portions);
-  const sellPrice = Number(suggestedSellingPrice) || 0;
-  const shareCanteen = Number(canteenShare) || 0;
-  const netProfitPerPiece = sellPrice - costPerPiece - shareCanteen;
-  const totalBatchProfit = netProfitPerPiece * portions;
+  const sellPrice = Math.round(Number(suggestedSellingPrice) || 0);
+  const shareCanteen = Math.round(Number(canteenShare) || 0);
+  const netProfitPerPiece = Math.round(sellPrice - costPerPiece - shareCanteen);
+  const totalBatchProfit = Math.round(netProfitPerPiece * portions);
 
   const handleAddIngredient = () => {
     if (!newIngName.trim() || !newIngCost) {
-      Alert.alert('Perhatian', 'Nama bahan dan estimasi biaya harus diisi.');
+      Alert.alert('Bahan Belum Lengkap', 'Isi nama bahan dan biaya takarannya.');
       return;
     }
-    const newId = String(Date.now());
-    setIngredients(prev => [
+    setIngredients((prev) => [
       ...prev,
-      { id: newId, name: newIngName.trim(), qty: 'Bahan Tambahan', cost: Number(newIngCost) || 0, icon: 'package_box' }
+      {
+        id: String(Date.now()),
+        name: newIngName.trim(),
+        cost: Math.round(Number(newIngCost) || 0),
+        icon: 'wheat_flour',
+      },
     ]);
     setNewIngName('');
     setNewIngCost('');
@@ -114,232 +96,210 @@ export const RecipeEditorScreen = ({ navigation, route }) => {
 
   const handleRemoveIngredient = (id) => {
     if (ingredients.length <= 1) {
-      Alert.alert('Perhatian', 'Minimal resep harus memiliki 1 bahan baku.');
+      Alert.alert('Minimal 1 Bahan', 'Resep wajib memiliki minimal satu komponen bahan.');
       return;
     }
-    setIngredients(prev => prev.filter(item => item.id !== id));
+    setIngredients((prev) => prev.filter((i) => i.id !== id));
   };
 
-  const handleSaveRecipe = () => {
-    Alert.alert('Sukses Disimpan', `Resep ${recipeName} (${batchPortions} porsi) berhasil diperbarui di katalog!`, [
-      { text: 'Buka Katalog HPP', onPress: () => navigation.navigate('Hpp') }
-    ]);
+  const handleSaveRecipe = async () => {
+    if (!recipeName.trim()) {
+      Alert.alert('Nama Kue Kosong', 'Mohon isi nama jajanan terlebih dahulu.');
+      return;
+    }
+    await addProduct({
+      id: recipeId || 'p_' + Date.now(),
+      name: recipeName.trim(),
+      icon: selectedIcon,
+      batchPortions: portions,
+      totalBatchCost: totalRawCost,
+      unitHpp: costPerPiece,
+      cost: costPerPiece,
+      price: sellPrice,
+      retailPrice: sellPrice,
+      canteenCut: shareCanteen,
+      netProfit: netProfitPerPiece,
+      category: 'Gorengan Gurih',
+      ingredients,
+    });
+    Alert.alert(
+      'Resep & HPP Tersimpan',
+      `${recipeName} (HPP ${formatRupiah(costPerPiece)}/pcs • Untung Bersih +${formatRupiah(netProfitPerPiece)}/pcs) telah diperbarui di katalog.`,
+      [{ text: 'Lihat Katalog', onPress: () => navigation.navigate('Hpp') }]
+    );
   };
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      
-      {/* 1. TOP HEADER SUB-LAYAR (DENGAN TOMBOL BACK) */}
-      <View style={styles.subpageHeader}>
-        <View style={styles.backBtnRow}>
-          <TouchableOpacity 
-            style={styles.backBtn}
-            activeOpacity={0.7}
-            onPress={() => navigation.goBack()}
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFBEB" />
+
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* 1. SCENIC HEADER RACIK RESEP */}
+        <ScenicBanner
+          scene="hpp_kitchen"
+          badgeText="SIMULATOR MODAL & MARGIN"
+          title="Racik Resep & HPP"
+          subtitle="Hitung otomatis modal per kue & proyeksi laba bersih"
+          onBackPress={() => navigation.goBack()}
+          actionLabel="Simpan"
+          onActionPress={handleSaveRecipe}
+        />
+
+        <View style={styles.bodyPadding}>
+          {/* 2. PILIH ILUSTRASI JAJANAN NUSANTARA */}
+          <Text style={styles.sectionLabel}>PILIH GAMBAR JAJANAN</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.iconPickerRow}
           >
-            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#0F172A" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-              <Line x1="19" y1="12" x2="5" y2="12" />
-              <Path d="M12 19L5 12L12 5" />
-            </Svg>
-          </TouchableOpacity>
+            {availableIcons.map((it) => {
+              const isSel = selectedIcon === it.key;
+              return (
+                <AnimatedPressable
+                  key={it.key}
+                  scaleTo={0.93}
+                  onPress={() => setSelectedIcon(it.key)}
+                  style={[styles.iconOptionCard, isSel && styles.iconOptionSelected]}
+                >
+                  <AssetVisual name={it.key} size={52} />
+                  <Text style={[styles.iconOptionLabel, isSel && { color: '#EA580C' }]}>
+                    {it.label}
+                  </Text>
+                </AnimatedPressable>
+              );
+            })}
+          </ScrollView>
 
-          <View style={styles.headerTextCol}>
-            <Text style={styles.pageTitle}>{isEditMode ? 'Ubah Resep Jajanan' : 'Tambah Resep Baru'}</Text>
-            <Text style={styles.pageSub}>{isEditMode ? `Formulasi: ${recipeName}` : 'Formulasi Menu Jajanan Baru'}</Text>
-          </View>
-        </View>
-
-        <TouchableOpacity 
-          activeOpacity={0.7}
-          onPress={() => {
-            setRecipeName('');
-            setBatchPortions('50');
-            setSuggestedSellingPrice('1200');
-            setCanteenShare('400');
-          }}
-        >
-          <Text style={styles.resetBtn}>Reset</Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        
-        {/* 2. LIVE SIMULATION RESULT CARD (DETERMINISTIK NYATA, ZERO PILL CLUTTER) */}
-        <View style={styles.simResultCard}>
-          <Text style={styles.simHeadlineLbl}>PROYEKSI LABA BERSIH PER BUTIR</Text>
-
-          <View style={styles.simBigProfitRow}>
-            <View>
-              <Text style={styles.simBigNum}>{formatRupiah(netProfitPerPiece)}</Text>
-              <Text style={styles.simUnitLbl}>Untung bersih dari modal HPP {formatRupiah(costPerPiece)}</Text>
-            </View>
-            <View style={styles.panIconBox}>
-              <AssetVisual name="cooking_pan" size={28} />
-            </View>
-          </View>
-
-          {/* 3 METRIK STRIP */}
-          <View style={styles.simMetricsStrip}>
-            <View style={styles.simMetricCol}>
-              <Text style={styles.simMLbl}>Modal Pokok (HPP)</Text>
-              <Text style={styles.simMVal}>{formatRupiah(costPerPiece)} / pcs</Text>
-            </View>
-            <View style={styles.simMetricCol}>
-              <Text style={styles.simMLbl}>Jatah Kantin</Text>
-              <Text style={[styles.simMVal, styles.valRed]}>-{formatRupiah(shareCanteen)}</Text>
-            </View>
-            <View style={styles.simMetricCol}>
-              <Text style={styles.simMLbl}>Harga Jual Rekomendasi</Text>
-              <Text style={[styles.simMVal, styles.valOrange]}>{formatRupiah(sellPrice)}</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* 3. IDENTITAS RESEP & BATCH */}
-        <Text style={styles.sectionLbl}>IDENTITAS JAJANAN & TARGET BATCH</Text>
-        <View style={styles.formCard}>
-          {/* PILIH IKON ATAU FOTO JAJANAN */}
-          <View style={styles.formFieldGroup}>
-            <Text style={styles.fieldLabel}>Pilihan Ikon atau Foto Jajanan</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.iconSelectorScroll}>
-              {availableIcons.map((ic) => {
-                const isSelected = selectedIcon === ic;
-                return (
-                  <TouchableOpacity
-                    key={ic}
-                    activeOpacity={0.8}
-                    onPress={() => setSelectedIcon(ic)}
-                    style={[styles.iconTileCard, isSelected && styles.iconTileCardSelected]}
-                    accessibilityLabel={`Pilih ikon ${ic}`}
-                    accessibilityRole="button"
-                  >
-                    <AssetVisual name={ic} size={42} />
-                  </TouchableOpacity>
-                );
-              })}
-
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => Alert.alert('Ambil Foto / Galeri', 'Opsi unggah foto dari kamera atau galeri HP akan aktif pada pembaruan mendatang.')}
-                style={styles.photoUploadTile}
-                accessibilityLabel="Ambil foto atau pilih dari galeri"
-                accessibilityRole="button"
-              >
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth={2}>
-                  <Path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                  <Circle cx="12" cy="13" r="4" />
-                </Svg>
-                <Text style={styles.photoUploadText}>+ Foto</Text>
-              </TouchableOpacity>
-            </ScrollView>
-          </View>
-
-          <View style={styles.formFieldGroup}>
-            <Text style={styles.fieldLabel}>Nama Menu Jajanan</Text>
+          {/* 3. FORM IDENTITAS & TARGET PORSI ADONAN */}
+          <View style={styles.formCard}>
+            <Text style={styles.inputLbl}>Nama Jajanan / Kue</Text>
             <TextInput
-              style={styles.fieldInput}
+              style={styles.textInput}
               value={recipeName}
               onChangeText={setRecipeName}
               placeholder="Contoh: Risoles Rogout Ayam"
-              placeholderTextColor="#94A3B8"
             />
-          </View>
 
-          <View style={styles.formRow2}>
-            <View style={styles.formCol}>
-              <Text style={styles.fieldLabel}>Target Batch (Porsi)</Text>
-              <TextInput
-                style={styles.fieldInput}
-                value={batchPortions}
-                onChangeText={setBatchPortions}
-                keyboardType="numeric"
-              />
-            </View>
-            <View style={styles.formCol}>
-              <Text style={styles.fieldLabel}>Harga Jual Eceran</Text>
-              <TextInput
-                style={styles.fieldInput}
-                value={suggestedSellingPrice}
-                onChangeText={setSuggestedSellingPrice}
-                keyboardType="numeric"
-              />
-            </View>
-          </View>
-
-          <View style={styles.formFieldGroup}>
-            <Text style={styles.fieldLabel}>Jatah Komisi Titip Kantin per Pcs</Text>
-            <TextInput
-              style={styles.fieldInput}
-              value={canteenShare}
-              onChangeText={setCanteenShare}
-              keyboardType="numeric"
-            />
-          </View>
-        </View>
-
-        {/* 4. DAFTAR BAHAN BAKU & ENERGI */}
-        <Text style={styles.sectionLbl}>BAHAN BAKU & BIAYA ENERGI ({ingredients.length} BAHAN)</Text>
-        <View style={styles.ingredientsListCard}>
-          {ingredients.map((item) => (
-            <View key={item.id} style={styles.ingRowItem}>
-              <View style={styles.ingLeftWrap}>
-                <View style={styles.ingIconBox}>
-                  <AssetVisual name={item.icon || 'wheat_flour'} size={20} />
-                </View>
-                <View>
-                  <Text style={styles.ingTitleText}>{item.name}</Text>
-                  <Text style={styles.ingSubText}>Takaran: {item.qty}</Text>
-                </View>
+            <View style={styles.tripleRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.inputLbl}>Hasil (Pcs)</Text>
+                <TextInput
+                  style={styles.textInput}
+                  keyboardType="numeric"
+                  value={batchPortions}
+                  onChangeText={setBatchPortions}
+                />
               </View>
-
-              <Text style={styles.ingCostNum}>{formatRupiah(item.cost)}</Text>
-              <TouchableOpacity onPress={() => handleRemoveIngredient(item.id)} style={styles.delBtn}>
-                <Text style={styles.delText}>✕</Text>
-              </TouchableOpacity>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.inputLbl}>Harga Jual</Text>
+                <TextInput
+                  style={styles.textInput}
+                  keyboardType="numeric"
+                  value={suggestedSellingPrice}
+                  onChangeText={setSuggestedSellingPrice}
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.inputLbl}>Komisi Kantin</Text>
+                <TextInput
+                  style={styles.textInput}
+                  keyboardType="numeric"
+                  value={canteenShare}
+                  onChangeText={setCanteenShare}
+                />
+              </View>
             </View>
-          ))}
+          </View>
 
-          {/* INPUT TAMBAH BAHAN CEPAT */}
-          <View style={styles.addIngBox}>
-            <View style={styles.addIngInputs}>
+          {/* 4. RINCIAN BAHAN BAKU 1 ADONAN */}
+          <View style={styles.formCard}>
+            <Text style={styles.sectionLabel}>TAKaran BAHAN 1 ADONAN ({portions} KUE)</Text>
+            {ingredients.map((ing) => (
+              <View key={ing.id} style={styles.ingItemRow}>
+                <AssetVisual name={ing.icon || 'wheat_flour'} size={28} />
+                <View style={{ flex: 1, marginLeft: 10 }}>
+                  <Text style={styles.ingItemName}>{ing.name}</Text>
+                </View>
+                <Text style={styles.ingItemCost}>{formatRupiah(ing.cost)}</Text>
+                <TouchableOpacity
+                  onPress={() => handleRemoveIngredient(ing.id)}
+                  style={styles.removeBtn}
+                >
+                  <Text style={styles.removeBtnText}>Hapus</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+
+            {/* Tambah Bahan Baru */}
+            <View style={styles.addIngRow}>
               <TextInput
-                style={[styles.fieldInput, styles.inputIngName]}
-                placeholder="Bahan baru..."
-                placeholderTextColor="#94A3B8"
+                style={[styles.textInput, { flex: 1.5, marginBottom: 0 }]}
+                placeholder="Nama bahan..."
                 value={newIngName}
                 onChangeText={setNewIngName}
               />
               <TextInput
-                style={[styles.fieldInput, styles.inputIngCost]}
-                placeholder="Rp Biaya"
-                placeholderTextColor="#94A3B8"
+                style={[styles.textInput, { flex: 1, marginBottom: 0 }]}
+                placeholder="Biaya Rp"
                 keyboardType="numeric"
                 value={newIngCost}
                 onChangeText={setNewIngCost}
               />
+              <TouchableOpacity style={styles.addIngBtn} onPress={handleAddIngredient}>
+                <Text style={styles.addIngBtnText}>+ Bahan</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity style={styles.addIngSubmitBtn} activeOpacity={0.8} onPress={handleAddIngredient}>
-              <Text style={styles.addIngSubmitBtnText}>+ Tambahkan ke Resep</Text>
-            </TouchableOpacity>
           </View>
+
+          {/* 5. SIMULATOR HASIL HPP & LABA BERSIH REAL-TIME */}
+          <View style={styles.simulatorCard}>
+            <View style={styles.simTopRow}>
+              <AssetVisual name={selectedIcon} size={62} />
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={styles.simOverline}>HASIL HITUNG HPP OTOMATIS</Text>
+                <Text style={styles.simMainProfit}>
+                  Untung Bersih: +{formatRupiah(netProfitPerPiece)} / pcs
+                </Text>
+                <Text style={styles.simBatchSub}>
+                  Total Laba 1 Adonan ({portions} kue): {formatRupiah(totalBatchProfit)}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.simGrid}>
+              <View style={styles.simBox}>
+                <Text style={styles.simBoxLbl}>Modal Bahan</Text>
+                <Text style={styles.simBoxVal}>{formatRupiah(totalRawCost)}</Text>
+              </View>
+              <View style={styles.simBox}>
+                <Text style={styles.simBoxLbl}>Modal / Kue</Text>
+                <Text style={styles.simBoxVal}>{formatRupiah(costPerPiece)}</Text>
+              </View>
+              <View style={styles.simBox}>
+                <Text style={styles.simBoxLbl}>Setor Kantin</Text>
+                <Text style={styles.simBoxVal}>
+                  {formatRupiah(Math.max(0, sellPrice - shareCanteen))}
+                </Text>
+              </View>
+            </View>
+
+            <AnimatedPressable
+              scaleTo={0.97}
+              style={styles.saveFullBtn}
+              onPress={handleSaveRecipe}
+            >
+              <Text style={styles.saveFullBtnText}>Simpan Resep & Terapkan HPP</Text>
+            </AnimatedPressable>
+          </View>
+
+          <View style={{ height: 100 }} />
         </View>
-
-        {/* 5. CTA SIMPAN RESEP */}
-        <TouchableOpacity style={styles.saveRecipeBtn} activeOpacity={0.85} onPress={handleSaveRecipe}>
-          <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
-            <Path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-            <Path d="M17 21v-8H7v8" />
-            <Path d="M7 3v5h8" />
-          </Svg>
-          <Text style={styles.saveRecipeBtnText}>
-            {isEditMode ? 'Simpan Perubahan Resep' : 'Tambahkan Resep ke Katalog HPP'}
-          </Text>
-        </TouchableOpacity>
-
       </ScrollView>
 
-      {/* 5. MODERN BOTTOM DOCK */}
       <ModernBottomNav activeTab="Wallet" navigation={navigation} />
     </SafeAreaView>
   );
@@ -350,336 +310,190 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-  subpageHeader: {
-    paddingHorizontal: 18,
-    paddingTop: 16,
-    paddingBottom: 12,
-    backgroundColor: '#FFFFFF',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1EFEA',
-  },
-  backBtnRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  backBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTextCol: {
-    gap: 1,
-  },
-  pageSub: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#64748B',
-  },
-  pageTitle: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#0F172A',
-    letterSpacing: -0.4,
-  },
-  resetBtn: {
-    fontSize: 11.5,
-    fontWeight: '800',
-    color: '#64748B',
-  },
   scrollContent: {
+    paddingBottom: 24,
+  },
+  bodyPadding: {
     paddingHorizontal: 18,
     paddingTop: 14,
-    paddingBottom: 110, // Ruang lega di atas ModernBottomNav
   },
-  simResultCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 16,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    borderBottomWidth: 3.5,
-    borderBottomColor: '#10B981',
-    gap: 12,
-    marginBottom: 18,
-    elevation: 2,
-    shadowColor: '#10B981',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
+  sectionLabel: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#78350F',
+    letterSpacing: 0.4,
+    marginBottom: 8,
   },
-  simTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  iconPickerRow: {
+    paddingBottom: 14,
+    gap: 10,
+  },
+  iconOptionCard: {
+    width: 82,
+    backgroundColor: '#FFFBEB',
+    borderRadius: 18,
+    paddingVertical: 10,
     alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#FDE68A',
   },
-  simHeadlineLbl: {
+  iconOptionSelected: {
+    backgroundColor: '#FFF7ED',
+    borderColor: '#EA580C',
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#9A3412',
+  },
+  iconOptionLabel: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#64748B',
-    letterSpacing: 0.5,
-  },
-  simProfitBadge: {
-    backgroundColor: '#DCFCE7',
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-  },
-  simProfitBadgeText: {
-    color: '#15803D',
-    fontSize: 12.5,
-    fontWeight: '900',
-  },
-  simBigProfitRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  simBigNum: {
-    fontSize: 28,
-    fontWeight: '900',
-    color: '#059669',
-    letterSpacing: -0.5,
-  },
-  simUnitLbl: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#64748B',
-  },
-  panIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: '#FFF7ED',
-    borderWidth: 1.5,
-    borderColor: '#FED7AA',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  simMetricsStrip: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#E2E8F0',
-    borderStyle: 'dashed',
-  },
-  simMetricCol: {
-    gap: 2,
-  },
-  simMLbl: {
-    fontSize: 10.5,
-    fontWeight: '600',
-    color: '#64748B',
-  },
-  simMVal: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#0F172A',
-  },
-  valRed: {
-    color: '#DC2626',
-  },
-  valOrange: {
-    color: '#EA580C',
-    fontWeight: '900',
-  },
-  sectionLbl: {
-    fontSize: 11.5,
-    fontWeight: '800',
-    color: '#64748B',
-    letterSpacing: 0.5,
-    marginBottom: 8,
+    color: '#52525B',
     marginTop: 4,
   },
   formCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    padding: 16,
+    borderRadius: 22,
+    padding: 15,
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
-    gap: 12,
-    marginBottom: 18,
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#CBD5E1',
+    marginBottom: 14,
   },
-  formFieldGroup: {
-    gap: 5,
+  inputLbl: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#52525B',
+    marginBottom: 5,
   },
-  iconSelectorScroll: {
+  textInput: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderRadius: 13,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    fontSize: 13.5,
+    fontWeight: '800',
+    color: '#18181B',
+    marginBottom: 10,
+  },
+  tripleRow: {
     flexDirection: 'row',
     gap: 8,
-    paddingVertical: 4,
   },
-  iconTileCard: {
-    width: 58,
-    height: 58,
-    borderRadius: 16,
-    backgroundColor: '#FAF8F5',
-    borderWidth: 1.8,
-    borderColor: '#E2E8F0',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconTileCardSelected: {
-    borderColor: '#EA580C',
-    backgroundColor: '#FFFBEB',
-    borderWidth: 2,
-    borderBottomWidth: 3.5,
-    borderBottomColor: '#C2410C',
-  },
-  photoUploadTile: {
-    width: 58,
-    height: 58,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.8,
-    borderColor: '#CBD5E1',
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 2,
-  },
-  photoUploadText: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: '#64748B',
-  },
-  fieldLabel: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    color: '#334155',
-  },
-  fieldInput: {
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    fontSize: 13.5,
-    fontWeight: '700',
-    color: '#0F172A',
-  },
-  formRow2: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  formCol: {
-    flex: 1,
-    gap: 5,
-  },
-  ingredientsListCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    padding: 16,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    gap: 10,
-    marginBottom: 18,
-  },
-  ingRowItem: {
+  ingItemRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#F1F5F9',
   },
-  ingLeftWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    flex: 1,
-  },
-  ingIconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  ingTitleText: {
-    fontSize: 12.5,
+  ingItemName: {
+    fontSize: 13,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#18181B',
   },
-  ingSubText: {
-    fontSize: 10.5,
-    color: '#64748B',
-  },
-  ingCostNum: {
+  ingItemCost: {
     fontSize: 13,
     fontWeight: '900',
-    color: '#0F172A',
-    marginRight: 12,
+    color: '#EA580C',
+    marginRight: 10,
   },
-  delBtn: {
-    padding: 4,
+  removeBtn: {
+    backgroundColor: '#FEF2F2',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
   },
-  delText: {
-    color: '#DC2626',
-    fontSize: 13,
+  removeBtnText: {
+    fontSize: 10.5,
     fontWeight: '800',
+    color: '#DC2626',
   },
-  addIngBox: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderStyle: 'dashed',
-    gap: 8,
-    marginTop: 4,
+  addIngRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 12,
   },
-  addIngInputs: {
+  addIngBtn: {
+    backgroundColor: '#FFF7ED',
+    borderWidth: 1.5,
+    borderColor: '#FDBA74',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  addIngBtnText: {
+    fontSize: 11.5,
+    fontWeight: '900',
+    color: '#EA580C',
+  },
+  simulatorCard: {
+    backgroundColor: '#ECFDF5',
+    borderRadius: 24,
+    padding: 16,
+    borderWidth: 1.8,
+    borderColor: '#6EE7B7',
+    borderBottomWidth: 4.5,
+    borderBottomColor: '#10B981',
+  },
+  simTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  simOverline: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#047857',
+  },
+  simMainProfit: {
+    fontSize: 16.5,
+    fontWeight: '900',
+    color: '#065F46',
+    marginTop: 2,
+  },
+  simBatchSub: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#047857',
+    marginTop: 2,
+  },
+  simGrid: {
     flexDirection: 'row',
     gap: 8,
+    marginBottom: 14,
   },
-  inputIngName: {
-    flex: 2,
-  },
-  inputIngCost: {
+  simBox: {
     flex: 1,
-  },
-  addIngSubmitBtn: {
-    backgroundColor: '#0F172A',
-    borderRadius: 10,
-    paddingVertical: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 13,
+    padding: 10,
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  addIngSubmitBtnText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '800',
+  simBoxLbl: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#71717A',
   },
-  saveRecipeBtn: {
+  simBoxVal: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#18181B',
+    marginTop: 2,
+  },
+  saveFullBtn: {
     backgroundColor: '#EA580C',
     borderRadius: 16,
-    paddingVertical: 13,
-    flexDirection: 'row',
+    paddingVertical: 14,
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    elevation: 3,
-    shadowColor: '#EA580C',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    borderBottomWidth: 4,
+    borderBottomColor: '#9A3412',
   },
-  saveRecipeBtnText: {
+  saveFullBtnText: {
     color: '#FFFFFF',
-    fontSize: 13.5,
+    fontSize: 14,
     fontWeight: '900',
   },
 });

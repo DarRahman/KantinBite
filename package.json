@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "dev": "EXPO_UNSTABLE_HEADLESS=1 BROWSER=none expo start --web --port 3000",
+    "start": "EXPO_UNSTABLE_HEADLESS=1 BROWSER=none expo start --web --port 3000",
+    "build": "EXPO_UNSTABLE_HEADLESS=1 expo export --platform web",
+    "android": "EXPO_UNSTABLE_HEADLESS=1 expo start --android",
+    "ios": "EXPO_UNSTABLE_HEADLESS=1 expo start --ios",
+    "web": "EXPO_UNSTABLE_HEADLESS=1 BROWSER=none expo start --web --port 3000"
   },
   "dependencies": {
     "@expo/metro-runtime": "~57.0.16",

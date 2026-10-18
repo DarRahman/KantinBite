@@ -2,26 +2,24 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   ScrollView,
   StyleSheet,
   StatusBar,
-  Dimensions,
   Share,
-  Alert
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Path, Rect, Circle, Line } from 'react-native-svg';
-import { ScreenHeader } from '../components/ScreenHeader';
 import { ModernBottomNav } from '../components/ModernBottomNav';
+import { ScenicBanner } from '../components/ScenicBanner';
 import AssetVisual from '../components/AssetVisual';
+import { CanteenPodiumScene } from '../components/Mascot';
+import { WeeklyBarChart } from '../components/WeeklyBarChart';
+import { AnimatedPressable, AnimatedProgressBar, TactilePill } from '../components/PlayfulComponents';
 import { getCashflow } from '../db/storage';
 import { formatRupiah } from '../utils/formatters';
 
-const { width } = Dimensions.get('window');
-
 export const FinanceReportScreen = ({ navigation }) => {
-  const [period, setPeriod] = useState('7hari'); // 'hariIni', '7hari', 'bulanIni'
+  const [period, setPeriod] = useState('7hari'); // 'hariIni' | '7hari' | 'bulanIni'
   const [cashflow, setCashflow] = useState({
     walletBalance: 850000,
     totalIncomeToday: 320000,
@@ -33,9 +31,8 @@ export const FinanceReportScreen = ({ navigation }) => {
       { day: 'Kam', amount: 350000 },
       { day: 'Jum', amount: 390000 },
       { day: 'Sab', amount: 420000 },
-      { day: 'Min', amount: 320000 }
+      { day: 'Min', amount: 320000 },
     ],
-    activities: []
   });
 
   useEffect(() => {
@@ -43,546 +40,313 @@ export const FinanceReportScreen = ({ navigation }) => {
   }, []);
 
   const loadData = async () => {
-    try {
-      const data = await getCashflow();
-      if (data) {
-        setCashflow(data);
-      }
-    } catch (e) {
-      console.log('Error loading cashflow in FinanceReportScreen:', e);
-    }
+    const data = await getCashflow();
+    if (data) setCashflow(data);
   };
 
-  // Kalkulasi Agregat Finansial Berdasarkan Periode
   const reportMetrics = {
     grossRevenue: period === 'hariIni' ? 320000 : period === '7hari' ? 2310000 : 9450000,
     ingredientCost: period === 'hariIni' ? 150000 : period === '7hari' ? 1050000 : 4200000,
     canteenCommission: period === 'hariIni' ? 45000 : period === '7hari' ? 315000 : 1260000,
     netProfit: period === 'hariIni' ? 125000 : period === '7hari' ? 945000 : 3990000,
     salesBreakdown: [
-      { name: 'Kasir Lapak Eceran', count: period === 'hariIni' ? 45 : 315, amount: period === 'hariIni' ? 90000 : 630000, color: '#EA580C' },
-      { name: 'Kantin Fakultas Teknik', count: period === 'hariIni' ? 60 : 420, amount: period === 'hariIni' ? 120000 : 840000, color: '#3B82F6' },
-      { name: 'Koperasi STIKOM', count: period === 'hariIni' ? 40 : 280, amount: period === 'hariIni' ? 70000 : 490000, color: '#10B981' },
-      { name: 'Kantin SMPN 1', count: period === 'hariIni' ? 25 : 175, amount: period === 'hariIni' ? 40000 : 350000, color: '#8B5CF6' }
-    ]
+      {
+        name: 'Kantin Fakultas Teknik',
+        count: period === 'hariIni' ? 60 : 420,
+        amount: period === 'hariIni' ? 120000 : 840000,
+        pct: 36,
+        color: '#EA580C',
+      },
+      {
+        name: 'Kasir Lapak Eceran',
+        count: period === 'hariIni' ? 45 : 315,
+        amount: period === 'hariIni' ? 90000 : 630000,
+        pct: 28,
+        color: '#10B981',
+      },
+      {
+        name: 'Koperasi STIKOM',
+        count: period === 'hariIni' ? 40 : 280,
+        amount: period === 'hariIni' ? 70000 : 490000,
+        pct: 21,
+        color: '#0284C7',
+      },
+      {
+        name: 'Kantin SMPN 1',
+        count: period === 'hariIni' ? 25 : 175,
+        amount: period === 'hariIni' ? 40000 : 350000,
+        pct: 15,
+        color: '#7C3AED',
+      },
+    ],
   };
 
-  const handleShareReport = () => {
-    Alert.alert(
-      'Ekspor Laporan Keuangan',
-      'Pilih format ekspor laporan usaha:',
-      [
-        {
-          text: 'Bagikan Ringkasan',
-          onPress: async () => {
-            const textReport = `LAPORAN KEUANGAN KANTINBITE\n` +
-              `Periode: ${period === 'hariIni' ? 'Hari Ini' : period === '7hari' ? '7 Hari Terakhir' : 'Bulan Ini'}\n` +
-              `--------------------------------\n` +
-              `Omzet Kotor: ${formatRupiah(reportMetrics.grossRevenue)}\n` +
-              `Modal Bahan: ${formatRupiah(reportMetrics.ingredientCost)}\n` +
-              `Komisi Kantin: ${formatRupiah(reportMetrics.canteenCommission)}\n` +
-              `Laba Bersih Riil: ${formatRupiah(reportMetrics.netProfit)}\n` +
-              `--------------------------------\n` +
-              `Saldo Kas Aktif: ${formatRupiah(cashflow.walletBalance)}\n` +
-              `KantinBite - Sistem Pembukuan Usaha Mandiri`;
-            try {
-              await Share.share({ message: textReport });
-            } catch (e) {
-              Alert.alert('Gagal Berbagi', 'Tidak dapat membagikan laporan.');
-            }
-          }
-        },
-        {
-          text: 'Cetak Dokumen PDF',
-          onPress: () => {
-            Alert.alert('Dokumen PDF Siap', `Laporan periode ${period === 'hariIni' ? 'Hari Ini' : period === '7hari' ? '7 Hari Terakhir' : 'Bulan Ini'} telah diformat ke dokumen tabel cetak dan siap diunduh.`);
-          }
-        },
-        { text: 'Batal', style: 'cancel' }
-      ]
-    );
+  const handleShareReport = async () => {
+    const periodLabel =
+      period === 'hariIni' ? 'Hari Ini' : period === '7hari' ? '7 Hari Terakhir' : 'Bulan Ini';
+    const textReport =
+      `*LAPORAN LABA BERSIH DAPUR BERKAH BUNDA*\n` +
+      `Periode: ${periodLabel}\n` +
+      `--------------------------------\n` +
+      `• Omzet Kotor: ${formatRupiah(reportMetrics.grossRevenue)}\n` +
+      `• Belanja Bahan: -${formatRupiah(reportMetrics.ingredientCost)}\n` +
+      `• Komisi Kantin: -${formatRupiah(reportMetrics.canteenCommission)}\n` +
+      `*LABA BERSIH DAPUR: +${formatRupiah(reportMetrics.netProfit)}*\n` +
+      `--------------------------------\n` +
+      `Saldo Kas Tunai: ${formatRupiah(cashflow.walletBalance)}`;
+    try {
+      await Share.share({ message: textReport });
+    } catch (e) {
+      Alert.alert('Info', 'Gagal membagikan laporan.');
+    }
   };
-
-  const maxTrend = Math.max(...cashflow.weeklyTrend.map(t => t.amount), 500000);
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-
-      {/* 1. HEADER HALAMAN RESMI */}
-      <ScreenHeader
-        title="Laporan Keuangan"
-        subtitle="Analisis Laba Bersih & Arus Kas"
-        rightElement={
-          <TouchableOpacity
-            style={styles.exportBtn}
-            activeOpacity={0.85}
-            onPress={handleShareReport}
-            accessibilityLabel="Ekspor dan bagikan laporan keuangan"
-            accessibilityRole="button"
-          >
-            <Svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="#EA580C" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
-              <Path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-              <Path d="M16 6l-4-4-4 4" />
-              <Line x1="12" y1="2" x2="12" y2="15" />
-            </Svg>
-            <Text style={styles.exportBtnText}>Bagi</Text>
-          </TouchableOpacity>
-        }
-      />
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFEDD5" />
 
       <ScrollView
-        style={styles.scrollArea}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* 2. FILTER SEGMENTED PERIOD TABS */}
-        <View style={styles.periodTabsWrap}>
-          {[
-            { id: 'hariIni', label: 'Hari Ini' },
-            { id: '7hari', label: '7 Hari' },
-            { id: 'bulanIni', label: 'Bulan Ini' }
-          ].map(tab => (
-            <TouchableOpacity
-              key={tab.id}
-              style={[styles.periodTab, period === tab.id && styles.periodTabActive]}
-              activeOpacity={0.8}
-              onPress={() => setPeriod(tab.id)}
-              accessibilityLabel={`Filter periode ${tab.label}`}
-              accessibilityRole="button"
-            >
-              <Text style={[styles.periodTabText, period === tab.id && styles.periodTabTextActive]}>
-                {tab.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        {/* 1. SCENIC REPORT HEADER DENGAN CHEF BITEY MERAYAKAN */}
+        <ScenicBanner
+          scene="canteen_afternoon"
+          badgeText="PEMBUKUAN & LABA USAHA"
+          title="Laporan Keuangan"
+          subtitle="Rekap omzet kotor, biaya bahan baku & untung bersih riil"
+          onBackPress={() => navigation.goBack()}
+          actionLabel="Bagikan WA"
+          onActionPress={handleShareReport}
+        />
 
-        {/* 3. HERO NET PROFIT SUMMARY CARD */}
-        <View style={styles.heroProfitCard}>
-          <View style={styles.heroTopRow}>
-            <View>
-              <Text style={styles.heroCardSubtitle}>SALDO KAS FISIK DI DOMPET</Text>
-              <Text style={styles.heroProfitAmount}>{formatRupiah(cashflow.walletBalance)}</Text>
-              <Text style={styles.heroCardSubDetail}>Laba Bersih ({period === 'hariIni' ? 'Hari Ini' : period === '7hari' ? '7 Hari' : 'Bulan Ini'}): +{formatRupiah(reportMetrics.netProfit)}</Text>
+        <View style={styles.bodyPadding}>
+          {/* 2. FILTER PERIODE WAKTU */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.periodRow}
+          >
+            {[
+              { key: 'hariIni', label: 'Hari Ini' },
+              { key: '7hari', label: '7 Hari Terakhir' },
+              { key: 'bulanIni', label: 'Bulan Ini' },
+            ].map((p) => (
+              <TactilePill
+                key={p.key}
+                label={p.label}
+                active={period === p.key}
+                onPress={() => setPeriod(p.key)}
+              />
+            ))}
+          </ScrollView>
+
+          {/* 3. KARTU HERO LABA BERSIH DAPUR */}
+          <View style={styles.netProfitCard}>
+            <View style={styles.netTopRow}>
+              <View>
+                <Text style={styles.netOverline}>UNTUNG BERSIH MASUK KANTONG</Text>
+                <Text style={styles.netBigAmount}>
+                  +{formatRupiah(reportMetrics.netProfit)}
+                </Text>
+              </View>
+              <AssetVisual name="coin_gold" size={48} />
             </View>
-            <View style={styles.heroIconBox}>
-              <AssetVisual name="wallet_purse" size={32} />
+
+            <View style={styles.breakdownRow}>
+              <View style={styles.miniStatBox}>
+                <Text style={styles.miniStatLbl}>Omzet Kotor</Text>
+                <Text style={styles.miniStatVal}>
+                  {formatRupiah(reportMetrics.grossRevenue)}
+                </Text>
+              </View>
+              <View style={styles.miniStatBox}>
+                <Text style={styles.miniStatLbl}>Modal Bahan</Text>
+                <Text style={[styles.miniStatVal, { color: '#DC2626' }]}>
+                  -{formatRupiah(reportMetrics.ingredientCost)}
+                </Text>
+              </View>
+              <View style={styles.miniStatBox}>
+                <Text style={styles.miniStatLbl}>Jatah Kantin</Text>
+                <Text style={[styles.miniStatVal, { color: '#D97706' }]}>
+                  -{formatRupiah(reportMetrics.canteenCommission)}
+                </Text>
+              </View>
             </View>
           </View>
 
-          <View style={styles.dividerLine} />
+          {/* 4. GRAFIK TREN OMZET 7 HARI */}
+          <WeeklyBarChart data={cashflow.weeklyTrend} />
 
-          <View style={styles.metricsSummaryGrid}>
-            <View style={styles.metricColumn}>
-              <Text style={styles.metricLabel}>Omzet Kotor</Text>
-              <Text style={styles.metricValueGross}>{formatRupiah(reportMetrics.grossRevenue)}</Text>
-            </View>
+          {/* 5. PODIUM 3 SUMBER PENJUALAN TERTINGGI */}
+          <Text style={styles.sectionTitle}>Podium Kontribusi Penjualan</Text>
+          <CanteenPodiumScene
+            topThree={[
+              { name: 'Kantin Teknik', sold: formatRupiah(reportMetrics.salesBreakdown[0].amount) },
+              { name: 'Kasir Lapak', sold: formatRupiah(reportMetrics.salesBreakdown[1].amount) },
+              { name: 'Kopma STIKOM', sold: formatRupiah(reportMetrics.salesBreakdown[2].amount) },
+            ]}
+          />
 
-            <View style={styles.metricColumn}>
-              <Text style={styles.metricLabel}>Modal Bahan</Text>
-              <Text style={styles.metricValueCost}>-{formatRupiah(reportMetrics.ingredientCost)}</Text>
-            </View>
-
-            <View style={styles.metricColumn}>
-              <Text style={styles.metricLabel}>Jatah Kantin</Text>
-              <Text style={styles.metricValueFee}>-{formatRupiah(reportMetrics.canteenCommission)}</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* 4. VISUALISASI GRAFIK OMZET 7 HARI (SVG BAR CHART) */}
-        <View style={styles.sectionCard}>
-          <View style={styles.sectionHeaderRow}>
-            <View style={styles.sectionTitleWithIcon}>
-              <AssetVisual name="chart_up" size={18} />
-              <Text style={styles.sectionTitle}>Tren Penjualan Harian</Text>
-            </View>
-            <Text style={styles.sectionBadge}>7 Hari Terakhir</Text>
-          </View>
-
-          <View style={styles.barChartContainer}>
-            {cashflow.weeklyTrend.map((item, idx) => {
-              const barHeight = Math.round((item.amount / maxTrend) * 90);
-              const isToday = idx === cashflow.weeklyTrend.length - 1;
-              return (
-                <View key={item.day + idx} style={styles.barColumn}>
-                  <Text style={styles.barValueText}>
-                    {Math.round(item.amount / 1000)}k
-                  </Text>
-                  <View style={styles.barTrack}>
-                    <View
-                      style={[
-                        styles.barFill,
-                        { height: Math.max(12, barHeight) },
-                        isToday && styles.barFillActive
-                      ]}
-                    />
-                  </View>
-                  <Text style={[styles.barDayText, isToday && styles.barDayTextActive]}>
-                    {item.day}
-                  </Text>
-                </View>
-              );
-            })}
-          </View>
-        </View>
-
-        {/* 5. DISTRIBUSI PINTU PENJUALAN (SALES CHANNELS) */}
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Pintu Pemasukan ({reportMetrics.salesBreakdown.length} Titik)</Text>
-          <Text style={styles.sectionSubtitle}>Rincian omzet dan kuantitas jajanan per mitra distribusi</Text>
-
-          <View style={styles.channelsListWrap}>
+          {/* 6. RINCIAN KONTRIBUSI PER TITIK PENJUALAN */}
+          <View style={styles.channelCard}>
+            <Text style={styles.channelCardTitle}>Rincian Serapan Kue per Saluran</Text>
             {reportMetrics.salesBreakdown.map((ch, idx) => (
               <View key={idx} style={styles.channelRow}>
-                <View style={styles.channelInfoCol}>
-                  <View style={styles.channelDotTitle}>
-                    <View style={[styles.channelColorDot, { backgroundColor: ch.color }]} />
-                    <Text style={styles.channelName}>{ch.name}</Text>
-                  </View>
-                  <Text style={styles.channelSub}>Total {ch.count} pcs laku terjual</Text>
+                <View style={styles.channelHead}>
+                  <Text style={styles.channelName}>
+                    {ch.name} ({ch.count} kue)
+                  </Text>
+                  <Text style={styles.channelAmount}>{formatRupiah(ch.amount)}</Text>
                 </View>
-                <Text style={styles.channelAmount}>{formatRupiah(ch.amount)}</Text>
+                <AnimatedProgressBar
+                  percent={ch.pct}
+                  color={ch.color}
+                  trackColor="#F1F5F9"
+                  height={8}
+                />
               </View>
             ))}
           </View>
-        </View>
 
-        {/* 6. STATUS DOMPET KAS SEKARANG */}
-        <View style={styles.cashWalletBanner}>
-          <View style={styles.walletIconWrap}>
-            <AssetVisual name="wallet_purse" size={24} />
-          </View>
-          <View style={styles.walletTextCol}>
-            <Text style={styles.walletTitle}>Saldo Dompet Fisik Aktif</Text>
-            <Text style={styles.walletAmount}>{formatRupiah(cashflow.walletBalance)}</Text>
-          </View>
-          <TouchableOpacity
-            style={styles.backHomeBtn}
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('Dashboard')}
-            accessibilityLabel="Kembali ke Dashboard"
-            accessibilityRole="button"
+          <AnimatedPressable
+            scaleTo={0.97}
+            style={styles.shareFullBtn}
+            onPress={handleShareReport}
           >
-            <Text style={styles.backHomeBtnText}>Dasbor</Text>
-          </TouchableOpacity>
-        </View>
+            <AssetVisual name="receipt_bill" size={20} />
+            <Text style={styles.shareFullBtnText}>
+              Kirim Ringkasan Laba-Rugi ke WhatsApp
+            </Text>
+          </AnimatedPressable>
 
-        <View style={{ height: 100 }} />
+          <View style={{ height: 100 }} />
+        </View>
       </ScrollView>
 
-      {/* 7. DOCK NAVIGASI RESMI DANA-STYLE */}
-      <ModernBottomNav activeTab="Home" navigation={navigation} />
+      <ModernBottomNav activeTab="Me" navigation={navigation} />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-  scrollArea: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
-  },
   scrollContent: {
+    paddingBottom: 24,
+  },
+  bodyPadding: {
     paddingHorizontal: 18,
     paddingTop: 14,
   },
-  exportBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#FFF7ED',
-    borderWidth: 1.2,
-    borderColor: '#FED7AA',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    minHeight: 38,
+  periodRow: {
+    paddingBottom: 14,
   },
-  exportBtnText: {
-    fontSize: 11.5,
-    fontWeight: '800',
-    color: '#EA580C',
-  },
-  periodTabsWrap: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    padding: 4,
-    borderWidth: 1.2,
-    borderColor: '#E2E8F0',
-    marginBottom: 14,
-  },
-  periodTab: {
-    flex: 1,
-    paddingVertical: 8,
-    alignItems: 'center',
-    borderRadius: 10,
-    minHeight: 36,
-    justifyContent: 'center',
-  },
-  periodTabActive: {
-    backgroundColor: '#EA580C',
-  },
-  periodTabText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#64748B',
-  },
-  periodTabTextActive: {
-    color: '#FFFFFF',
-    fontWeight: '800',
-  },
-  heroProfitCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    padding: 18,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    borderBottomWidth: 4,
-    borderBottomColor: '#CBD5E1',
-    marginBottom: 14,
-  },
-  heroTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  heroCardSubtitle: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#059669',
-    letterSpacing: 0.5,
-    marginBottom: 3,
-  },
-  heroCardSubDetail: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#059669',
-    marginTop: 2,
-  },
-  heroProfitAmount: {
-    fontSize: 26,
-    fontWeight: '900',
-    color: '#0F172A',
-    letterSpacing: -0.6,
-  },
-  heroIconBox: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
+  netProfitCard: {
     backgroundColor: '#ECFDF5',
-    borderWidth: 1.2,
-    borderColor: '#A7F3D0',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dividerLine: {
-    height: 1,
-    backgroundColor: '#F1EFEA',
-    marginVertical: 14,
-  },
-  metricsSummaryGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  metricColumn: {
-    flex: 1,
-  },
-  metricLabel: {
-    fontSize: 10.5,
-    fontWeight: '600',
-    color: '#64748B',
-    marginBottom: 2,
-  },
-  metricValueGross: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#0F172A',
-  },
-  metricValueCost: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#DC2626',
-  },
-  metricValueFee: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#D97706',
-  },
-  sectionCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 24,
     padding: 16,
-    borderWidth: 1.2,
-    borderColor: '#E2E8F0',
-    marginBottom: 14,
+    borderWidth: 1.8,
+    borderColor: '#6EE7B7',
+    borderBottomWidth: 4.5,
+    borderBottomColor: '#10B981',
+    marginBottom: 16,
   },
-  sectionHeaderRow: {
+  netTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
   },
-  sectionTitleWithIcon: {
+  netOverline: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#047857',
+    letterSpacing: 0.4,
+  },
+  netBigAmount: {
+    fontSize: 30,
+    fontWeight: '900',
+    color: '#065F46',
+    marginTop: 2,
+  },
+  breakdownRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     gap: 8,
+  },
+  miniStatBox: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 13,
+    padding: 9,
+  },
+  miniStatLbl: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#71717A',
+  },
+  miniStatVal: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#18181B',
+    marginTop: 2,
   },
   sectionTitle: {
-    fontSize: 14.5,
-    fontWeight: '900',
-    color: '#0F172A',
-  },
-  sectionSubtitle: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#64748B',
-    marginBottom: 10,
-  },
-  sectionBadge: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#EA580C',
-    backgroundColor: '#FFF7ED',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-  },
-  barChartContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    height: 125,
-    paddingTop: 10,
-    paddingBottom: 4,
-  },
-  barColumn: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  barValueText: {
-    fontSize: 9.5,
-    fontWeight: '700',
-    color: '#64748B',
-    marginBottom: 4,
-  },
-  barTrack: {
-    width: 22,
-    height: 90,
-    backgroundColor: '#F1F5F9',
-    borderRadius: 8,
-    justifyContent: 'flex-end',
-    overflow: 'hidden',
-  },
-  barFill: {
-    width: '100%',
-    backgroundColor: '#94A3B8',
-    borderRadius: 8,
-  },
-  barFillActive: {
-    backgroundColor: '#EA580C',
-  },
-  barDayText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#64748B',
-    marginTop: 6,
-  },
-  barDayTextActive: {
-    color: '#EA580C',
-    fontWeight: '900',
-  },
-  channelsListWrap: {
-    gap: 10,
-    marginTop: 4,
-  },
-  channelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 4,
-  },
-  channelInfoCol: {
-    flex: 1,
-  },
-  channelDotTitle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  channelColorDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  channelName: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#0F172A',
-  },
-  channelSub: {
-    fontSize: 10.5,
-    color: '#64748B',
-    fontWeight: '600',
-    marginTop: 1,
-    marginLeft: 16,
-  },
-  channelAmount: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#0F172A',
-  },
-  cashWalletBanner: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    padding: 14,
-    borderWidth: 1.2,
-    borderColor: '#E2E8F0',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  walletIconWrap: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
-    backgroundColor: '#FFF7ED',
-    borderWidth: 1,
-    borderColor: '#FED7AA',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  walletTextCol: {
-    flex: 1,
-  },
-  walletTitle: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#64748B',
-  },
-  walletAmount: {
     fontSize: 16,
     fontWeight: '900',
-    color: '#EA580C',
+    color: '#18181B',
+    marginBottom: 10,
   },
-  backHomeBtn: {
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1.2,
-    borderColor: '#CBD5E1',
-    paddingVertical: 7,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    minHeight: 36,
+  channelCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 16,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderBottomWidth: 3.5,
+    borderBottomColor: '#CBD5E1',
+    marginBottom: 16,
+  },
+  channelCardTitle: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#18181B',
+    marginBottom: 12,
+  },
+  channelRow: {
+    marginBottom: 12,
+  },
+  channelHead: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 5,
+  },
+  channelName: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: '#3F3F46',
+  },
+  channelAmount: {
+    fontSize: 12.5,
+    fontWeight: '900',
+    color: '#18181B',
+  },
+  shareFullBtn: {
+    backgroundColor: '#EA580C',
+    borderRadius: 16,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
+    gap: 8,
+    borderBottomWidth: 4,
+    borderBottomColor: '#9A3412',
   },
-  backHomeBtnText: {
-    fontSize: 11.5,
-    fontWeight: '800',
-    color: '#334155',
+  shareFullBtnText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '900',
   },
 });
