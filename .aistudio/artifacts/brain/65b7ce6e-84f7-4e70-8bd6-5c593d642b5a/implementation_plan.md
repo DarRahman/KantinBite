@@ -1,148 +1,66 @@
-# KantinBite — Rombak Total UI/UX Mobile, Scenic Illustrations & Animasi Taktil
+# KantinBite — Harmonisasi Palet Kuliner, Ikon Seragam & Galeri Pop-Up 26+ Jajanan + Upload Foto
 
-Perombakan menyeluruh antarmuka **KantinBite** menjadi aplikasi mobile operasional dapur dan konsinyasi kantin yang kaya ilustrasi pemandangan (*scenic headers*), variasi pose maskot Chef Bitey, visual jajanan Nusantara yang menggugah selera, animasi sentuhan membal (*spring micro-interactions*), serta bingkai tampilan mobile proporsional yang nyaman dipandang di segala layar.
+Perbaikan menyeluruh atas ketidakselarasan visual, penghapusan ornamen *tech/online indicator* (titik bulat status & *Dynamic Island*), pembaruan aturan keras di `RULES.md` dan `DESIGN.md`, penggantian ikon operasional lama agar seragam dengan tema **Warm Cream & Terracotta**, serta penambahan **Pop-Up Katalog Galeri 26+ Jajanan Kantin + Gambar Universal Netral + Fitur Upload Foto Sendiri**.
 
 ### User Review & Critical Decisions
 
 > [!IMPORTANT]
-> Berikut adalah keputusan arah desain dan cakupan fitur yang telah dikonfirmasi untuk dieksekusi secara menyeluruh dengan tetap mematuhi aturan ketat `DESIGN.md` dan `RULES.md` (Zero Emoji, Zero Box-in-Box, Zero Dev Jargon, dan Matematika Rupiah Bulat):
+> Seluruh perubahan ini dirancang untuk langsung mengatasi ke-4 tangkapan layar yang Anda tandai serta mengunci aturan desain baru di dalam dokumen `RULES.md` dan `DESIGN.md`:
 
-- **Confirmed Decision 1 — Gaya Visual & Scenic Header**: Mengadopsi *scenic illustrated headers* bertema suasana dapur pagi, etalase kantin, dan kafe bakery hangat dengan maskot Chef Bitey ekspresif (terinspirasi dari referensi aplikasi *outdoor/scenic banner*, *Jujuly Cafe*, dan *playful bento mobile UI*).
-- **Confirmed Decision 2 — Kekayaan Aset Visual & Ilustrasi**: Menambahkan sistem ilustrasi berlapis (*layered SVG illustrations*) mencakup:
-  - **Multi-pose Maskot Chef Bitey**: Bitey membawa boks kue pagi, Bitey menjaga mesin kasir, Bitey memeriksa gudang tepung/telur, Bitey mencatat buku kas, dan Bitey merayakan target laku keras.
-  - **Ilustrasi Jajanan Nusantara Detail**: Risoles Rogout keemasan berlapis tepung panir renyah dengan saus cabai/mayo, Pastel Telur berlipat gerigi dengan isian wortel-telur, Dadar Gulung Pandan berpori alami dengan unti kelapa gula merah, Lemper Ayam berbalut daun pisang segar, serta tambahan variasi jajanan pasar (Kue Lumpur, Tahu Isi, Klepon, Bolu Kukus, Onde-Onde).
-  - **Banner Suasana Tiap Layar**: Pemandangan langit pagi dapur mengepul, tenda/etalase kantin sekolah & kampus, rak gudang bahan baku, dan suasana pasar subuh.
-- **Confirmed Decision 3 — Animasi & Interaksi Mobile**: Menerapkan animasi komprehensif berbasis `Animated` native: efek tekan membal (*spring scale bounce*) pada seluruh tombol/kartu/ikon squircle, animasi mengambang/bernapas halus pada maskot Bitey, transisi grafik dan progress bar yang tumbuh mulus, serta umpan balik keranjang kasir real-time.
-- **Confirmed Decision 4 — Cakupan 12 Layar & Mobile Frame**: Merombak seluruh 12 layar utama & sub-layar operasional serta membungkus aplikasi dalam *Responsive Mobile Viewport Frame* (rasio layar HP 412px–430px terpusat dengan *ambient backdrop* hangat pada layar lebar/web, dan *full-bleed* otomatis pada perangkat mobile asli).
-
----
-
-### 1. Overview & Core Concept
-
-- **What It Does**: **KantinBite** membantu produsen jajanan rumahan mengelola seluruh siklus bisnis harian dari subuh hingga sore: perencanaan belanja pasar subuh, pencatatan stok gudang bahan baku, formulasi resep & perhitungan Harga Pokok Penjualan (HPP), titip jual konsinyasi ke berbagai mitra kantin pagi hari, kasir eceran cepat (POS), rekonsiliasi retur sore, buku piutang mitra, hingga penerbitan nota digital WhatsApp dan laporan laba-rugi.
-- **Target Audience / Persona**: Ibu rumah tangga dan pengusaha kuliner jajanan pasar/kantin (usia 35–55 tahun) yang membutuhkan antarmuka visual yang hangat, penuh gambar penjelas yang intuitif, teks angka rupiah besar yang terbaca dalam 1 detik, serta tombol sentuh empuk berukuran minimal 48px.
-- **Key Value**: Mengubah antarmuka tabel/kartu kaku menjadi pengalaman aplikasi mobile kelas konsumen (*consumer-grade playful mobile app*) yang hidup, kaya ilustrasi kontekstual, bebas istilah teknis rumit, dan 100% akurat secara finansial.
+- **Confirmed Decision 1 — Zero Tech/Online Dots & Zero Faded Design (`RULES.md` & `DESIGN.md`)**:
+  - Menghapus total *Dynamic Island* hitam bertitik di bagian atas frame, menghapus seluruh kapsul bertitik (`• DAPUR PRODUKSI PAGI`, `• SIMULATOR MODAL & MARGIN`), serta menghapus titik bulat hijau/oranye (`statDotGreen`, `statDotOrange`, `profileMiniDot`) di seluruh layar.
+  - Menghapus penggunaan *opacity* transparan/pudar pada kanopi, matahari, dan latar header sehingga seluruh warna tampil **100% tegas, hangat, dan tajam** tanpa kesan pudar.
+  - Memperbaiki teks kapitalisasi yang salah ketik seperti `"TAKaran"` menjadi `"TAKARAN BAHAN 1 ADONAN"` dan menghapus istilah teknis `"SIMULATOR"`.
+- **Confirmed Decision 2 — Penggantian Total Ikon Operasional Lama (`PastelReferenceIcon.js`)**:
+  - Mengganti 4 ikon lama (*Kasir Lapak, Titip Kantin, Gudang Stok, Belanja Subuh*) yang sebelumnya berwarna cokelat gelap kaku dengan kotak ungu/hijau/kuning belang-belang menjadi **Ilustrasi Alat Dapur & Kantin Bernuansa Krem, Madu, dan Oranye Terakota Seragam** (`#FFF7ED`, `#FEF3C7`, `#FDBA74`, `#EA580C`, `#9A3412`) sehingga menyatu hangat dengan keseluruhan aplikasi.
+- **Confirmed Decision 3 — Harmonisasi Kartu Kas "Masuk Hari Ini & Belanja Subuh" (`DashboardScreen.js`)**:
+  - Mengganti strip putih kontras bertitik hijau/oranye yang tidak nyaman dilihat menjadi **2 Kartu Mini Berdampingan Bernuansa Krem Madu & Terakota Lembut** dengan ikon visual koin/keranjang mini, kontras teks cokelat tua (`#431407`) dan oranye terakota (`#C2410C`), serta pemisah yang menyatu lembut dengan kartu dompet utama.
+- **Confirmed Decision 4 — Pop-Up Katalog Galeri 26+ Jajanan + Ikon Netral + Upload Foto Sendiri (`RecipeEditorScreen.js` & `AssetVisual.js`)**:
+  - Mengganti deretan 4 gambar di halaman Tambah/Edit Resep menjadi **Kartu Pratinjau Gambar Jajanan Aktif** dengan tombol **"Pilih Gambar Jajanan / Upload Foto"** yang membuka **Pop-Up Galeri Katalog Penuh**.
+  - Menyediakan **26+ Ilustrasi Jajanan Kantin & Pasar** yang dikelompokkan per kategori (*Gorengan, Kue Basah, Roti & Bolu, Minuman & Puding*), ditambah **3 Gambar Universal Netral** (*Piring Saji Jajanan, Boks Mika Kue, Bungkus Daun Pisang*), serta tombol **Unggah Foto Sendiri dari HP/Perangkat** untuk jajanan unik buatan sendiri.
 
 ---
 
-### 2. User Experience & Visual Design
+### 1. Daftar Pembaruan Spesifik Berdasarkan 4 Tangkapan Layar Anda
 
-- **Key User Flows**:
-  1. **Masuk & Sapaan Dapur (`Auth` -> `Dashboard`)**: Pengguna disambut ilustrasi kanvas kafe/dapur pagi dengan Chef Bitey membawa boks jajanan hangat, tombol angka PIN taktil yang membal saat disentuh, lalu masuk ke Beranda dengan *Scenic Morning Kitchen Banner*, kartu dompet kas berlapis ilustrasi koin & dompet, 4 tombol aksi squircle 3D bervolume, karusel jajanan bergambar detail, dan grafik analitik beranimasi.
-  2. **Siklus Pagi — Gudang, Belanja Subuh & Resep HPP (`Stock` -> `MarketShopping` -> `Hpp` -> `RecipeEditor`)**: Ilustrasi rak dapur dan pasar pagi memandu pengecekan bahan kritis, daftar ceklis belanja subuh interaktif dengan progress bar beranimasi, serta kartu resep HPP visual dengan simulasi laba bersih per butir secara langsung.
-  3. **Siklus Siang — Kasir Kilat Eceran (`Pos` -> `Receipt`)**: Grid katalog jajanan bergaya etalase bakery (seperti referensi *Jujuly Cafe*) dengan ilustrasi kue besar di atas piring saji, tombol stepper `[-]` `[+]` yang membal, *floating checkout dock* dengan pecahan uang cepat, dan pratinjau struk digital bergerigi (*perforated paper ticket*) siap kirim ke WhatsApp.
-  4. **Siklus Sore — Titip Kantin, Piutang & Laporan (`Consignment` -> `PartnerDirectory` -> `DebtLedger` -> `FinanceReport` -> `Settings`)**: Banner ilustrasi kanopi kantin dengan pergantian suasana langit Pagi (Nitip) vs Sore (Rekap), kartu mitra bergambar avatar karakter PIC, kalkulator retur fisik anti-minus, podium kantin terlaris (mengadaptasi visual podium dari referensi), dan laporan keuangan visual.
+1. **Perbaikan Tangkapan Layar 1 (4 Ikon Operasional: Kasir Lapak, Titip Kantin, Gudang Stok, Belanja Subuh)**:
+   - Menghapus warna latar ungu (`#DDD6FE`), hijau mint (`#A7F3D0`), hijau stabilo (`#D9F99D`), dan siluet hitam-cokelat tua (`#3D312A`) pada `PastelReferenceIcon.js`.
+   - Menggantinya dengan **8 Ilustrasi Kuliner Terakota & Krem Madu Seragam** (Mesin Kasir Toko Roti, Tenda Etalase Kantin Hangat, Stoples & Karung Tepung Dapur, Keranjang Anyaman Pasar Pagi, Buku Resep & Kalkulator, Buku Catatan Setoran, Gerai Mitra Kantin, dan Grafik Laba Emas) dengan bingkai squircle krem-oranye yang selaras satu tema.
 
-- **Visual Identity & Theme**:
-  - *Aesthetic Direction*: **Warm Culinary Scenic & Tactile Bento** — perpaduan header berilustrasi pemandangan hangat (seperti referensi aplikasi *Camp/Park* & *Jujuly Cafe*) dengan kartu konten putih bersih berbatas ruang kosong proporsional (*whitespace-driven*) dan tombol berdimensi taktil (`borderBottomWidth` tebal).
-  - *Color Palette & Mood*:
-    - `--canvas`: `#FFFFFF` (Latar utama kartu & konten bersih) dan `#FFFBEB` / `#FFF7ED` (Latar suasana langit pagi hangat pada *scenic banner*).
-    - `--primary`: `#EA580C` (Deep Culinary Orange) dengan aksen tekan `#C2410C` (Roasted Orange) dan sorotan lembut `#FFF7ED`.
-    - `--secondary`: `#F59E0B` (Warm Honey Amber) & `#FEF3C7` (Butter Cream).
-    - `--status-success`: `#059669` (Emerald Green) pada latar `#ECFDF5` untuk kas masuk, setoran lunas, dan daun pandan/pisang.
-    - `--status-danger`: `#DC2626` (Crimson Red) pada latar `#FEF2F2` untuk stok kritis, pengeluaran pasar, dan piutang kantin.
-    - `--text`: `#18181B` (Zinc-900 untuk angka utama & judul), `#52525B` (Zinc-600 untuk keterangan), `#A1A1AA` (Zinc-400 untuk teks bantu).
-  - *Typography & Hierarchy*:
-    - Angka Saldo & Hero Metric: `32px–34px` (`fontWeight: 900`, tabular numerals).
-    - Judul Layar & Sub-total Kasir: `20px–24px` (`fontWeight: 800`, `letterSpacing: -0.5`).
-    - Nama Jajanan & Mitra Kantin: `15px–16px` (`fontWeight: 800`).
-    - Keterangan Bahan & Waktu: `12px–13px` (`fontWeight: 600`).
-  - *Component Styling & Layout*:
-    - **Responsive Mobile Frame**: Pada tampilan browser/desktop, aplikasi dibingkai dalam kanvas mobile proporsional (`maxWidth: 430px`, sudut membulat `36px`, bayangan lembut, dan bar status/indikator atas) dengan latar belakang suasana dapur pastel lembut di sekelilingnya sehingga benar-benar terasa seperti memegang APK mobile asli.
-    - **Zero Box-in-Box & Zero Emoji**: Murni menggunakan komponen SVG berlapis, pemisah baris halus (`#F4F4F5`), dan chip permukaan satu lapis tanpa tumpukan kotak bergaris ganda dan tanpa satu pun karakter emoji mentah.
+2. **Perbaikan Tangkapan Layar 2 (Strip "Masuk Hari Ini +Rp 320.000 | Belanja Subuh -Rp 150.000")**:
+   - Menghapus titik bulat hijau (`statDotGreen`) dan titik bulat oranye (`statDotOrange`) yang terlihat seperti indikator status online.
+   - Mengubah tata letaknya menjadi dua panel permukaan hangat (`#FFF7ED` dan `#FEF3C7`) dengan ikon mini `coin_gold` dan `market_cart`, warna teks yang harmonis (`#7C2D12`, `#065F46`, `#9A3412`), dan garis batas hangat yang nyaman dipandang mata.
 
-- **Interactive Feedback & Motion**:
-  - **Spring Press Wrapper (`AnimatedPressable`)**: Setiap kartu jajanan, tombol aksi cepat, chip kategori, dan tombol kasir mengecil halus (`scale: 0.96`) saat disentuh dan membal kembali (`spring friction: 5`) saat dilepas.
-  - **Living Mascot & Scenic Elements**: Maskot Chef Bitey memiliki animasi mengayun/bernapas lembut (`translateY` periodik) dan kepulan uap hangat pada ilustrasi jajanan baru matang.
-  - **Animated Charts & Progress Bars**: Grafik batang 7 hari, rasio donat pemasukan, dan bar kapasitas stok gudang bergerak tumbuh secara mulus saat layar dibuka atau periode diganti.
-  - **Floating Pill Bottom Navigation**: Dock navigasi bawah bergaya kapsul mengambang modern (seperti referensi ke-1 dan ke-5) dengan indikator aktif beranimasi dan tombol tengah **KASIR** bervolume yang menonjol.
+3. **Perbaikan Tangkapan Layar 3 (Badge `• DAPUR PRODUKSI PAGI` & Warna Pudar)**:
+   - Menghapus komponen `sceneBadge` dan `sceneDot` dari seluruh `ScenicBanner`.
+   - Menghilangkan efek *opacity* pudar pada kanopi toko roti, bukit latar, dan elemen dekoratif; serta mengatur ulang posisi ilustrasi latar agar tidak pernah bertabrakan dengan teks judul/subjudul.
+
+4. **Perbaikan Tangkapan Layar 4 (Layar `Racik Resep & HPP` & Pemilih Gambar Menu)**:
+   - Menghapus *Dynamic Island* hitam bertitik biru di bagian atas bingkai layar HP pada `App.js`.
+   - Memperbaiki typo `"TAKaran"` menjadi `"TAKARAN BAHAN 1 ADONAN"`.
+   - Mengganti pemilih 4 ikon menjadi **Kartu Pemilih Gambar Menu Interaktif** yang saat diklik membuka **Modal Pop-Up Galeri Jajanan Lengkap (26+ Ilustrasi + Ikon Universal Netral + Upload Foto Sendiri)**.
 
 ---
 
-### 3. Key Product Decisions & Trade-Offs
+### 2. Arsitektur Katalog 26+ Jajanan, Ikon Universal & Foto Kustom (`AssetVisual.js`)
 
-- **Decision 1: Sistem Ilustrasi SVG Modular & Pemandangan Kontekstual (`ScenicHeader` & `RichFoodVisual`)**
-  - *Chosen Approach*: Membangun mesin komponen ilustrasi SVG multi-layer langsung di dalam kode React Native (`react-native-svg`) untuk seluruh pemandangan header, 6 pose maskot Chef Bitey, avatar karakter pengurus kantin, dan 10+ ilustrasi jajanan/bahan baku bertekstur lengkap dengan piring saji dan bayangan.
-  - *Why*: Menjamin ketajaman visual 100% di semua resolusi layar, waktu muat instan (0 ms *network latency*), mendukung animasi per bagian elemen (seperti awan bergerak, uap kue, atau tangan maskot melambai), serta mematuhi aturan keras bebas emoji dan *offline-first*.
-  - *Alternatives Considered*: Memuat gambar statis eksternal via URL internet (ditolak karena melanggar prinsip *Offline-First Mandiri* dan rawan gagal muat saat tanpa kuota).
-
-- **Decision 2: Bingkai Simulasi Mobile (*Mobile App Shell*) untuk Web & Layar Lebar**
-  - *Chosen Approach*: Membungkus `NavigationContainer` di dalam *Mobile Viewport Shell* yang secara otomatis menampilkan bingkai smartphone proporsional (420px x tinggi penuh) saat dibuka di layar lebar/web, lengkap dengan dock navigasi bawah yang terkunci presisi di dasar bingkai HP.
-  - *Why*: Menjawab keluhan utama bahwa tampilan saat ini terasa melebar dan kaku seperti halaman web biasa, bukan seperti APK mobile yang padat, rapi, dan ergonomis.
-  - *Alternatives Considered*: Membiarkan layout melebar 100% mengikuti layar monitor (ditolak karena merusak proporsi kartu bento, ilustrasi header, dan jangkauan jempol).
-
-- **Decision 3: Pertahanan Integritas Finansial & Penyimpanan Lokal Terisolasi**
-  - *Chosen Approach*: Mempertahankan seluruh rumus pembulatan bulat (`Math.round`), validasi `retur <= titip`, pencegahan pembagian nol pada HPP, dan pemusatan CRUD pada modul penyimpanan lokal sambil memperkaya struktur data default dengan atribut visual (jenis ilustrasi, warna tema produk, avatar mitra).
-  - *Why*: Memastikan perombakan visual tidak merusak sedikit pun logika bisnis dan keandalan data pengguna yang sudah tersimpan.
+Komponen `AssetVisual` akan diperluas agar mampu merender:
+1. **Foto Kustom Pengguna (`customPhotoUri` / `data:image/...` / `file://...`)**: Jika produk memiliki foto unggahan pengguna, `AssetVisual` otomatis menampilkan `<Image source={{ uri }} />` di dalam bingkai piring/kartu yang rapi di seluruh layar (Beranda, Kasir POS, Katalog HPP, dan Nota).
+2. **3 Ilustrasi Universal Netral (Untuk Jajanan Unik Apa Saja)**:
+   - `universal_plate`: Piring saji keramik hangat dengan tudung/hiasan daun pandan netral.
+   - `universal_box`: Boks mika kemasan jajanan kantin berpita hangat.
+   - `universal_leaf`: Bungkusan daun pisang segar tradisional dengan semat lidi.
+3. **23+ Ilustrasi Spesifik Jajanan Kantin & Pasar Nusantara**:
+   - **Gorengan Gurih**: `risoles_rogout` (Risoles Rogout), `pastel_telur` (Pastel Telur), `tahu_isi` (Tahu Isi Sayur), `bakwan_jagung` (Bakwan Sayur/Jagung), `tempe_mendoan` (Tempe Mendoan), `pisang_goreng` (Pisang Goreng Crispy), `martabak_telur` (Martabak Mini Telur).
+   - **Kue Basah Tradisional**: `dadar_gulung` (Dadar Gulung Pandan), `lemper_ayam` (Lemper Ayam), `kue_lumpur` (Kue Lumpur Kentang), `klepon_pandan` (Klepon Gula Aren), `onde_onde` (Onde-Onde Wijen), `kue_lapis` (Kue Lapis Pelangi/Beras), `putu_ayu` (Putu Ayu Kelapa), `nagasari` (Nagasari Pisang).
+   - **Roti, Bolu & Pastry**: `bolu_kukus` (Bolu Kukus Mekar), `donat_gula` (Donat Gula Salju/Meses), `brownies_coklat` (Brownies Cokelat Keju), `sosis_solo` (Sosis Solo Ayam), `pie_susu` (Pie Susu Lumer).
+   - **Minuman & Dessert Kantin**: `puding_cup` (Puding Cup Vla), `es_teh_cup` (Es Teh / Minuman Cup), `salad_buah` (Salad Buah / Jelly Cup).
 
 ---
 
-### 4. Technical Architecture & Data Strategy *(Technical Reference)*
+### 3. Pembaruan Dokumen Standar (`RULES.md` & `DESIGN.md`)
 
-- **Architecture & Component Diagram**:
-
-```
-┌───────────────────────────────────────────────────────────────────────────┐
-│                   MOBILE VIEWPORT SHELL (App Frame)                       │
-│   Responsive Phone Container (420px Mobile Canvas + Ambient Backdrop)     │
-└─────────────────────────────────────┬─────────────────────────────────────┘
-                                      │
-┌─────────────────────────────────────▼─────────────────────────────────────┐
-│                 SHARED VISUAL, ILLUSTRATION & MOTION ENGINE               │
-│  ┌─────────────────────┐  ┌──────────────────────┐  ┌──────────────────┐  │
-│  │ ScenicBannerEngine  │  │  BiteyMascotPoses    │  │ AnimatedTactile  │  │
-│  │ • Dapur Pagi Scene  │  │  • Baker Box Pose    │  │ • SpringBounce   │  │
-│  │ • Etalase Kantin    │  │  • Cashier POS Pose  │  │ • BreathingFloat │  │
-│  │ • Pasar Subuh Scene │  │  • Stock Chef Pose   │  │ • AnimatedBar    │  │
-│  │ • Gudang Rak Scene  │  │  • Celebrate Pose    │  │ • StaggerReveal  │  │
-│  └─────────────────────┘  └──────────────────────┘  └──────────────────┘  │
-│  ┌────────────────────────────────────┐  ┌─────────────────────────────┐  │
-│  │ PlatedFood & Ingredient Visuals    │  │ FloatingPillBottomNav       │  │
-│  │ • 10+ Kue Nusantara & Bahan Baku   │  │ • 5 Tab + Center Kasir FAB  │  │
-│  └────────────────────────────────────┘  └─────────────────────────────┘  │
-└─────────────────────────────────────┬─────────────────────────────────────┘
-                                      │
-        ┌─────────────────────────────┼─────────────────────────────┐
-        ▼                             ▼                             ▼
-┌───────────────────┐       ┌───────────────────┐         ┌───────────────────┐
-│  CORE 5 SCREENS   │       │  OPERATIONAL SUB  │         │  FINANCE & DOCS   │
-│ • DashboardScreen │       │ • StockScreen     │         │ • ReceiptScreen   │
-│ • ConsignmentScr  │       │ • MarketShopping  │         │ • DebtLedgerScr   │
-│ • PosScreen       │       │ • RecipeEditorScr │         │ • FinanceReport   │
-│ • HppScreen       │       │ • PartnerDirScr   │         │ • AuthScreen      │
-│ • SettingsScreen  │       └─────────┬─────────┘         └─────────┬─────────┘
-└─────────┬─────────┘                 │                             │
-          └───────────────────────────┼─────────────────────────────┘
-                                      ▼
-┌───────────────────────────────────────────────────────────────────────────┐
-│               ISOLATED ASYNC STORAGE DRIVER (Data & Math Layer)           │
-│  • Profile & PIN   • Products & Recipes HPP   • Canteens & Consignment    │
-│  • Cashflow Log    • Market Shopping Items    • Backup / Restore JSON     │
-└───────────────────────────────────────────────────────────────────────────┘
-```
-
-- **Data Model & State**:
-  - **Produk & Resep HPP**: Menyimpan identitas jajanan (`id`, `name`, `category`, `icon`, `price`, `cost`, `canteenCut`, `batchPortions`, `ingredients[]`, `totalBatchCost`, `stock`) dengan perhitungan deterministik `unitHpp = Math.round(totalBatchCost / batchPortions)` dan `netProfit = price - unitHpp - canteenCut`.
-  - **Mitra Kantin & Sesi Konsinyasi**: Menyimpan daftar mitra (`id`, `name`, `pic`, `phone`, `address`, `dropSchedule`, `fee`, `debt`, `avatarType`) beserta rekap titip pagi & retur sore per mitra (`initialQty`, `returnQty`, `soldQty`, `totalDue`, `isPaid`).
-  - **Arus Kas & Laporan (`Cashflow`)**: Menyimpan `walletBalance`, `totalIncomeToday`, `totalExpenseToday`, `weeklyTrend[]`, dan `activities[]` yang otomatis diperbarui saat transaksi Kasir POS, rekap konsinyasi, atau belanja pasar disimpan.
-
-- **Interactive Component & State Mapping**:
-  - **Beranda (`DashboardScreen`)**:
-    - *Scenic Morning Kitchen Header* dengan sapaan waktu dinamis, karakter Chef Bitey melambai, dan bar pencarian kapsul yang menumpuk manis di batas bawah ilustrasi (mengadaptasi layout referensi ke-4).
-    - *Kartu Dompet Kas Interaktif*: Tombol sembunyikan/tampilkan saldo dengan animasi transisi, ilustrasi tumpukan koin emas & dompet kulit, serta ringkasan Pemasukan vs Pengeluaran hari ini.
-    - *4 Tombol Aksi Squircle 3D*: Tombol *Gudang Bahan*, *Belanja Subuh*, *Buku Piutang*, dan *Mitra Kantin* dengan efek tekan membal (`AnimatedPressable`) dan ilustrasi penuh warna.
-    - *Etalase Jajanan & Grafik Hidup*: Kartu jajanan horizontal dengan gambar piring kue berlapis serta grafik batang 7 hari & rasio donat yang bisa diklik untuk melihat detail harian.
-  - **Kasir Kilat (`PosScreen`) & Nota Digital (`ReceiptScreen`)**:
-    - *Sidebar / Pill Kategori & Katalog 2 Kolom* (mengadaptasi *Jujuly Cafe*): Kartu jajanan menampilkan ilustrasi makanan besar di atas alas saji, stok tersisa, dan tombol stepper `[-]` `[qty]` `[+]` beranimasi membal.
-    - *Interactive Checkout Dock*: Pemilihan nominal uang tunai cepat (`Uang Pas`, `10rb`, `20rb`, `50rb`, `100rb`), hitung kembalian otomatis, dan navigasi ke `ReceiptScreen` yang menampilkan struk kertas bergerigi dengan cap lunas Chef Bitey serta tombol kirim WhatsApp.
-  - **Titip Kantin (`ConsignmentScreen`), Mitra (`PartnerDirectoryScreen`) & Piutang (`DebtLedgerScreen`)**:
-    - *Scenic Canteen Awning Header* yang berubah warna suasana antara tab **Sesi Pagi (Nitip Kue)** dan **Sesi Sore (Rekap & Setoran)**.
-    - *Karusel Mitra dengan Avatar Karakter PIC* (Pak Joko, Bu Siti, Bang Hendra, dll.), input titip & retur dengan tombol stepper cepat dan validasi `retur <= titip`, serta penyimpanan langsung ke buku kas atau buku piutang.
-    - *Podium Mitra Kantin Terlaris* pada halaman Direktori Mitra & Laporan Keuangan (mengadaptasi visual podium kayu/emas dari referensi ke-2 dan ke-5) untuk menampilkan 3 kantin dengan serapan kue tertinggi.
-  - **Katalog HPP (`HppScreen`) & Editor Resep (`RecipeEditorScreen`)**:
-    - *Kartu Resep Visual*: Menampilkan ilustrasi jajanan besar, rincian takaran bahan baku dengan ikon masing-masing bahan (tepung, telur, ayam, minyak, gas, daun pandan), serta bar perbandingan visual antara Modal HPP, Komisi Kantin, dan Untung Bersih.
-    - *Live Simulator di Editor Resep*: Setiap perubahan harga bahan atau porsi batch langsung memperbarui kartu proyeksi laba bersih per butir secara real-time dengan tombol pilih ikon jajanan visual.
-  - **Gudang Stok (`StockScreen`) & Belanja Subuh (`MarketShoppingScreen`)**:
-    - *Scenic Pantry & Market Header* dengan Chef Bitey membawa keranjang belanja, indikator bar kapasitas stok beranimasi, filter bahan kritis, tombol tambah/update stok langsung di kartu, dan ceklis belanja pasar interaktif yang langsung memotong/mencatat kas pengeluaran.
-  - **Pengaturan (`SettingsScreen`) & Masuk Akun (`AuthScreen`)**:
-    - *Kartu Profil Toko Bergambar Banner Gerai*, modal edit profil usaha langsung di tempat, layar kunci PIN 6 digit dengan *numpad* kustom yang empuk, serta fitur cadangkan/pulihkan data JSON.
+- Menambahkan pasal eksplisit pada `RULES.md` dan `DESIGN.md`:
+  - **Aturan Anti-Pudar (Zero Washed-Out / Faded Colors)**: Dilarang menggunakan *opacity* rendah pada elemen ilustrasi utama, kanopi, atau kartu yang membuat tampilan tampak kusam/pudar.
+  - **Aturan Anti-Indikator Online/Tech (Zero Tech Dots & Notch Clutter)**: Dilarang menampilkan titik bulat indikator status (`•`), lampu hijau/oranye ala aplikasi server, atau *Dynamic Island* kamera palsu.
+  - **Aturan Kohesi Warna Kuliner (Unified Warm Culinary Palette)**: Seluruh ikon pintasan, kartu ringkasan kas, dan permukaan kartu wajib berada dalam harmoni warna **Warm Cream (`#FFFBEB`), Soft Peach (`#FFF7ED`), Honey Gold (`#F59E0B`), Roasted Terracotta (`#EA580C`), dan Deep Espresso (`#431407`)** tanpa warna pelangi yang saling bertabrakan.

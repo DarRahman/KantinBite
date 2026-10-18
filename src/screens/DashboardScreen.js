@@ -10,7 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import Svg, { Path, Circle } from 'react-native-svg';
 import { ModernBottomNav } from '../components/ModernBottomNav';
 import { ScenicBanner } from '../components/ScenicBanner';
 import AssetVisual from '../components/AssetVisual';
@@ -120,15 +120,13 @@ export const DashboardScreen = ({ navigation }) => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* 1. SCENIC MORNING KITCHEN BANNER + LIVING MASCOT BITEY */}
+        {/* 1. SCENIC MORNING KITCHEN BANNER (SOLID, TANPA TITIK INDIKATOR TECH) */}
         <ScenicBanner
           scene="kitchen_morning"
-          badgeText="DAPUR PRODUKSI PAGI"
           title={profile.businessName || 'Dapur Berkah Bunda'}
           subtitle={`Halo ${profile.ownerName || 'Bunda Sumiati'}, adonan siap disajikan hari ini`}
           rightAvatarOnPress={() => navigation.navigate('Settings')}
         >
-          {/* Search Bar Kapsul Mengambang di Bawah Ilustrasi (Gaya Referensi 4) */}
           <View style={styles.floatingSearchBox}>
             <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#9A3412" strokeWidth={2.2}>
               <Circle cx="11" cy="11" r="8" />
@@ -152,7 +150,7 @@ export const DashboardScreen = ({ navigation }) => {
         </ScenicBanner>
 
         <View style={styles.bodyPadding}>
-          {/* 2. HERO DOMPET KAS HARIAN BERVOLUME */}
+          {/* 2. HERO DOMPET KAS HARIAN BERVOLUME DENGAN KARTU MASUK & BELANJA YANG MENYATU */}
           <View style={styles.heroWalletCard}>
             <View style={styles.walletHeaderRow}>
               <View style={styles.walletLabelBox}>
@@ -184,33 +182,35 @@ export const DashboardScreen = ({ navigation }) => {
               <AssetVisual name="wallet_purse" size={50} />
             </View>
 
-            {/* Strip Ringkasan Pemasukan vs Belanja Subuh */}
-            <View style={styles.walletDualStatStrip}>
+            {/* DUA KARTU MINI HARMONIS (TANPA TITIK BULAT HIJAU/ORANYE, WARNA KREM-TERAKOTA MENYATU) */}
+            <View style={styles.walletDualCardsRow}>
               <AnimatedPressable
                 scaleTo={0.97}
                 onPress={() => navigation.navigate('FinanceReport')}
-                style={styles.walletStatItem}
+                style={styles.walletSubCardWarm}
               >
-                <View style={styles.statDotGreen} />
-                <View>
+                <View style={styles.walletSubIconWrap}>
+                  <AssetVisual name="coin_gold" size={22} />
+                </View>
+                <View style={{ flex: 1 }}>
                   <Text style={styles.statItemLbl}>Masuk Hari Ini</Text>
-                  <Text style={styles.statItemValGreen}>
+                  <Text style={styles.statItemValWarmIncome}>
                     +{formatRupiah(cashflow.totalIncomeToday)}
                   </Text>
                 </View>
               </AnimatedPressable>
 
-              <View style={styles.walletStatDivider} />
-
               <AnimatedPressable
                 scaleTo={0.97}
                 onPress={() => navigation.navigate('MarketShopping')}
-                style={styles.walletStatItem}
+                style={styles.walletSubCardPeach}
               >
-                <View style={styles.statDotOrange} />
-                <View>
+                <View style={styles.walletSubIconWrap}>
+                  <AssetVisual name="market_cart" size={22} />
+                </View>
+                <View style={{ flex: 1 }}>
                   <Text style={styles.statItemLbl}>Belanja Subuh</Text>
-                  <Text style={styles.statItemValOrange}>
+                  <Text style={styles.statItemValWarmExpense}>
                     -{formatRupiah(cashflow.totalExpenseToday)}
                   </Text>
                 </View>
@@ -236,7 +236,7 @@ export const DashboardScreen = ({ navigation }) => {
             </AnimatedPressable>
           </View>
 
-          {/* 3. MENU PINTASAN SQUIRCLE 3D (GAYA REFERENSI 1 PASTEL 8-ICON) */}
+          {/* 3. MENU PINTASAN SQUIRCLE SERAGAM (WARM CREAM & TERRACOTTA) */}
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>Operasional Dapur & Lapak</Text>
             <TouchableOpacity onPress={() => navigation.navigate('FinanceReport')}>
@@ -282,7 +282,6 @@ export const DashboardScreen = ({ navigation }) => {
             </AnimatedPressable>
           </View>
 
-          {/* Baris Kedua Pintasan: Mitra Kantin, Buku Piutang, Resep HPP, Laporan */}
           <View style={[styles.quickActionGrid, { marginTop: 2, marginBottom: 18 }]}>
             <AnimatedPressable
               scaleTo={0.92}
@@ -321,7 +320,7 @@ export const DashboardScreen = ({ navigation }) => {
             </AnimatedPressable>
           </View>
 
-          {/* 4. ETALASE JAJANAN HARI INI (KARTU PIRING SAJI GAYA JUJULY CAFE) */}
+          {/* 4. ETALASE JAJANAN HARI INI */}
           <View style={styles.sectionHeaderRow}>
             <View>
               <Text style={styles.sectionTitle}>Etalase Jajanan Pagi Ini</Text>
@@ -371,7 +370,7 @@ export const DashboardScreen = ({ navigation }) => {
             })}
           </ScrollView>
 
-          {/* 5. TARGET SERAPAN HARIAN DENGAN PROGRESS BAR BERANIMASI */}
+          {/* 5. TARGET SERAPAN HARIAN */}
           <AnimatedPressable
             scaleTo={0.98}
             onPress={() => navigation.navigate('Consignment')}
@@ -398,11 +397,11 @@ export const DashboardScreen = ({ navigation }) => {
               </View>
               <View style={styles.targetMetricChip}>
                 <Text style={styles.metricLabel}>Sisa Retur</Text>
-                <Text style={[styles.metricVal, { color: '#DC2626' }]}>5 Pcs</Text>
+                <Text style={[styles.metricVal, { color: '#C2410C' }]}>5 Pcs</Text>
               </View>
               <View style={styles.targetMetricChip}>
                 <Text style={styles.metricLabel}>Setoran Sore</Text>
-                <Text style={[styles.metricVal, { color: '#059669' }]}>Rp 175.000</Text>
+                <Text style={[styles.metricVal, { color: '#9A3412' }]}>Rp 175.000</Text>
               </View>
             </View>
           </AnimatedPressable>
@@ -456,7 +455,7 @@ export const DashboardScreen = ({ navigation }) => {
                   <View
                     style={[
                       styles.actIconWrap,
-                      { backgroundColor: isIncome ? '#ECFDF5' : '#FEF2F2' },
+                      { backgroundColor: isIncome ? '#FEF3C7' : '#FFEDD5' },
                     ]}
                   >
                     <AssetVisual name={iconName} size={26} />
@@ -474,7 +473,7 @@ export const DashboardScreen = ({ navigation }) => {
                     <Text
                       style={[
                         styles.actAmountText,
-                        { color: isIncome ? '#059669' : '#DC2626' },
+                        { color: isIncome ? '#15803D' : '#C2410C' },
                       ]}
                     >
                       {isIncome ? '+' : '-'}
@@ -515,9 +514,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 13,
     paddingVertical: 8,
     borderWidth: 1.5,
-    borderColor: '#FED7AA',
+    borderColor: '#FDBA74',
     borderBottomWidth: 3.5,
-    borderBottomColor: '#FDBA74',
+    borderBottomColor: '#EA580C',
   },
   searchInput: {
     flex: 1,
@@ -583,79 +582,89 @@ const styles = StyleSheet.create({
   walletAmountText: {
     fontSize: 30,
     fontWeight: '900',
-    color: '#18181B',
+    color: '#431407',
     letterSpacing: -0.8,
   },
   walletSubHelper: {
     fontSize: 11.5,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#78350F',
     marginTop: 2,
   },
-  walletDualStatStrip: {
+  walletDualCardsRow: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: '#FDE68A',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    alignItems: 'center',
+    gap: 10,
   },
-  walletStatItem: {
+  walletSubCardWarm: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#FEF3C7',
+    borderRadius: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 11,
+    borderWidth: 1.5,
+    borderColor: '#FDE68A',
+    borderBottomWidth: 3,
+    borderBottomColor: '#F59E0B',
     gap: 8,
   },
-  statDotGreen: {
-    width: 9,
-    height: 9,
-    borderRadius: 4.5,
-    backgroundColor: '#10B981',
+  walletSubCardPeach: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF7ED',
+    borderRadius: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 11,
+    borderWidth: 1.5,
+    borderColor: '#FED7AA',
+    borderBottomWidth: 3,
+    borderBottomColor: '#FDBA74',
+    gap: 8,
   },
-  statDotOrange: {
-    width: 9,
-    height: 9,
-    borderRadius: 4.5,
-    backgroundColor: '#EA580C',
-  },
-  walletStatDivider: {
-    width: 1.5,
-    height: 26,
-    backgroundColor: '#FEF3C7',
-    marginHorizontal: 10,
+  walletSubIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   statItemLbl: {
     fontSize: 10.5,
-    fontWeight: '700',
-    color: '#71717A',
+    fontWeight: '800',
+    color: '#78350F',
   },
-  statItemValGreen: {
+  statItemValWarmIncome: {
     fontSize: 13.5,
     fontWeight: '900',
-    color: '#059669',
+    color: '#431407',
+    marginTop: 1,
   },
-  statItemValOrange: {
+  statItemValWarmExpense: {
     fontSize: 13.5,
     fontWeight: '900',
-    color: '#EA580C',
+    color: '#9A3412',
+    marginTop: 1,
   },
   dailyClosingBtn: {
     marginTop: 10,
-    backgroundColor: '#FEF3C7',
-    borderRadius: 13,
+    backgroundColor: '#FFF7ED',
+    borderRadius: 14,
     paddingVertical: 9,
     paddingHorizontal: 12,
     flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#FED7AA',
     gap: 7,
   },
   dailyClosingBtnText: {
     flex: 1,
     fontSize: 11.5,
     fontWeight: '800',
-    color: '#92400E',
+    color: '#78350F',
   },
   closingArrow: {
     fontSize: 11.5,
@@ -671,13 +680,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '900',
-    color: '#18181B',
+    color: '#431407',
     letterSpacing: -0.3,
   },
   sectionSubHint: {
     fontSize: 11.5,
     fontWeight: '600',
-    color: '#71717A',
+    color: '#78350F',
     marginTop: 1,
   },
   sectionSeeAll: {
@@ -697,7 +706,7 @@ const styles = StyleSheet.create({
   actionTileLabel: {
     fontSize: 11.5,
     fontWeight: '800',
-    color: '#18181B',
+    color: '#431407',
     marginTop: 6,
     textAlign: 'center',
   },
@@ -737,7 +746,7 @@ const styles = StyleSheet.create({
   foodCardName: {
     fontSize: 13.5,
     fontWeight: '900',
-    color: '#18181B',
+    color: '#431407',
     marginTop: 4,
   },
   foodPriceRow: {
@@ -752,7 +761,7 @@ const styles = StyleSheet.create({
     color: '#EA580C',
   },
   profitMiniTag: {
-    backgroundColor: '#DCFCE7',
+    backgroundColor: '#FEF3C7',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 7,
@@ -760,7 +769,7 @@ const styles = StyleSheet.create({
   profitMiniText: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#059669',
+    color: '#92400E',
   },
   targetBentoCard: {
     backgroundColor: '#FFFFFF',
@@ -786,7 +795,7 @@ const styles = StyleSheet.create({
   targetHeadline: {
     fontSize: 15,
     fontWeight: '900',
-    color: '#18181B',
+    color: '#431407',
     marginTop: 2,
   },
   targetPctBadge: {
@@ -816,22 +825,22 @@ const styles = StyleSheet.create({
   metricLabel: {
     fontSize: 10,
     fontWeight: '700',
-    color: '#71717A',
+    color: '#78350F',
   },
   metricVal: {
     fontSize: 13,
     fontWeight: '900',
-    color: '#18181B',
+    color: '#431407',
     marginTop: 2,
   },
   debtBannerCard: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: '#FFF7ED',
     borderRadius: 20,
     padding: 14,
     borderWidth: 1.5,
-    borderColor: '#FECACA',
+    borderColor: '#FDBA74',
     borderBottomWidth: 4,
-    borderBottomColor: '#FCA5A5',
+    borderBottomColor: '#EA580C',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -846,16 +855,16 @@ const styles = StyleSheet.create({
   debtBannerTitle: {
     fontSize: 13,
     fontWeight: '900',
-    color: '#991B1B',
+    color: '#7C2D12',
   },
   debtBannerSub: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#B91C1C',
+    color: '#9A3412',
     marginTop: 2,
   },
   debtActionPill: {
-    backgroundColor: '#DC2626',
+    backgroundColor: '#EA580C',
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 12,
@@ -869,9 +878,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 22,
     borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderColor: '#FED7AA',
     borderBottomWidth: 3.5,
-    borderBottomColor: '#CBD5E1',
+    borderBottomColor: '#FDBA74',
     paddingHorizontal: 14,
     paddingVertical: 6,
   },
@@ -880,7 +889,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 11,
     borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    borderBottomColor: '#FFF7ED',
   },
   actIconWrap: {
     width: 42,
@@ -896,12 +905,12 @@ const styles = StyleSheet.create({
   actTitleText: {
     fontSize: 13,
     fontWeight: '800',
-    color: '#18181B',
+    color: '#431407',
   },
   actTimeText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#71717A',
+    color: '#78350F',
     marginTop: 2,
   },
   actAmountCol: {

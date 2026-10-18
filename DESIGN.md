@@ -1,94 +1,35 @@
-# DESIGN.md - Design Token & System Specification
-# Proyek: KantinBite (Aplikasi Operasional Dapur & Konsinyasi Kantin)
+# DESIGN.md - Spesifikasi Sistem Desain KantinBite
 
-Dokumen spesifikasi token desain antarmuka mengacu pada standar Mobbin UI, token A2UI, dan mockup final yang telah diverifikasi (`mockup_kantinbite.png`).
-
----
-
-## 1. Filosofi Desain (Mobbin Native & Anti-Slop)
-
-- **Brand Name:** **KantinBite**
-- **Target Persona:** Ibu rumah tangga / produsen jajanan usia 35-55 tahun.
-- **Prinsip Utama:**
-  - *Whitespace-Driven:* Ruang napas proporsional antar-elemen tanpa mengurung teks ke dalam kotak-kotak kaku berlapis (*zero box-nesting*).
-  - *Zero Border Noise:* Menghilangkan garis tepi abu-abu tipis berlebihan. Memanfaatkan perbedaan latar belakang permukaan halus (*surface tint*) untuk memisahkan hierarki informasi.
-  - *Zero Technical Slop:* Menghilangkan kata-kata teknis developer seperti "Offline Mode", "Local Database", atau "Tanpa Kuota". Antarmuka murni mencerminkan aktivitas nyata pengguna (*Kas Harian*, *Kasir Eceran*, *Konsinyasi Sore*).
-  - *Tipografi Bernapas:* Angka kasir dan saldo kas menggunakan tipografi tebal berskala besar (28px - 34px tabular) agar mudah dipindai dalam 1 detik di bawah sinar matahari.
+Panduan visual, token warna, tipografi, dan tata letak antarmuka **KantinBite**.
 
 ---
 
-## 2. Palet Warna Resmi (Fresh Culinary Orange & Warm Honey)
+## 1. Palet Warna Harmonis (Warm Culinary Terracotta & Honey Cream)
 
-```json
-{
-  "colors": {
-    "primary": {
-      "base": "#EA580C",       // Deep Culinary Orange (Warna Aksi Utama, Tombol, Sorotan Aktif)
-      "dark": "#C2410C",       // Roasted Orange (Status Tombol Ditekan / Outline Halus)
-      "subtle": "#FFF7ED"      // Soft Orange Wash (Latar Menu Terpilih / Badge Avatar)
-    },
-    "secondary": {
-      "base": "#F59E0B",       // Warm Honey / Amber (Aksen Risoles & Sorotan Kategori)
-      "light": "#FEF3C7"
-    },
-    "canvas": "#FFFFFF",       // Pure Clean Canvas (Latar Belakang Layar)
-    "surface": {
-      "subtle": "#FAFAFA",     // Soft Card Surface (Kartu Makanan & Dock Kasir)
-      "muted": "#F4F4F5"       // Gray-100 (Kolom Input Form & Latar Tagihan WhatsApp)
-    },
-    "text": {
-      "primary": "#18181B",    // Zinc-900 (Keterbacaan Tertinggi, Hitam Lembut Bebas Silau)
-      "secondary": "#52525B",  // Zinc-600 (Label Formulir & Penjelasan Subtitle)
-      "muted": "#A1A1AA"       // Zinc-400 (Placeholder & Ikon Navigasi Nonaktif)
-    },
-    "border": {
-      "hairline": "#F4F4F5",   // Pemisah Baris Halus (Divider Native)
-      "subtle": "#E4E4E7"      // Garis Pembatas Segmented Control
-    },
-    "status": {
-      "success": {
-        "text": "#059669",     // Emerald-600 (Lunas Tunai / Kas Masuk)
-        "bg": "#ECFDF5"        // Emerald-50 (Chip Latar Pemasukan)
-      },
-      "danger": {
-        "text": "#DC2626",     // Red-600 (Retur Rusak / Pengeluaran Belanja)
-        "bg": "#FEF2F2"        // Red-50 (Chip Latar Belanja Modal)
-      }
-    }
-  }
-}
-```
+Seluruh layar menggunakan gradasi warna hangat yang saling menyambung dan teduh di mata:
+
+| Token | Hex | Penggunaan Utama |
+| :--- | :--- | :--- |
+| **Canvas Pure** | `#FFFFFF` | Latar dasar halaman & kartu konten utama |
+| **Warm Cream** | `#FFFBEB` | Permukaan kartu kas, kartu resep, & latar galeri |
+| **Soft Peach** | `#FFF7ED` | Latar kartu aksi cepat, strip kas, & sorotan aktif |
+| **Honey Border** | `#FDE68A` / `#FDBA74` | Garis tepi kartu & pemisah blok hangat |
+| **Primary Terracotta** | `#EA580C` | Tombol utama, harga produk, & aksen aktif |
+| **Roasted Terracotta** | `#C2410C` / `#9A3412` | Bayangan bawah tombol taktil (`borderBottomColor`) |
+| **Espresso Ink** | `#18181B` / `#431407` | Judul utama, nama kue, & nominal saldo |
+| **Warm Brown Muted** | `#78350F` / `#92400E` | Subjudul, keterangan takaran, & label kartu |
+| **Emerald Leaf** | `#15803D` / `#DCFCE7` | Penanda uang masuk / lunas yang lembut & menyatu |
 
 ---
 
-## 3. Sistem Tipografi & Ukuran Teks (Skala Keterbacaan Senior)
+## 2. Standar Komponen Utama
 
-- **Display / Hero Metric Number:** 34px (Font-weight: 800, Tabular Numerals) -> Saldo kas dompet.
-- **Cash Sub-Total:** 20px (Font-weight: 800) -> Total belanja kasir & HPP per butir.
-- **Header 1 (Judul Layar):** 24px (Font-weight: 800, letter-spacing -0.5px) -> Judul aplikasi & modul.
-- **Header 2 (Sub-modul):** 16px (Font-weight: 800) -> Nama resep & judul katalog jajanan.
-- **Body Text:** 14px (Font-weight: 500, line-height 1.5) -> Label input formulir.
-- **Caption / Badge:** 11px - 12px (Font-weight: 700) -> Keterangan porsi batch & badge kuantitas pesanan.
-
----
-
-## 4. Spesifikasi Komponen & Tombol (Touch Target Ergonomis)
-
-- **Minimum Touch Target:** Minimal 48px x 48px pada setiap tombol aksi utama untuk menjamin kenyamanan pengoperasian satu tangan.
-- **Corner Radius:**
-  - `Pills / Badges`: 6px - 8px
-  - `Input Fields`: 12px
-  - `Cards / Docks`: 16px
-  - `Primary Buttons`: 14px
-- **Elevasi & Bayangan:** Menggunakan bayangan lembut alami (`shadow-sm` / `elevation: 2`) tanpa neon blur glow sintetis.
-
----
-
-## 5. Maskot & Aset Visual Makanan
-
-- **Maskot Resmi (Bitey):** Karakter adonan roti bulat kuning (`#FDE68A`) memakai topi koki putih bersih dengan pipi merah muda (`#FCA5A5`) dan senyum ramah melengkung.
-- **Aset Vektor Makanan Asli:**
-  - *Risoles Rogout:* Gulungan silinder keemasan (`#F59E0B`) dengan motif garis renyah.
-  - *Pastel Telur:* Siluet pastel kuning telur (`#FBBF24`) dengan lipatan gerigi tepi khas.
-  - *Dadar Gulung:* Gulungan hijau pandan (`#10B981`) dengan motif kelapa.
-  - *Lemper Ayam:* Bentuk trapesium daun pisang hijau tua (`#059669`) dengan sematan lidi.
+1. **Scenic Header Bersih (Tanpa Kapsul Titik & Tanpa Efek Pudar)**:
+   - Menampilkan ilustrasi langit hangat, kanopi toko kue solid, dan maskot Chef Bitey di sisi kanan tanpa menabrak teks judul/subjudul.
+   - Tidak menggunakan badge kapsul bertitik (`•`) di atas judul.
+2. **Ikon Operasional Seragam (`PastelReferenceIcon`)**:
+   - Seluruh 8 ikon pintasan menggunakan bingkai squircle krem-oranye hangat (`#FFF7ED` & `#FEF3C7`) dengan garis tepi terakota (`#FDBA74` / `#F59E0B`) dan ilustrasi alat dapur/kantin berwarna oranye-emas-cokelat yang seragam satu tema.
+3. **Kartu Kas Dompet & Ringkasan Harian**:
+   - Bagian *Masuk Hari Ini* dan *Belanja Subuh* menggunakan dua kartu mini krem-persik berdampingan dengan ikon visual koin/keranjang tanpa titik indikator bulat.
+4. **Pop-Up Galeri 26+ Jajanan & Upload Foto**:
+   - Pemilih gambar di halaman resep menggunakan tombol pembuka **Modal Galeri Katalog Penuh** dengan filter kategori (*Universal Netral, Gorengan, Kue Basah, Roti & Bolu, Minuman*) serta tombol **Upload Foto dari HP**.

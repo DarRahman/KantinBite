@@ -1,52 +1,46 @@
-# RULES.md - Aturan Keras Kode & Integritas Produk
+# RULES.md - Aturan Keras & Standar Kualitas KantinBite
 
-Dokumen ini memuat batasan mutlak (*hard constraints*), kebijakan anti-slop, aturan matematis, dan standar arsitektur untuk seluruh pengembangan aplikasi **KantinBite**.
-
----
-
-## 1. Aturan Anti-Slop Visual & UI (Zero AI-Slop)
-
-1. **Dilarang Menggunakan Box-in-Box Berlapis:**
-   - Dilarang membungkus data ke dalam kartu di dalam kartu yang memiliki garis tepi dobel. Gunakan pembatas baris satu lapis (`border-b border-zinc-100`) atau ruang kosong (*whitespace*).
-2. **Dilarang Menggunakan Badge Kapsul Tempelan & Persentase Acak (Zero Pill Clutter):**
-   - Dilarang menempelkan badge seperti `+40% Sehat`, `Hot`, atau pill mengambang yang tidak memiliki dasar matematis riil. Teks persentase laba harus dihitung secara akurat dari rumus finansial nyata, bukan angka acak pemanis visual AI.
-3. **Dilarang Menggunakan Emoji dalam Kode & Antarmuka:**
-   - Seluruh elemen visual wajib menggunakan ikon SVG murni (`react-native-svg`), bukan karakter emoji mentah.
-4. **Dilarang Menggunakan Kata-Kata Teknis Developer & Atribut Internal:**
-   - Dilarang menampilkan istilah *"Offline Mode"*, *"Local DB"*, *"Syncing"*, *"Universal SaaS"*, *"Kelompok C"*, atau *"Tugas Pemvis"* pada antarmuka pengguna publik. Gunakan istilah bisnis operasional langsung: *"Kas Harian"*, *"Kasir Eceran"*, *"Rekap Sore"*.
-5. **Dilarang Menggunakan Gradien Ungu-Biru AI Klise:**
-   - Seluruh warna komponen wajib merujuk secara ketat pada token warna di `DESIGN.md` (Deep Culinary Orange `#EA580C`, Warm Honey `#F59E0B`, dan Zinc Neutrals).
+Dokumen ini menetapkan aturan mutlak (*hard constraints*) yang wajib dipatuhi pada seluruh kode antarmuka dan logika aplikasi **KantinBite**.
 
 ---
 
-## 2. Aturan Integritas Finansial & Matematika Deterministik
+## 1. Aturan Visual & Anti-Slop (UI/UX Constraints)
 
-1. **Aritmatika Bilangan Bulat (Integer / Rounding):**
-   - Seluruh perhitungan rupiah wajib dibulatkan penuh (`Math.round`) tanpa menghasilkan pecahan desimal sen (contoh: `Rp600`, bukan `Rp600.33`).
-2. **Pencegahan Pembagian dengan Nol (Zero Division):**
-   - Pada kalkulasi resep HPP, kuantitas porsi output wajib divalidasi `porsi > 0`. Jika kosong atau nol, sistem tidak mengeksekusi perhitungan dan mengembalikan nilai aman `0`.
-3. **Validasi Retur Konsinyasi:**
-   - Nilai retur sisa fisik tidak boleh melebihi jumlah titip pagi:
-     $$\text{Retur} \le \text{Titip Awal}$$
-   - Jika `retur > titip`, sistem menolak penyimpanan dan menandai kolom masukan tidak valid.
-4. **Pencegahan Nilai Negatif:**
-   - Seluruh kolom input harga, jumlah barang, gramasi, dan uang tunai wajib memfilter tanda minus (`-`) dan karakter non-angka.
+### 1.1 Zero Raw Emoji
+- **Dilarang keras** menggunakan karakter emoji Unicode mentah di dalam teks maupun komponen UI.
+- Seluruh ikon, maskot Chef Bitey, bahan baku, dan jajanan wajib dirender menggunakan komponen vektor `react-native-svg` melalui `AssetVisual`, `Mascot`, dan `PastelReferenceIcon` atau foto produk yang diunggah pengguna.
+
+### 1.2 Zero Tech/Online Dots & Zero Notch Clutter
+- **Dilarang keras** merender titik-titik indikator bulat (`•`, dot hijau, dot oranye, atau dot merah) yang menyerupai status *online/server/tech dashboard* pada header, tombol profil, maupun kartu ringkasan kas.
+- **Dilarang keras** menampilkan *Dynamic Island* hitam bertitik kamera atau bar sinyal palsu yang mengganggu kebersihan kanvas aplikasi.
+- **Dilarang keras** menampilkan kapsul status berlabel teknis seperti `• SIMULATOR MODAL & MARGIN` atau `• DAPUR PRODUKSI PAGI`.
+
+### 1.3 Zero Washed-Out / Faded Design
+- **Dilarang keras** menggunakan efek pudar (*washed-out low opacity*) pada kanopi header, bukit latar, maupun kartu utama yang membuat tampilan terlihat kusam atau berbayang menabrak teks.
+- Seluruh warna latar, border, dan ilustrasi wajib tampil **tegas, solid, bersih, dan kontras tinggi** sehingga nyaman dibaca oleh pengguna dewasa (ibu-ibu produsen kue & pedagang kantin).
+
+### 1.4 Harmonisasi Warna Kuliner (Unified Warm Culinary Palette)
+- **Dilarang keras** mencampur warna kotak ikon belang-belang yang bertabrakan (seperti ungu neon, hijau stabilo, dan siluet hitam-cokelat tua kaku dalam satu baris).
+- Seluruh ikon pintasan operasional (*Kasir Lapak, Titip Kantin, Gudang Stok, Belanja Subuh*, dll.) serta kartu ringkasan kas (*Masuk Hari Ini & Belanja Subuh*) wajib menggunakan palet hangat yang menyatu:
+  - **Warm Cream & Butter:** `#FFFBEB`, `#FEF3C7`
+  - **Soft Culinary Peach:** `#FFF7ED`, `#FFEDD5`
+  - **Honey Gold & Terracotta:** `#F59E0B`, `#EA580C`, `#C2410C`
+  - **Deep Espresso Ink:** `#431407`, `#78350F`, `#18181B`
+
+### 1.5 Zero Dev/SaaS Jargon
+- **Dilarang keras** menampilkan istilah teknis developer seperti `SaaS`, `Simulator`, `Layar 10`, `Sync`, `Database`, atau `API`. Gunakan bahasa sehari-hari dapur & warung kantin (*Hitung Modal, Buku Piutang, Simpan Resep, Setoran Sore*).
 
 ---
 
-## 3. Konvensi Kode React Native (Expo)
+## 2. Katalog Galeri Jajanan & Fleksibilitas Gambar Produk
 
-1. **Dependency Verification:**
-   - Dilarang mengimpor pustaka pihak ketiga di luar yang terpasang pada `package.json`.
-2. **Komponen Fungsional & Hooks:**
-   - Gunakan React Functional Components dengan hooks standar (`useState`, `useEffect`, `useCallback`, `useMemo`).
-3. **Isolasi Logika Penyimpanan:**
-   - Seluruh interaksi baca/tulis `AsyncStorage` wajib melalui modul tunggal di `src/db/storage.js`. Tidak boleh memanggil `AsyncStorage.getItem/setItem` secara liar di dalam berkas layar.
-4. **Ketepatan Layout Mockup (Pixel-Presisi):**
-   - Komposisi 6 layar aplikasi wajib mengacu 100% pada struktur visual berkas `mockup_kantinbite.png`:
-     - Layar 1: Masuk Akun & Maskot Bitey
-     - Layar 2: Hero Metric Saldo Kas & Riwayat Native List
-     - Layar 3: HPP Resep & Segmented Margin Dock
-     - Layar 4: Kasir Grid Jajanan Bervektor & Hitung Kembalian
-     - Layar 5: Tab Rekonsiliasi Sore Konsinyasi
-     - Layar 6: Struk Bukti Digital WhatsApp
+1. **Galeri 26+ Jajanan Kantin & Pasar:** Halaman pembuatan/pengeditan menu wajib menyediakan **Pop-Up Galeri Katalog Lengkap** berisi puluhan jajanan umum kantin (Gorengan, Kue Basah Tradisional, Roti & Bolu, Minuman & Puding).
+2. **Gambar Universal Netral:** Wajib menyediakan opsi gambar netral (*Piring Saji Jajanan, Boks Mika Kue, Bungkus Daun Pisang*) untuk kue unik yang belum memiliki ilustrasi khusus.
+3. **Unggah Foto Sendiri:** Pengguna wajib dapat mengunggah foto makanan sendiri dari galeri HP/perangkat dan foto tersebut langsung tampil di seluruh layar (Beranda, Kasir POS, dan Katalog HPP).
+
+---
+
+## 3. Integritas Matematika Finansial
+
+1. **Rupiah Bulat Deterministik:** Seluruh perhitungan HPP (`Math.round(totalBatchCost / batchPortions)`), laba bersih, kembalian kasir, dan setoran konsinyasi wajib menghasilkan bilangan bulat tanpa pecahan desimal.
+2. **Validasi Retur Fisik:** Jumlah sisa retur sore tidak boleh melebihi jumlah titip pagi (`0 <= returnQty <= initialQty`).
